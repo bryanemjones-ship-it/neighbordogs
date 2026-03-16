@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Retired Guy Dog Walker</title>
+  <title>NeighborDogs</title>
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <link rel="manifest" href="./manifest.webmanifest">
   <meta name="theme-color" content="#1a78c8"/>
@@ -722,8 +722,8 @@
 
 <header id="appHeader" style="display:none;">
   <div class="wrap">
-    <img src="./icon-192.png" alt="Dog" />
-    <h1>Retired Guy Dog Walker</h1>
+    <img src="./icon-192.png" alt="NeighborDogs" />
+    <h1>NeighborDogs</h1>
   </div>
 </header>
 
@@ -731,7 +731,30 @@
 
   <!-- ═══ HOME ═══════════════════════════════════════════ -->
   <section id="screenHome" class="screen active">
-    <div style="text-align:center; padding: 28px var(--pad) 16px;">
+    <!-- NeighborDogs primary -->
+    <div id="neighbordogsHero" style="text-align:center; padding: 20px var(--pad) 16px;">
+      <h1 style="font-size:26px; font-weight:700; margin:0 0 4px; letter-spacing:-0.5px;">NeighborDogs</h1>
+      <div style="font-size:13px; color:var(--muted); margin-bottom:14px;">Exclusive territories for dog walking businesses &middot; USA</div>
+      <div class="stack" style="gap:10px; max-width:320px; margin:0 auto 20px;">
+        <button class="hero-btn blue" type="button" onclick="go('screenTerritoryMap')">
+          <div class="hero-icon">&#128506;</div>
+          <div class="hero-text"><h3>View territory map</h3><p>See owned territories</p></div>
+          <span class="hero-chevron">&#8250;</span>
+        </button>
+        <button class="hero-btn green" type="button" onclick="go('screenTerritoryBuy')">
+          <div class="hero-icon">&#128725;</div>
+          <div class="hero-text"><h3>Buy a territory</h3><p>Enter your address</p></div>
+          <span class="hero-chevron">&#8250;</span>
+        </button>
+        <div id="ndAuthRow" class="row" style="justify-content:center; gap:10px;">
+          <button id="ndSignInBtn" class="btn primary" type="button" onclick="go('screenSignIn')">Sign in</button>
+          <button id="ndDashboardBtn" class="btn secondary hidden" type="button" onclick="go('screenDashboard')">Dashboard</button>
+          <button id="ndLogoutBtn" class="btn hidden" type="button" onclick="ndLogout()">Log out</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center; padding: 12px var(--pad) 16px; border-top:1px solid rgba(255,255,255,0.4);">
       <!-- Logo ring -->
       <div style="position:relative; display:inline-block; margin-bottom:16px;">
         <div style="position:absolute; inset:-6px; border-radius:50%; background:radial-gradient(circle, rgba(255,255,255,0.35), transparent 70%); animation:pawFloat1 6s ease-in-out infinite;"></div>
@@ -741,7 +764,7 @@
           box-shadow: 0 8px 32px rgba(28,55,100,0.18), 0 2px 0 rgba(255,255,255,0.9) inset;
           display:flex; align-items:center; justify-content:center; margin:0 auto;
           backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
-          <img src="./icon-192.png" alt="Retired Guy Dog Walker" style="width:82px; height:82px; border-radius:50%; object-fit:cover; box-shadow: 0 4px 20px rgba(28,55,100,0.15);" />
+          <img src="./icon-192.png" alt="Dog" style="width:82px; height:82px; border-radius:50%; object-fit:cover; box-shadow: 0 4px 20px rgba(28,55,100,0.15);" />
         </div>
         <span class="paw1" style="position:absolute; top:-4px; right:-10px; opacity:0.40;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="#8a7060"><path d="M12 15c-2 0-4 1.5-4 3s1 2 4 2 4-1 4-2-2-3-4-3zm-5-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm10 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM8.5 9c.8 0 1.5-.7 1.5-1.5S9.3 6 8.5 6 7 6.7 7 7.5 7.7 9 8.5 9zm7 0c.8 0 1.5-.7 1.5-1.5S16.3 6 15.5 6 14 6.7 14 7.5 14.7 9 15.5 9z"/></svg>
@@ -751,7 +774,7 @@
         </span>
       </div>
 
-      <h1 style="font-size:28px; font-weight:700; margin:0 0 4px; letter-spacing:-0.5px; line-height:1.12;">Retired Guy<br>Dog Walker</h1>
+      <h2 style="font-size:22px; font-weight:700; margin:0 0 4px;">Retired Guy Dog Walker</h2>
       <div style="font-size:14px; color:var(--muted); margin-bottom:12px;">Raleigh, NC &middot; Six Forks &amp; Lassiter Mill</div>
 
       <span class="trust-pill" style="font-weight:600; color:var(--green-dk);">
@@ -957,6 +980,159 @@
       <div id="testimonialCards" style="display:flex; flex-direction:column; gap:10px;"></div>
     </div>
   </section>
+
+  <!-- ═══ NeighborDogs: Territory map (owned only) ═══════════════════════ -->
+  <section id="screenTerritoryMap" class="screen">
+    <div class="subnav">
+      <button class="btn back" onclick="go('screenHome')">&#8592;</button>
+      <span class="icon">&#128506;</span>
+      <h2>Territory map</h2>
+    </div>
+    <div class="content">
+      <div class="card stack">
+        <div class="muted tiny">Owned territories only. Enter an address on Home to buy a new territory.</div>
+        <div id="territoryMapContainer" style="height:320px; border-radius:14px; overflow:hidden; background:#e8eef4;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ NeighborDogs: Buy territory (enter address) ═══════════════════════ -->
+  <section id="screenTerritoryBuy" class="screen">
+    <div class="subnav">
+      <button class="btn back" onclick="go('screenHome')">&#8592;</button>
+      <span class="icon">&#128725;</span>
+      <h2>Buy a territory</h2>
+    </div>
+    <div class="content">
+      <div class="card stack">
+        <label class="field-label">ADDRESS (USA)</label>
+        <input id="territoryAddress" type="text" placeholder="Street, City, State ZIP" />
+        <button id="territoryPreviewBtn" class="btn primary full" onclick="ndTerritoryPreview()">Get territory preview</button>
+        <div id="territoryBuyMsg" class="muted"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ NeighborDogs: Territory preview ═══════════════════════ -->
+  <section id="screenTerritoryPreview" class="screen">
+    <div class="subnav">
+      <button class="btn back" onclick="go('screenTerritoryBuy')">&#8592;</button>
+      <span class="icon">&#128200;</span>
+      <h2>Territory preview</h2>
+    </div>
+    <div class="content">
+      <div id="territoryPreviewCard" class="card stack hidden">
+        <div id="territoryPreviewMap" style="height:220px; border-radius:12px; overflow:hidden; background:#e8eef4;"></div>
+        <div class="row two" style="margin-top:12px;">
+          <div><span class="field-label">Estimated homes</span><div id="previewHomes" style="font-size:18px; font-weight:700;"></div></div>
+          <div><span class="field-label">Opportunity %</span><div id="previewPct" style="font-size:18px; font-weight:700;"></div></div>
+        </div>
+        <div><span class="field-label">Monthly price</span><div id="previewPrice" style="font-size:18px; font-weight:700;"></div></div>
+        <div id="previewSmallerNote" class="muted tiny hidden"></div>
+        <button id="territoryPurchaseBtn" class="btn primary full" onclick="ndTerritoryPurchase()">Proceed to purchase</button>
+        <div id="territoryPreviewMsg" class="muted"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ NeighborDogs: Sign in (magic link) ═══════════════════════ -->
+  <section id="screenSignIn" class="screen">
+    <div class="subnav">
+      <button class="btn back" onclick="go('screenHome')">&#8592;</button>
+      <span class="icon">&#128274;</span>
+      <h2>Sign in</h2>
+    </div>
+    <div class="content">
+      <div class="card stack">
+        <label class="field-label">EMAIL</label>
+        <input id="ndSignInEmail" type="email" placeholder="you@email.com" />
+        <button class="btn primary full" onclick="ndMagicLink()">Send magic link</button>
+        <div id="ndSignInMsg" class="muted"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ NeighborDogs: Dashboard ═══════════════════════ -->
+  <section id="screenDashboard" class="screen">
+    <div class="subnav">
+      <button class="btn back" onclick="go('screenHome')">&#8592;</button>
+      <span class="icon">&#128736;</span>
+      <h2>Dashboard</h2>
+    </div>
+    <div class="content">
+      <div class="card stack">
+        <div class="section-label">My territories</div>
+        <div id="dashboardTerritories" class="stack"></div>
+        <div id="dashboardNoTerr" class="muted hidden">You have no territories yet.</div>
+        <div class="hr"></div>
+        <button class="btn full" onclick="go('screenTeam')">Team management</button>
+        <button class="btn full" onclick="go('screenResale')">AppStack resale marketplace</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ NeighborDogs: Team ═══════════════════════ -->
+  <section id="screenTeam" class="screen">
+    <div class="subnav">
+      <button class="btn back" onclick="go('screenDashboard')">&#8592;</button>
+      <span class="icon">&#128101;</span>
+      <h2>Team</h2>
+    </div>
+    <div class="content">
+      <div class="card stack">
+        <div class="muted tiny">Unlimited team members per territory.</div>
+        <div id="teamList" class="stack"></div>
+        <div class="field-label">Add member (email)</div>
+        <div class="row" style="gap:8px;">
+          <input id="teamMemberEmail" type="email" placeholder="member@email.com" style="flex:1;" />
+          <button class="btn primary" onclick="ndTeamInvite()">Invite</button>
+        </div>
+        <div id="teamMsg" class="muted"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ NeighborDogs: Resale marketplace ═══════════════════════ -->
+  <section id="screenResale" class="screen">
+    <div class="subnav">
+      <button class="btn back" onclick="go('screenDashboard')">&#8592;</button>
+      <span class="icon">&#128176;</span>
+      <h2>Resale marketplace</h2>
+    </div>
+    <div class="content">
+      <div class="card stack">
+        <div class="muted tiny">Resale only through AppStack. 10% platform fee. Customer transfer and non-compete apply.</div>
+        <div id="resaleList" class="stack"></div>
+        <div id="resaleMyListings" class="stack"></div>
+        <div id="resaleMsg" class="muted"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ NeighborDogs: Resale contract acceptance ═══════════════════════ -->
+  <section id="screenResaleContract" class="screen">
+    <div class="subnav">
+      <button class="btn back" onclick="go('screenResale')">&#8592;</button>
+      <span class="icon">&#128203;</span>
+      <h2>Resale terms</h2>
+    </div>
+    <div class="content">
+      <div id="resaleContractCard" class="card stack">
+        <div id="resaleContractText" class="muted" style="white-space:pre-wrap; max-height:280px; overflow-y:auto;">Resale is allowed only through the AppStack marketplace. By accepting:
+&#8226; AppStack platform fee of 10% applies to the sale.
+&#8226; Seller agrees to a non-compete for the sold territory.
+&#8226; Customers transfer with the territory to the buyer.
+&#8226; You agree to the transfer, non-compete, and customer transfer terms.</div>
+        <label style="display:flex; gap:10px; align-items:flex-start; margin-top:12px;">
+          <input type="checkbox" id="resaleContractAccept" />
+          <span>I accept the resale, transfer, non-compete, and customer transfer terms.</span>
+        </label>
+        <button id="resaleContractSubmit" class="btn primary full" onclick="ndResaleAcceptContract()">Accept and continue</button>
+        <div id="resaleContractMsg" class="muted"></div>
+      </div>
+    </div>
+  </section>
+
   <section id="screenNew" class="screen">
     <div class="subnav">
       <button class="btn back" onclick="go('screenHome')">&#8592;</button>
@@ -2012,6 +2188,11 @@ function go(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id)?.classList.add("active");
   document.getElementById("appHeader").style.display = id === "screenHome" ? "none" : "";
+  if (id === "screenTerritoryMap" && typeof ndLoadTerritoryMap === "function") ndLoadTerritoryMap();
+  if (id === "screenDashboard" && typeof ndLoadDashboard === "function") ndLoadDashboard();
+  if (id === "screenTeam" && typeof ndLoadTeam === "function") ndLoadTeam();
+  if (id === "screenResale" && typeof ndLoadResale === "function") ndLoadResale();
+  if (id === "screenHome") _ndPreviewData = null;
   if (id === "screenReturning") {
     // If customer already loaded, keep buttons enabled; otherwise disable
     const profileVisible = !document.getElementById("returnProfileSection")?.classList.contains("hidden");
@@ -4602,11 +4783,250 @@ async function adminSavePricing() {
 }
 
 // ═══════════════════════════════════════════════════════════
+// NeighborDogs: auth, territory map, purchase, dashboard, team, resale
+// ═══════════════════════════════════════════════════════════
+let _ndMap = null;
+let _ndPreviewData = null;
+
+function ndUpdateAuthUI() {
+  const session = window.supabaseSession;
+  const signedIn = !!(session && session.user);
+  const signInBtn = document.getElementById("ndSignInBtn");
+  const dashBtn = document.getElementById("ndDashboardBtn");
+  const logoutBtn = document.getElementById("ndLogoutBtn");
+  if (signInBtn) signInBtn.classList.toggle("hidden", signedIn);
+  if (dashBtn) dashBtn.classList.toggle("hidden", !signedIn);
+  if (logoutBtn) logoutBtn.classList.toggle("hidden", !signedIn);
+}
+
+async function ndLogout() {
+  if (typeof window.supabaseLogout === "function") await window.supabaseLogout();
+  ndUpdateAuthUI();
+  go("screenHome");
+}
+
+async function ndMagicLink() {
+  const el = document.getElementById("ndSignInEmail");
+  const msg = document.getElementById("ndSignInMsg");
+  const email = (el && el.value || "").trim();
+  if (!email) { if (msg) msg.textContent = "Enter your email."; return; }
+  msg.textContent = "Sending…";
+  try {
+    if (typeof window.supabaseMagicLink !== "function") throw new Error("Auth not configured");
+    const { error } = await window.supabaseMagicLink(email);
+    if (error) throw error;
+    msg.textContent = "Check your email for the sign-in link.";
+    msg.className = "msg-alert success";
+  } catch (e) {
+    msg.textContent = e.message || "Failed to send link.";
+    msg.className = "msg-alert error";
+  }
+}
+
+async function ndTerritoryPreview() {
+  const address = (document.getElementById("territoryAddress") && document.getElementById("territoryAddress").value || "").trim();
+  const msg = document.getElementById("territoryBuyMsg");
+  if (!address) { msg.textContent = "Enter an address."; return; }
+  msg.textContent = "Loading…";
+  try {
+    const base = (typeof API_BASE !== "undefined" ? API_BASE : "/api").replace(/\/$/, "");
+    const res = await fetch(base + "/territory-preview", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ address }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Preview failed");
+    if (!data.ok) throw new Error(data.error || "Preview failed");
+    _ndPreviewData = data;
+    document.getElementById("previewHomes").textContent = data.estimated_homes.toLocaleString();
+    document.getElementById("previewPct").textContent = data.opportunity_pct + "% of benchmark";
+    document.getElementById("previewPrice").textContent = "$" + data.monthly_price + "/mo";
+    const smallerNote = document.getElementById("previewSmallerNote");
+    if (data.is_smaller_fallback) {
+      smallerNote.classList.remove("hidden");
+      smallerNote.textContent = "This is a smaller valid territory with proportional pricing.";
+    } else smallerNote.classList.add("hidden");
+    document.getElementById("territoryPreviewCard").classList.remove("hidden");
+    document.getElementById("territoryPreviewMsg").textContent = "";
+    go("screenTerritoryPreview");
+    ndRenderPreviewMap(data);
+  } catch (e) {
+    msg.textContent = e.message || "Preview failed.";
+    msg.className = "msg-alert error";
+  }
+}
+
+function ndRenderPreviewMap(data) {
+  const container = document.getElementById("territoryPreviewMap");
+  if (!container || !data) return;
+  if (_ndMap) { _ndMap.remove(); _ndMap = null; }
+  setTimeout(function() {
+    const map = L.map(container).setView([data.center_lat, data.center_lng], 12);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap", maxZoom: 19 }).addTo(map);
+    const rMi = data.radius_miles;
+    const rM = rMi * 1609.34;
+    L.circle([data.center_lat, data.center_lng], { radius: rM, color: "#1c8c5e", fillColor: "#1c8c5e", fillOpacity: 0.2, weight: 2 }).addTo(map);
+    _ndMap = map;
+  }, 150);
+}
+
+async function ndTerritoryPurchase() {
+  if (!_ndPreviewData) return;
+  const session = window.supabaseSession;
+  if (!session || !session.access_token) {
+    showToast("Sign in required", "Sign in to purchase a territory.", "warning");
+    go("screenSignIn");
+    return;
+  }
+  const btn = document.getElementById("territoryPurchaseBtn");
+  const msg = document.getElementById("territoryPreviewMsg");
+  btn.disabled = true;
+  msg.textContent = "Redirecting to checkout…";
+  try {
+    const base = (typeof API_BASE !== "undefined" ? API_BASE : "/api").replace(/\/$/, "");
+    const res = await fetch(base + "/create-checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + session.access_token },
+      body: JSON.stringify(_ndPreviewData),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Checkout failed");
+    if (data.url) window.location.href = data.url;
+    else throw new Error("No checkout URL");
+  } catch (e) {
+    msg.textContent = e.message || "Checkout failed.";
+    msg.className = "msg-alert error";
+    btn.disabled = false;
+  }
+}
+
+function ndLoadTerritoryMap() {
+  const container = document.getElementById("territoryMapContainer");
+  if (!container) return;
+  if (_ndMap) { _ndMap.remove(); _ndMap = null; }
+  setTimeout(async function() {
+    const map = L.map(container).setView([39.5, -98.35], 4);
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { attribution: "© OpenStreetMap", maxZoom: 19 }).addTo(map);
+    try {
+      const client = window.supabaseClient;
+      if (!client) return;
+      const { data: rows } = await client.from("territory_subscriptions").select("territory_id, territories(center_lat, center_lng, radius_miles)").eq("status", "active");
+      const list = (rows || []).map(function(r) { return r.territories; }).filter(Boolean);
+      const bounds = [];
+      for (let i = 0; i < list.length; i++) {
+        const t = list[i];
+        const rM = (t.radius_miles || 0) * 1609.34;
+        L.circle([t.center_lat, t.center_lng], { radius: rM, color: "#1e6fd4", fillColor: "#1e6fd4", fillOpacity: 0.25, weight: 2 }).addTo(map);
+        bounds.push([t.center_lat, t.center_lng]);
+      }
+      if (bounds.length) map.fitBounds(bounds, { padding: [30, 30] });
+    } catch (e) { console.warn("ndLoadTerritoryMap", e); }
+    _ndMap = map;
+  }, 150);
+}
+
+async function ndLoadDashboard() {
+  const session = window.supabaseSession;
+  if (!session || !session.user) { go("screenSignIn"); return; }
+  const listEl = document.getElementById("dashboardTerritories");
+  const noEl = document.getElementById("dashboardNoTerr");
+  if (!listEl) return;
+  listEl.innerHTML = "";
+  noEl.classList.add("hidden");
+  try {
+    const client = window.supabaseClient;
+    const { data: rows } = await client.from("territory_subscriptions").select("id, territory_id, status, monthly_cents, territories(anchor_address, estimated_homes)").eq("owner_id", session.user.id).eq("status", "active");
+    if (rows && rows.length) {
+      rows.forEach(function(r) {
+        const t = r.territories || {};
+        const div = document.createElement("div");
+        div.className = "card";
+        div.innerHTML = "<strong>" + esc(t.anchor_address || "Territory") + "</strong><div class=\"muted tiny\">" + (t.estimated_homes || 0) + " homes &middot; $" + ((r.monthly_cents || 0) / 100) + "/mo</div>";
+        listEl.appendChild(div);
+      });
+    } else noEl.classList.remove("hidden");
+  } catch (e) { noEl.classList.remove("hidden"); }
+}
+
+async function ndLoadTeam() {
+  const session = window.supabaseSession;
+  if (!session || !session.user) { go("screenSignIn"); return; }
+  const listEl = document.getElementById("teamList");
+  if (!listEl) return;
+  listEl.innerHTML = "";
+  try {
+    const client = window.supabaseClient;
+    const { data: mySubs } = await client.from("territory_subscriptions").select("territory_id").eq("owner_id", session.user.id).eq("status", "active");
+    if (!mySubs || !mySubs.length) { listEl.innerHTML = "<div class=\"muted\">You need an active territory first.</div>"; return; }
+    const tid = mySubs[0].territory_id;
+    let { data: teamRow } = await client.from("teams").select("id").eq("territory_id", tid).eq("owner_id", session.user.id).single();
+    if (!teamRow) {
+      const { data: created } = await client.from("teams").insert({ territory_id: tid, owner_id: session.user.id }).select("id").single();
+      teamRow = created;
+    }
+    const { data: members } = await client.from("team_members").select("id, user_id").eq("team_id", teamRow.id);
+    (members || []).forEach(function(m) {
+      const d = document.createElement("div");
+      d.className = "card";
+      d.textContent = "Member " + (m.user_id ? m.user_id.slice(0, 8) + "…" : "");
+      listEl.appendChild(d);
+    });
+  } catch (e) { listEl.innerHTML = "<div class=\"muted\">Could not load team.</div>"; }
+}
+
+function ndTeamInvite() {
+  const emailEl = document.getElementById("teamMemberEmail");
+  const msgEl = document.getElementById("teamMsg");
+  const email = (emailEl && emailEl.value || "").trim();
+  if (!email) { if (msgEl) msgEl.textContent = "Enter an email."; return; }
+  msgEl.textContent = "Invite sent. They must sign in with this email to join.";
+}
+
+async function ndLoadResale() {
+  const listEl = document.getElementById("resaleList");
+  const myEl = document.getElementById("resaleMyListings");
+  if (!listEl) return;
+  listEl.innerHTML = "";
+  if (myEl) myEl.innerHTML = "";
+  try {
+    const client = window.supabaseClient;
+    const { data: listings } = await client.from("resale_listings").select("id, territory_id, listing_price_cents, status").eq("status", "active");
+    (listings || []).forEach(function(l) {
+      const d = document.createElement("div");
+      d.className = "card";
+      d.innerHTML = "Territory listing &middot; $" + (l.listing_price_cents / 100) + " <button class=\"btn primary\" onclick=\"go('screenResaleContract')\">View &amp; buy</button>";
+      listEl.appendChild(d);
+    });
+  } catch (e) { listEl.innerHTML = "<div class=\"muted\">Could not load listings.</div>"; }
+}
+
+function ndResaleAcceptContract() {
+  const cb = document.getElementById("resaleContractAccept");
+  const msg = document.getElementById("resaleContractMsg");
+  if (!cb || !cb.checked) { if (msg) msg.textContent = "Please accept the terms."; return; }
+  msg.textContent = "Contract accepted. Complete purchase via AppStack.";
+}
+
+// ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
-if (typeof window.supabaseAuthInit === "function") window.supabaseAuthInit();
+if (typeof window.supabaseAuthInit === "function") {
+  window.supabaseAuthInit();
+  if (window.supabaseClient && window.supabaseClient.auth) {
+    window.supabaseClient.auth.onAuthStateChange(function() { ndUpdateAuthUI(); });
+  }
+}
+setTimeout(function() { ndUpdateAuthUI(); }, 500);
 loadPricingFromServer();
 loadTestimonials();
+
+// Handle territory purchase success redirect
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("territory") === "success") {
+    showToast("Territory purchased", "Your territory is now active.", "success", 5000);
+    if (typeof history.replaceState === "function") history.replaceState({}, "", window.location.pathname);
+    if (typeof go === "function") go("screenDashboard");
+    return;
+  }
+})();
 
 // Handle shareable gallery links: ?gallery=TOKEN
 (function() {

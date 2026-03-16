@@ -1,0 +1,10 @@
+{
+  "name": "neighbordogs",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "stripe": "^14.10.0",
+    "@turf/turf": "^6.5.0"
+  }
+}
