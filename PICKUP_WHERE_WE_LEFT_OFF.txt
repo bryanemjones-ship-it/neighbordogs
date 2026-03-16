@@ -1,0 +1,323 @@
+================================================================
+APPSTACK — PICKUP WHERE WE LEFT OFF
+Last updated: March 4, 2026
+================================================================
+
+WHO IS BRYAN
+============
+Bryan Jones (bryanemjones@gmail.com)
+Location: Raleigh, North Carolina
+Background: NOT a developer. Business/operations mindset.
+Previously built retiredguydogwalker.com — a full dog walking
+  business app (4,600+ lines, GPS tracking, booking, payments,
+  photo galleries, admin dashboard). Built with vanilla HTML/JS
+  and hosted on HostGator using cPanel file upload workflow.
+Learning style: Needs step-by-step instructions with exact
+  locations ("in VS Code" not "in the editor"). Gets frustrated
+  when instructions assume knowledge he doesn't have. Calls
+  himself "Baby Groot." Getting faster every session.
+Preferred workflow: Would rather just build and upload (like
+  HostGator days). Currently using Git/VS Code/Vercel which is
+  more powerful but more painful for him.
+
+================================================================
+WHAT ALREADY EXISTS (SHIPPED PRODUCTS)
+================================================================
+
+1. RETIREDGUYDOGWALKER (retiredguydogwalker.com)
+   Status: LIVE on HostGator
+   Tech: Vanilla HTML/CSS/JS, single index.html (4,600+ lines)
+   Features built:
+   - Customer booking system
+   - GPS walk tracking with live map (Leaflet)
+   - Walk photo galleries with shareable links
+   - Admin dashboard with pricing management
+   - Walk durations (20/30/60 min) with buddy add-on pricing
+   - Weekly discount system
+   - Visit reports with route maps and distance tracking
+   - Customer-facing and admin-facing views
+   - Emergency booking support
+   - Testimonials system
+   Backend: PHP API (gps_live.php, customer_gallery.php, etc.)
+   THIS IS IMPORTANT: Bryan already has a working product in the
+   dog walking space. PawRoute in the AppStack portfolio is a
+   MIGRATION of this app into the new platform, not a new build.
+   All features, business logic, and user experience are already
+   proven. The index.html file (4,600+ lines) is the source of
+   truth for what PawRoute needs to do.
+
+2. COURTFILL / SCHEDSOLVEE (appstack-schedsolvee.vercel.app)
+   Status: LIVE on Vercel, auth working, core features built
+   Tech: Next.js 14, TypeScript, Tailwind, Supabase
+   GitHub: bryanemjones-ship-it/appstack-schedsolvee
+   Local: C:\Projects\appstack-schedsolvee
+
+   What's built and deployed:
+   ✅ Landing page (CourtFill branding)
+   ✅ Auth system (signup, login, email confirmation)
+   ✅ Auth callback route (/auth/callback)
+   ✅ Protected dashboard with sidebar navigation
+   ✅ Courts management page (add, edit, delete, pause courts)
+   ✅ Bookings page — manager view (time slots, book for players)
+   ✅ Public booking page at /book (no login needed, players self-book)
+   ✅ Placeholder pages: players, waitlist, payments, settings
+
+   What's NOT built yet:
+   ❌ Stripe payments (so bookings actually charge money)
+   ❌ Email confirmations to players after booking
+   ❌ Recurring bookings (leagues, weekly groups)
+   ❌ Waitlist for full slots
+   ❌ Player profiles
+   ❌ Calendar view
+   ❌ Settings page (facility hours, pricing tiers)
+   ❌ Better landing page for conversions
+   ❌ Mobile polish
+
+   Estimated: ~30-35% done for a sellable product.
+   Next features to build: Stripe payments, email notifications.
+
+================================================================
+INFRASTRUCTURE & ACCOUNTS
+================================================================
+
+Vercel:
+  Account: bryanemjones-... (Hobby tier, free)
+  Project: appstack-schedsolvee
+  Live URL: appstack-schedsolvee.vercel.app
+  Auto-deploys from GitHub on push to main
+
+GitHub:
+  Account: bryanemjones-ship-it
+  Repo: appstack-schedsolvee
+  Branch: main
+
+Supabase:
+  Project: AppStack
+  Project URL: https://klxlfotpmdrdkhczmsfz.supabase.co
+  12 tables: app_pricing, bookings, contacts, dunning_configs,
+    invoices, notification_log, organizations, owner_events,
+    resources, skyops_packages, trial_notifications, users
+  IMPORTANT: Using LEGACY API keys (eyJ... format), NOT the new
+    sb_publishable/sb_secret format. New format doesn't work
+    with our supabase-js client version.
+  RLS disabled on: resources, bookings (for dev speed — need to
+    re-enable with proper policies before launch)
+  Schema fix applied: org_id made nullable on resources and
+    bookings tables (ALTER TABLE ... DROP NOT NULL)
+
+Supabase Auth:
+  Site URL set to: https://appstack-schedsolvee.vercel.app
+  Email confirmation working
+  Bryan's account: bryanemjones@gmail.com (confirmed)
+
+Local Dev Environment:
+  VS Code: Installed (just today, first time using it)
+  Node.js: Installed at C:\Program Files\nodejs\
+  Git: Installed and configured
+  Project: C:\Projects\appstack-schedsolvee
+  .env.local: Configured with real legacy Supabase keys
+  Run locally: cd C:\Projects\appstack-schedsolvee → npm run dev
+  NOTE: VS Code terminal uses PowerShell which blocks npm.
+    Must type "cmd" first to switch to Command Prompt, then
+    npm run dev works. Or use the separate Command Prompt app.
+
+Domain:
+  No custom domain yet. Using free .vercel.app URL.
+  Recommended registrar: Cloudflare (~$10/year for .com)
+  Don't buy domain until closer to launch.
+
+HostGator:
+  Bryan has an existing HostGator account (hosts
+  retiredguydogwalker). May have a domain there worth keeping.
+
+================================================================
+DEVELOPMENT WORKFLOW (Bryan's current process)
+================================================================
+
+How Bryan works now (learned today):
+1. Claude gives code
+2. Bryan opens the right file in VS Code (left sidebar)
+3. Ctrl+A to select all, Ctrl+V to paste new code
+4. Ctrl+S to save
+5. Browser at localhost:3000 auto-refreshes
+6. When happy: git add . → git commit -m "message" → git push
+7. Vercel auto-deploys from GitHub
+
+Things that still trip him up:
+- Knowing which program to be in (VS Code vs browser vs terminal)
+- Terminal commands (needs exact text to type)
+- PowerShell vs Command Prompt (PowerShell blocks npm)
+- Variable name mismatches between services
+- File/folder navigation
+
+Things that help:
+- Always say WHERE first ("In VS Code..." or "In your browser...")
+- Give exact text to type, one step at a time
+- Don't assume he knows where anything is
+- Explain name differences between platforms upfront
+
+================================================================
+APPSTACK BUILD SEQUENCE (36-week roadmap)
+================================================================
+
+PHASE 1: Foundation Sprint (Weeks 1-6) ← WE ARE HERE
+  SchedSolve (platform engine) — Weeks 1-3
+    Auth, scheduling core, Stripe, notifications, CRM, dashboard
+  CourtFill (first launch) — Weeks 3-6 ← CURRENTLY BUILDING
+    Court management, booking flow, waitlist, payments, public page
+
+PHASE 2: Revenue Acceleration (Weeks 7-14)
+  PawRoute (dog walker mgmt) — Weeks 7-10
+    THIS IS A MIGRATION, NOT A NEW BUILD.
+    retiredguydogwalker.com is a live, working product with real
+    features (GPS tracking, booking, payments, photo galleries,
+    admin dashboard, pricing management). The job is to rebuild
+    it on the AppStack platform (Next.js + Supabase) so it shares
+    infrastructure with CourtFill and future apps. Bryan already
+    knows every feature and edge case. This should be faster than
+    a from-scratch build.
+  PodRun (microschool mgmt) — Weeks 10-14
+    Enrollment, attendance, parent portal, curriculum, ESA billing
+
+PHASE 3: Portfolio Expansion (Weeks 15-24)
+  ADU BuildFlow (construction mgmt) — Weeks 15-19
+    Project pipeline, permit tracking, zoning, cost templates
+    Highest price point: $149-199/mo
+    Strongest confirmed competitive gap
+  EstateEdge (estate sale mgmt) — Weeks 19-24
+    Item catalog, sale events, POS, CRM, settlement reports
+
+PHASE 4: Full Portfolio (Weeks 25-36)
+  StagePro (home staging) — Weeks 25-28
+  TruckBase (food truck ops) — Weeks 28-31
+  ChefSheet (personal chef) — Weeks 31-34
+  SkyOps (drone services) — Weeks 34-36
+
+Milestones:
+  Week 6:  First paying customers (CourtFill)
+  Week 14: 3 apps live, platform proven
+  Week 24: 5 apps live including $199/mo ADU BuildFlow
+  Week 36: Full portfolio: 10 apps on AppStack
+
+================================================================
+NEW MARKET OPPORTUNITIES — TIER RANKINGS
+================================================================
+
+Based on ChatGPT research + Claude analysis of underserved app
+markets (apps with 3.0-3.8 stars, 10K-100K downloads = "users
+need it but hate it").
+
+TIER 1 — BUILD THESE (best for solo builder, fastest to revenue):
+
+1. CourtFill (court/facility booking) — ALREADY BUILDING
+   Why: Pickleball booming, facility managers non-technical,
+   switching costs low, most using spreadsheets/phone calls.
+   Weakness: Bigger players (CourtReserve) could notice.
+   Pricing: $49-99/month per facility.
+
+2. Shift Scheduling for Small Businesses
+   Why: WhenIWork/Deputy charge $4-8/user/month, over-engineered
+   for an 8-person coffee shop. Dead-simple $29/mo flat rate
+   would spread by word of mouth. Massive market, daily usage
+   means high retention.
+   Weakness: Competitive, but incumbents are hated.
+   Overlaps with: SchedSolvee core engine.
+
+3. Church Management
+   Why: 300K+ churches in US. Planning Center charges $50-200/mo,
+   small churches can't justify it. They need: member directory,
+   volunteer scheduling, giving/donations, event calendar.
+   Strength: Churches talk to each other — one sale becomes five
+   through denominational networks.
+   Weakness: Long sales cycles, relationship-driven.
+
+TIER 2 — GOOD BUT HARDER:
+
+4. Tenant Communication / Maintenance
+   Strength: Small landlords (5-20 units) underserved.
+   Weakness: Standalone tool is hard to charge for — they want
+   rent collection bundled. Scope tight to maintenance only.
+
+5. Property Inspection Apps
+   Strength: High willingness to pay ($30-50/mo per inspector).
+   Weakness: Needs offline mode, photo handling, PDF generation.
+   Technically heavy for solo builder.
+
+6. Volunteer / Nonprofit Management
+   Weakness: Nonprofits have no money. SignUpGenius is free.
+   Getting to $10K/month revenue would be a grind.
+
+TIER 3 — SKIP FOR NOW:
+
+7. HOA/Condo Management
+   Weakness: Selling to committees, brutal sales cycle.
+
+8. PawRoute (pet sitting/dog walking)
+   Weakness: Competing with Rover (billion-dollar company).
+   BUT: Bryan already built and runs retiredguydogwalker.com as
+   a live business. This is a MIGRATION into AppStack, not a new
+   product. Keep in portfolio at Phase 2 position — the app
+   already exists, it just needs to move to the new platform.
+
+RECOMMENDED FIRST FOUR TO BUILD:
+1. CourtFill (finish it)
+2. Shift scheduling
+3. Church management
+4. Tenant maintenance
+
+================================================================
+ADU BUILDFLOW — COMPETITIVE RESEARCH
+================================================================
+
+Confirmed competitive gap: No tool does full pipeline
+(feasibility → permit → build → inspect) in one ADU-specific
+product. Market is fragmented.
+
+Existing tools (none are direct competitors):
+- Canibuild: $195/mo, feasibility/3D viz only. Sales tool.
+- Symbium Build: Free, computational law for zoning. B2G model.
+- Opoplan/Open ADU: Lot-level feasibility only.
+- Buildertrend: Generic construction PM, not ADU-specific.
+- PermitFlow: AI permit management, all construction types.
+
+Positioning: "Canibuild tells you IF you can build. BuildFlow
+manages the entire project AFTER you say yes, and includes
+feasibility as part of a unified pipeline."
+
+Target: ADU design-build firms, prefab companies, consultants.
+Market: 20K+ ADUs permitted annually in CA alone.
+Price: $149-199/month (highest in AppStack portfolio).
+
+================================================================
+NEXT SESSION — WHAT TO DO
+================================================================
+
+1. Start server: Open Command Prompt (not PowerShell)
+   cd C:\Projects\appstack-schedsolvee
+   npm run dev
+
+2. Build Stripe payments for CourtFill
+   - Create Stripe account (if Bryan doesn't have one)
+   - Add Stripe checkout to public booking page
+   - Booking creates a payment intent
+   - Facility manager sees revenue in dashboard
+
+3. After payments: Email confirmations
+   - Player gets booking receipt
+   - Facility manager gets new booking notification
+
+4. Then: Polish landing page for real customer outreach
+
+REMEMBER:
+- Always say WHERE Bryan should be doing something
+- One step at a time
+- PowerShell blocks npm — use "cmd" first or Command Prompt
+- Bryan's Supabase uses LEGACY keys (eyJ... format)
+- RLS is disabled on resources and bookings tables
+- Bryan prefers simple workflows (the HostGator days)
+- He already shipped a real product (retiredguydogwalker)
+- He's not a beginner at product thinking, just at this toolchain
+- When we get to PawRoute: have Bryan upload the
+  retiredguydogwalker index.html so we can reference every
+  feature during the migration to Next.js/Supabase
+================================================================

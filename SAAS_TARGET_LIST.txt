@@ -1,0 +1,430 @@
+SaaS PROSPECT TARGET LIST
+Scheduling + Notification Platform
+March 2026
+
+===============================================================================
+HOW TO READ THIS LIST
+===============================================================================
+
+Priority Score (1-5 stars) based on:
+  ★ = # of locations (more = bigger deal)
+  ★ = Tech sophistication (less = more likely to need you)
+  ★ = Recurring scheduling model (vs one-off)
+  ★ = Fit with current platform features
+  ★ = Accessibility (can you actually reach decision-makers?)
+
+Revenue estimate = locations × $49-99/mo per location
+
+
+===============================================================================
+TIER 1 — HAIR SALONS & BARBERSHOPS ($63B industry)
+===============================================================================
+Your strongest vertical. Recurring appointments, no-show problems,
+review generation, and most mid-market chains are underserved by tech.
+
+COMPANY                    LOCATIONS   PRIORITY   POTENTIAL REVENUE
+───────────────────────────────────────────────────────────────────
+
+Fantastic Sam's             ~650       ★★★★★      $380K-770K/yr
+  HQ: Woburn, MA
+  Parent: Dessange International
+  Why #1: Huge footprint but aging tech stack. Franchise model
+  means corporate could mandate your platform across all locations.
+  Walk-in + appointment hybrid = perfect for your booking engine.
+  At 650 locations, one deal = instant scale.
+  Contact: Corporate franchise development team
+  Pitch: "Reduce no-shows, automate confirmations, branded SMS"
+
+Cost Cutters               ~600       ★★★★★      $350K-710K/yr
+  HQ: Minneapolis, MN
+  Parent: Regis Corporation
+  Why: Part of Regis (owns 27 salon brands). Land Cost Cutters and
+  you have a foot in the door to Supercuts, Roosters, City Looks,
+  First Choice, and SmartStyle. Regis is the whale — 27 brands,
+  thousands of locations total. Cost Cutters is mid-market enough
+  to be your entry point.
+  Contact: Regis Corporation franchise operations
+
+Sola Salon Studios          ~564       ★★★★☆      $330K-670K/yr
+  HQ: Lakewood, CO
+  Why: Salon suite model — independent stylists rent booths.
+  Each stylist is essentially a solo business that needs their
+  OWN booking, confirmation texts, and review requests.
+  Your platform could be offered as a value-add to every
+  stylist in every Sola location. 564 locations × avg 20
+  stylists = 11,000+ potential individual subscribers.
+  Different pitch: "Give your stylists a professional booking
+  and notification system as part of their suite rental."
+
+Hand & Stone Massage/Spa    ~540       ★★★★☆      $315K-640K/yr
+  HQ: Trevose, PA
+  Why: Membership-based spa franchise growing fast. Massage,
+  facials, waxing — all appointment-driven. Membership model
+  means recurring scheduling is central. 540 locations and
+  expanding. Appointment reminders reduce costly no-shows
+  for high-revenue services ($60-120/session).
+  Contact: Franchise support/operations team
+
+Phenix Salon Suites         ~334       ★★★★☆      $195K-395K/yr
+  HQ: Encinitas, CA
+  Why: Same salon suite model as Sola. Growing fast.
+  Same pitch — platform for individual beauty professionals.
+
+Drybar                      ~160       ★★★☆☆      $94K-190K/yr
+  HQ: Irvine, CA
+  Why: Blow dry bar concept, 100% appointment-driven.
+  Higher-end clientele expects polished digital experience.
+  Smaller footprint but premium brand = higher willingness to pay.
+
+Blo Blow Dry Bar            ~165       ★★★☆☆      $97K-196K/yr
+  HQ: Toronto (US operations)
+  Why: Same concept as Drybar, slightly different market.
+  Growing franchise, appointment-only model.
+
+Floyd's 99 Barbershop       ~125       ★★★☆☆      $73K-148K/yr
+  HQ: Greenwood Village, CO
+  Why: Premium barbershop targeting millennials. Fast growing.
+  Tech-savvy customer base expects text confirmations.
+  Smaller but could be a great early win + case study.
+
+Cookie Cutters (kids)       ~113       ★★★☆☆      $66K-134K/yr
+  HQ: Lake City, UT
+  Why: Children's salon — parents ESPECIALLY want reminders
+  and confirmations. High no-show sensitivity. Niche enough
+  that a tailored solution wins over generic software.
+
+Roosters Men's Grooming     ~82        ★★★☆☆      $48K-97K/yr
+  HQ: Minneapolis, MN
+  Parent: Regis Corporation
+  Why: Another Regis brand. Land this and use as proof
+  of concept to pitch up to the Regis mothership.
+
+Pigtails & Crewcuts         ~69        ★★★☆☆      $40K-82K/yr
+  HQ: Atlanta, GA
+  Why: Another kids salon chain. Small but growing.
+  Parents are the decision-makers — they love automation.
+
+REGIS CORPORATION — THE WHALE DEAL
+  If you land any Regis brand, pitch the whole portfolio:
+  Supercuts (2,100+), SmartStyle (1,200+), Cost Cutters (600+),
+  Roosters (82), City Looks, First Choice, and more.
+  That's 4,000+ locations under one corporate umbrella.
+  Even at $49/location = $2.4M ARR. This is the dream deal.
+
+
+ALSO CONSIDER (salon-adjacent):
+  European Wax Center         ~890 locations (NASDAQ: EWCZ)
+  Massage Envy               ~1,100 locations
+  Palm Beach Tan              ~329 locations
+  Elements Massage            ~250 locations
+  MassageLuXe                 ~80 locations
+  LaVida Massage              ~46 locations
+
+  Note: Massage Envy and European Wax Center are large enough
+  to have in-house tech, but their FRANCHISEES might not be
+  getting great tools from corporate. Worth investigating.
+
+
+===============================================================================
+TIER 2 — HOME CLEANING ($20B+ industry)
+===============================================================================
+Perfect fit. Recurring schedules, crew assignment (= walker assignment),
+"team is on the way" notifications, completion confirmation, review requests.
+Your platform was basically built for this with minor terminology swaps.
+
+COMPANY                    LOCATIONS   PRIORITY   POTENTIAL REVENUE
+───────────────────────────────────────────────────────────────────
+
+Molly Maid                  ~456       ★★★★★      $268K-540K/yr
+  HQ: Ann Arbor, MI
+  Parent: Neighborly (29 home service brands)
+  Why #1: Neighborly is the ultimate whale. They own Molly Maid,
+  Mr. Handyman, Mr. Electric, Mr. Appliance, Mr. Rooter,
+  Aire Serv, Glass Doctor, Rainbow Restoration, and 20+ more.
+  That's 5,500+ franchise owners across all brands.
+  Land Molly Maid as proof of concept, then pitch the whole
+  Neighborly ecosystem. 98% recurring customer base means
+  scheduling automation is critical.
+  Contact: Neighborly corporate technology/innovation team
+  THE NEIGHBORLY WHALE: 29 brands, 5,500+ franchise owners.
+  Even at $49/location = $3.2M+ ARR.
+
+Merry Maids                 ~450       ★★★★★      $264K-530K/yr
+  HQ: Memphis, TN
+  Parent: ServiceMaster (now Roark Capital)
+  Why: Nearly 1,000 territories, 5,000+ employees, 40+ years.
+  Massive brand with proven model. ServiceMaster also owns
+  Terminix, American Home Shield, and other service brands.
+  Another potential whale deal through the parent company.
+  Contact: ServiceMaster/Roark franchise operations
+
+MaidPro                     ~265       ★★★★☆      $155K-315K/yr
+  HQ: Boston, MA
+  Why: Mid-market sweet spot. Customizable cleaning plans
+  (49-point checklist) means complex scheduling needs.
+  Founded by a guy who built software to manage the business —
+  they understand tech value. But their current platform may
+  be aging. Great candidate for a modern upgrade.
+  Contact: Corporate operations team
+
+The Maids                   ~200       ★★★★☆      $118K-238K/yr
+  HQ: Omaha, NE
+  Parent: Authority Brands
+  Why: Authority Brands also owns DoodyCalls, Homewatch
+  CareGivers, and other service brands. Another multi-brand
+  parent that could open doors.
+
+Two Maids                   ~165       ★★★★☆      $97K-196K/yr
+  HQ: Birmingham, AL
+  Parent: Home Franchise Concepts
+  Why: Fastest-growing cleaning franchise. Their unique
+  "Pay for Performance" model means customer feedback is
+  central to operations. Your auto review request feature
+  is a perfect match. Young brand = more open to new tech.
+  Home Franchise Concepts also owns Budget Blinds, Concrete
+  Craft, and other brands.
+
+The Cleaning Authority      ~230       ★★★★☆      $135K-273K/yr
+  Why: Their "Detail-Clean Rotation System" requires complex
+  scheduling (different zones cleaned on different visits).
+  Your platform could handle this rotation logic.
+
+Maid Brigade                ~400+      ★★★★☆      $235K-475K/yr
+  Why: Only cleaning service using electrolyzed water
+  (PUREcleaning). Eco-focused brand. 400+ territories.
+  Good mid-market target.
+
+
+PARENT COMPANY WHALE DEALS:
+  Neighborly:        29 brands, 5,500+ owners → $3.2M+ ARR potential
+  ServiceMaster:     Multiple service brands → $1M+ ARR potential
+  Authority Brands:  Multiple service brands → $500K+ ARR potential
+  Home Franchise Concepts: Multiple brands → $500K+ ARR potential
+
+
+===============================================================================
+TIER 3 — TUTORING & EDUCATION ($20B+ industry, 65% annual growth)
+===============================================================================
+Almost identical to your dog walking model. Parent books session,
+system confirms, sends reminder, tutor reports after session.
+Swap "dog names" for "student names" and "walk type" for "subject."
+
+COMPANY                    LOCATIONS   PRIORITY   POTENTIAL REVENUE
+───────────────────────────────────────────────────────────────────
+
+Mathnasium                  ~1,100     ★★★★★      $646K-1.3M/yr
+  HQ: Los Angeles, CA
+  Why #1: Sweet spot — big enough to matter, small enough to
+  not have enterprise-grade custom tech. Math-only focus means
+  simple scheduling model. 1,100 locations, mostly franchisee-
+  owned. Parents book assessments and recurring weekly sessions.
+  Reminders reduce no-shows (which kill tutor utilization).
+  Progress reports after sessions = your walk report feature.
+  Contact: Franchise operations/technology team
+  Pitch: "Automated session reminders, parent notifications,
+  progress updates, and review requests for every center."
+
+Huntington Learning Center  ~300       ★★★★★      $176K-356K/yr
+  HQ: Oradell, NJ
+  Why: Full-service tutoring + test prep. K-12 students.
+  Multiple subjects means complex scheduling (student A has
+  math Tuesday, reading Thursday). Appointment confirmation
+  and reminders are critical — parents are paying $40-80/hour.
+  One missed session costs real money. Founded 1977, been
+  franchising since 1977 — likely has legacy tech.
+  Contact: Corporate franchise support
+
+Sylvan Learning             ~570       ★★★★☆      $335K-677K/yr
+  HQ: Baltimore, MD
+  Why: Legacy brand (40+ years), 750+ points worldwide.
+  SAT/ACT prep + K-12 tutoring + STEM programs. Complex
+  scheduling needs. Locations have declined from 727 to 570,
+  suggesting the brand needs modernization — your tech could
+  be part of a revitalization pitch.
+
+Kumon                       ~1,660 US  ★★★☆☆      $975K-1.97M/yr
+  HQ: Teaneck, NJ (US) / Osaka, Japan (global)
+  Why: Massive — 26,000+ worldwide, 1,660 in US. BUT: highly
+  structured Japanese corporate culture, likely has established
+  global tech. Hard to penetrate at corporate level. However,
+  individual FRANCHISEES might adopt your tool independently
+  if corporate doesn't mandate alternatives. Lower priority
+  for corporate deal, but individual franchisee sales could
+  work. Rating lower for accessibility despite huge size.
+
+JEI Learning Centers        ~217       ★★★★☆      $127K-258K/yr
+  HQ: Closter, NJ
+  Why: Growing fast. One-on-one + practice model.
+  Personalized learning plans = recurring weekly scheduling.
+
+Tutor Doctor                ~550+      ★★★★☆      $323K-653K/yr
+  HQ: Toronto (US operations)
+  Why: IN-HOME tutoring franchise. Tutor goes to student's
+  house. This is literally your dog walking model — provider
+  travels to customer. "Tutor is on the way" text, session
+  confirmation, parent gets progress note after. 550+ locations.
+  HOME-BASED model means low overhead franchisees who need
+  affordable tech. Perfect match.
+  HIGHEST FIT SCORE of any tutoring brand.
+
+Code Ninjas                 ~400       ★★★★☆      $235K-475K/yr
+  Why: Kids coding education franchise. Growing fast.
+  Session-based model. Tech-forward brand (they teach coding!)
+  but may not have great operational scheduling tech.
+
+School of Rock              ~550+      ★★★★☆      $323K-653K/yr
+  Why: Music education franchise. Recurring weekly lessons +
+  group sessions + performances. Complex scheduling needs.
+  180+ locations, growing. Parents want reminders and updates.
+
+Snapology                   ~100       ★★★☆☆      $59K-119K/yr
+  Why: STEM education for kids. Growing franchise.
+  Session-based, parent-driven booking.
+
+
+===============================================================================
+TIER 4 — BONUS TARGETS (high fit, different verticals)
+===============================================================================
+
+COMPANY                    LOCATIONS   PRIORITY   POTENTIAL REVENUE
+───────────────────────────────────────────────────────────────────
+
+Club Pilates               ~1,000      ★★★★☆      $588K-1.19M/yr
+  Parent: Xponential Fitness (10 fitness brands)
+  Why: Class scheduling + waitlists + reminders. Xponential
+  also owns Pure Barre (600+), CycleBar (250+), StretchLab
+  (400+), YogaSix (350+), Rumble (70+), and more.
+  XPONENTIAL WHALE: 10 brands, 2,500+ locations → $1.5M+ ARR
+
+Goldfish Swim School        ~200+      ★★★★☆      $118K-238K/yr
+  Why: Kids swim lessons. Recurring weekly classes.
+  Parents book, get reminders, get progress updates.
+  Very similar to tutoring model.
+
+The Little Gym              ~200+      ★★★★☆      $118K-238K/yr
+  Why: Kids gymnastics/motor skills. Same recurring model.
+
+Camp Bow Wow                ~220       ★★★★☆      $129K-261K/yr
+  Why: Pet care — you literally already built this vertical.
+  Doggy daycare + boarding. Drop-off/pick-up notifications,
+  daily report cards with photos. Your photo gallery feature
+  is exactly what they'd want.
+
+
+===============================================================================
+TOP 10 FIRST CALLS — RANKED BY PROBABILITY OF CLOSING
+===============================================================================
+
+Ranking considers: deal size, tech gap, accessibility of decision-makers,
+fit with current platform, and likelihood of saying yes.
+
+ 1. Tutor Doctor (~550 locations)
+    WHY FIRST: In-home tutoring = your exact model. Provider travels
+    to customer. Lowest adaptation cost. Home-based franchisees need
+    affordable tools. Franchise operations team is accessible.
+
+ 2. Fantastic Sam's (~650 locations)
+    WHY: Big enough to matter, old enough to have legacy tech,
+    franchise model means corporate can mandate across all locations.
+
+ 3. Two Maids (~165 locations)
+    WHY: Youngest, fastest-growing cleaning brand. Most open to new
+    tech. "Pay for Performance" model aligns with your review system.
+
+ 4. Mathnasium (~1,100 locations)
+    WHY: Huge footprint, simple scheduling model (math only),
+    parents expect digital experience, massive ARR potential.
+
+ 5. Floyd's 99 Barbershop (~125 locations)
+    WHY: Premium brand, millennial customers, tech-forward mindset,
+    small enough that you'd talk to actual decision-makers.
+
+ 6. MaidPro (~265 locations)
+    WHY: Founded by a software guy — they understand tech value.
+    Mid-market sweet spot. Customizable model = needs flexible platform.
+
+ 7. Huntington Learning Center (~300 locations)
+    WHY: Legacy brand likely running on old systems. Multi-subject
+    scheduling complexity. Parents paying premium prices expect
+    premium communication.
+
+ 8. Camp Bow Wow (~220 locations)
+    WHY: You already built the pet vertical. Minimal adaptation.
+    Daily report cards with photos = your walk reports.
+
+ 9. Cookie Cutters / Pigtails & Crewcuts (~180 combined)
+    WHY: Children's salons. Parents are the customer — they LOVE
+    automated reminders and will leave reviews when asked nicely.
+    Niche enough that generic salon software doesn't serve them well.
+
+10. Molly Maid → Neighborly (~456 locations, gateway to 5,500+)
+    WHY: The whale play. Start with Molly Maid, prove value,
+    then pitch across all 29 Neighborly brands. Long sales cycle
+    but potentially the biggest single deal you could close.
+
+
+===============================================================================
+WHALE DEALS — PARENT COMPANIES
+===============================================================================
+
+If you land ANY brand under these parents, you have a shot at the whole
+portfolio. These are the deals that go from $50K ARR to $1M+ overnight.
+
+PARENT COMPANY           BRANDS                        TOTAL LOCATIONS
+─────────────────────────────────────────────────────────────────────
+
+Regis Corporation         Supercuts, SmartStyle,         ~4,000+
+                          Cost Cutters, Roosters,
+                          City Looks, First Choice
+
+Neighborly                Molly Maid, Mr. Handyman,      ~5,500+
+                          Mr. Electric, Mr. Rooter,
+                          Aire Serv, Glass Doctor,
+                          + 23 more brands
+
+Xponential Fitness        Club Pilates, Pure Barre,      ~2,500+
+                          CycleBar, StretchLab,
+                          YogaSix, Rumble, + more
+
+ServiceMaster/Roark       Merry Maids, Terminix,         ~2,000+
+                          American Home Shield
+
+Authority Brands          The Maids, DoodyCalls,         ~500+
+                          Homewatch CareGivers
+
+Home Franchise Concepts   Two Maids, Budget Blinds,      ~1,500+
+                          Concrete Craft, + more
+
+
+===============================================================================
+SALES APPROACH NOTES
+===============================================================================
+
+THE PITCH (customize per vertical):
+"We built a scheduling and notification platform that reduces no-shows,
+automates customer communication, and generates 5-star reviews — all
+branded to your business. Your [stylists/techs/tutors/cleaners] get
+a simple mobile dashboard. Your customers get branded text confirmations,
+day-before reminders, 'on the way' alerts, and automatic review requests
+after every appointment. $49-99/month per location. One prevented
+no-show pays for the entire year."
+
+WHO TO CONTACT:
+- Franchise Development VP (cares about franchisee satisfaction)
+- Chief Technology Officer / VP Operations (cares about efficiency)
+- Franchisee Advisory Council members (influencers who talk to corporate)
+- Individual multi-unit franchisees (own 5-20 locations, can adopt
+  independently even without corporate mandate)
+
+PROOF POINTS TO BUILD:
+- Before/after no-show rates
+- Review generation numbers (X reviews generated per month)
+- Customer satisfaction scores
+- Time saved per location per week on manual communication
+
+ENTRY STRATEGY:
+1. Start with 2-3 individual franchisees (any brand) as beta customers
+2. Build case studies with real numbers
+3. Approach franchise corporate with proven ROI data
+4. Negotiate enterprise deal for full brand rollout
+5. Use first brand win to approach parent company for multi-brand deal
