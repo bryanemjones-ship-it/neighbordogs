@@ -12,9 +12,11 @@ async function geocode(address) {
   const q = new URLSearchParams({ address, benchmark: "Public_AR_Current", format: "json" });
   const r = await fetch(`${CENSUS_GEOCODE}?${q.toString()}`);
   const data = await r.json();
+  console.log("GEOCODE_RAW_RESPONSE", JSON.stringify(data, null, 2));
   const matches = data.result?.addressMatches || [];
   if (!matches.length) return null;
   const m = matches[0];
+  console.log("GEOCODE_MATCH", JSON.stringify(m, null, 2));
   const geos = m.geographies || {};
 
   let state = null;
