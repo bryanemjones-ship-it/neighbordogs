@@ -92,8 +92,20 @@ export default async function handler(req, res) {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     let benchmark = { base_opportunity: 5000 };
-    const { data: configRow } = await supabase.from("app_config").select("value").eq("key", "benchmark").single();
-    if (configRow?.value?.base_opportunity) benchmark.base_opportunity = configRow.value.base_opportunity;
+
+    try {
+      const { data: configRow, error } = await supabase
+        .from("app_config")
+        .select("value")
+        .eq("key", "benchmark")
+        .maybeSingle();
+
+      if (!error && configRow?.value?.base_opportunity) {
+        benchmark.base_opportunity = configRow.value.base_opportunity;
+      }
+    } catch (e) {
+      // fallback to default benchmark
+    }
 
     const baseOpportunity = benchmark.base_opportunity;
     const housing = await countyHousing(geo.state, geo.county);
