@@ -15,8 +15,20 @@ async function geocode(address) {
   const matches = data.result?.addressMatches || [];
   if (!matches.length) return null;
   const m = matches[0];
-  const state = m.geographies?.["Census Tracts"]?.[0]?.STATE || m.geographies?.["States"]?.[0]?.STATE;
-  const county = m.geographies?.["Census Tracts"]?.[0]?.COUNTY || m.geographies?.["Counties"]?.[0]?.COUNTY;
+  const geos = m.geographies || {};
+
+  let state = null;
+  let county = null;
+
+  for (const value of Object.values(geos)) {
+    if (Array.isArray(value) && value.length) {
+      const row = value[0];
+      if (!state && row?.STATE) state = row.STATE;
+      if (!county && row?.COUNTY) county = row.COUNTY;
+      if (state && county) break;
+    }
+  }
+
   return { lat: m.coordinates.y, lng: m.coordinates.x, state, county, formatted: m.matchedAddress || address };
 }
 
