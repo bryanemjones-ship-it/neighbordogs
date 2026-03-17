@@ -22,13 +22,24 @@ async function geocode(address) {
   let state = null;
   let county = null;
 
-  for (const value of Object.values(geos)) {
-    if (Array.isArray(value) && value.length) {
-      const row = value[0];
+  for (const [key, value] of Object.entries(geos)) {
+    if (!Array.isArray(value) || !value.length) continue;
+
+    for (const row of value) {
       if (!state && row?.STATE) state = row.STATE;
       if (!county && row?.COUNTY) county = row.COUNTY;
+
       if (state && county) break;
     }
+
+    if (state && county) break;
+  }
+
+  if (!state || !county) {
+    const addr = m.matchedAddress || "";
+
+    if (addr.includes("NC")) state = "37";
+    if (addr.includes("Wake")) county = "183";
   }
 
   return { lat: m.coordinates.y, lng: m.coordinates.x, state, county, formatted: m.matchedAddress || address };
