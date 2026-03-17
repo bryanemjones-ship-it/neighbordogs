@@ -36,10 +36,31 @@ async function geocode(address) {
   }
 
   if (!state || !county) {
-    const addr = m.matchedAddress || "";
+    const GEO_LOOKUP = "https://geocoding.geo.census.gov/geocoder/geographies/coordinates";
+    const geoParams = new URLSearchParams({
+      x: String(m.coordinates.x),
+      y: String(m.coordinates.y),
+      benchmark: "Public_AR_Current",
+      vintage: "Current_Current",
+      format: "json",
+    });
 
-    if (addr.includes("NC")) state = "37";
-    if (addr.includes("Wake")) county = "183";
+    const geoResp = await fetch(`${GEO_LOOKUP}?${geoParams.toString()}`);
+    const geoData = await geoResp.json();
+    const resultGeos = geoData.result?.geographies || {};
+
+    for (const value of Object.values(resultGeos)) {
+      if (!Array.isArray(value) || !value.length) continue;
+
+      for (const row of value) {
+        if (!state && row?.STATE) state = row.STATE;
+        if (!county && row?.COUNTY) county = row.COUNTY;
+
+        if (state && county) break;
+      }
+
+      if (state && county) break;
+    }
   }
 
   return { lat: m.coordinates.y, lng: m.coordinates.x, state, county, formatted: m.matchedAddress || address };
