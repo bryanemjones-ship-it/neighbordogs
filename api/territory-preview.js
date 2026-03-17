@@ -29,10 +29,30 @@ async function countyHousing(stateFips, countyFips) {
   });
   if (process.env.CENSUS_API_KEY) params.set("key", process.env.CENSUS_API_KEY);
   const r = await fetch(`${ACS_BASE}?${params.toString()}`);
-  const rows = await r.json();
+  const raw = await r.text();
+
+  if (!r.ok || !raw) {
+    return 0;
+  }
+
+  let rows;
+  try {
+    rows = JSON.parse(raw);
+  } catch (e) {
+    return 0;
+  }
+
+  if (!Array.isArray(rows) || rows.length < 2) {
+    return 0;
+  }
+
   const header = rows[0];
   const dataRow = rows[1];
-  if (!dataRow) return 0;
+
+  if (!Array.isArray(header) || !Array.isArray(dataRow)) {
+    return 0;
+  }
+
   const idx = header.indexOf("B25001_001E");
   return idx >= 0 ? parseInt(dataRow[idx], 10) || 0 : 0;
 }
@@ -70,6 +90,9 @@ export default async function handler(req, res) {
 
   try {
     const geo = await geocode(address);
+    if (!geo?.state || !geo?.county) {
+      return res.status(400).json({ error: "Could not resolve county for this address" });
+    }
     if (!geo) return res.status(400).json({ error: "Address not found" });
 
     const supabaseUrl =
