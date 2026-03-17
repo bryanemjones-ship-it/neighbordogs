@@ -708,6 +708,7 @@
 <body>
 <div class="bg-noise" aria-hidden="true"></div>
 <div class="toast-container" id="toastContainer"></div>
+<div id="testModeRoot"></div>
 <svg style="display:none">
   <symbol id="pawSVG" viewBox="0 0 24 24"><path d="M12 15c-2 0-4 1.5-4 3s1 2 4 2 4-1 4-2-2-3-4-3zm-5-3c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm10 0c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zM8.5 9c.8 0 1.5-.7 1.5-1.5S9.3 6 8.5 6 7 6.7 7 7.5 7.7 9 8.5 9zm7 0c.8 0 1.5-.7 1.5-1.5S16.3 6 15.5 6 14 6.7 14 7.5 14.7 9 15.5 9z"/></symbol>
   <symbol id="checkSVG" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></symbol>
@@ -5094,6 +5095,74 @@ if (typeof window.supabaseAuthInit === "function") {
 setTimeout(function() { ndUpdateAuthUI(); }, 500);
 loadPricingFromServer();
 loadTestimonials();
+
+(function() {
+  var base = (typeof API_BASE !== "undefined" ? API_BASE : "/api").replace(/\/$/, "");
+  fetch(base + "/test-mode-status").then(function(r) { return r.json(); }).then(function(data) {
+    if (!data.enabled) return;
+    var root = document.getElementById("testModeRoot");
+    if (!root) return;
+    var unlocked = false;
+    var pin = "";
+    root.innerHTML = "<div id=\"testModeFloatingBtn\" style=\"position:fixed;bottom:20px;right:20px;z-index:9990;padding:10px 16px;border-radius:12px;background:#1e6fd4;color:#fff;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.2);\">Test Mode</div>" +
+      "<div id=\"testModePanel\" class=\"card stack\" style=\"display:none;position:fixed;bottom:60px;right:20px;z-index:9989;max-width:280px;max-height:80vh;overflow-y:auto;\">" +
+      "<div style=\"font-weight:700;margin-bottom:8px;\">Customer</div>" +
+      "<button type=\"button\" class=\"btn full\" data-action=\"approve-customer\">Approve Customer</button>" +
+      "<button type=\"button\" class=\"btn full\" data-action=\"meet-greet-complete\">Mark Meet &amp; Greet Complete</button>" +
+      "<div style=\"font-weight:700;margin:12px 0 8px;\">Booking</div>" +
+      "<button type=\"button\" class=\"btn full\" data-action=\"create-booking\">Create Test Booking</button>" +
+      "<button type=\"button\" class=\"btn full\" data-action=\"assign-walker\">Assign Walker</button>" +
+      "<div style=\"font-weight:700;margin:12px 0 8px;\">Walk</div>" +
+      "<button type=\"button\" class=\"btn full\" data-action=\"start-walk\">Start Walk</button>" +
+      "<button type=\"button\" class=\"btn full\" data-action=\"complete-walk\">Complete Walk</button>" +
+      "<div style=\"font-weight:700;margin:12px 0 8px;\">Post-walk</div>" +
+      "<button type=\"button\" class=\"btn full\" data-action=\"generate-report\">Generate Report Card</button>" +
+      "<button type=\"button\" class=\"btn full\" data-action=\"mark-paid\">Mark Payment Paid</button>" +
+      "<div style=\"font-weight:700;margin:12px 0 8px;\">System</div>" +
+      "<button type=\"button\" class=\"btn full\" data-action=\"seed\">Seed Demo Data</button>" +
+      "<button type=\"button\" class=\"btn full\" data-action=\"reset\">Reset Demo Data</button>" +
+      "<button type=\"button\" class=\"btn\" id=\"testModePanelClose\">Close</button></div>";
+    var btn = document.getElementById("testModeFloatingBtn");
+    var panel = document.getElementById("testModePanel");
+    function doAuth(cb) {
+      if (unlocked && pin) { cb(); return; }
+      showPrompt({ title: "Test Mode", message: "Enter admin PIN.", placeholder: "PIN", inputType: "password" }).then(function(entered) {
+        if (!entered) return;
+        fetch(base + "/test-mode-auth", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin: entered }) })
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+            if (data.ok) { unlocked = true; pin = entered; cb(); }
+            else showToast("Test Mode", "Incorrect PIN.", "error");
+          })
+          .catch(function() { showToast("Test Mode", "Auth failed.", "error"); });
+      });
+    }
+    btn.addEventListener("click", function() {
+      doAuth(function() {
+        panel.style.display = panel.style.display === "none" ? "block" : "none";
+      });
+    });
+    document.getElementById("testModePanelClose").addEventListener("click", function() { panel.style.display = "none"; });
+    panel.querySelectorAll("[data-action]").forEach(function(el) {
+      el.addEventListener("click", function() {
+        var action = el.getAttribute("data-action");
+        if (!unlocked || !pin) { doAuth(function() { runAction(action); }); return; }
+        runAction(action);
+      });
+    });
+    function runAction(action) {
+      var body = { action: action, pin: pin };
+      if (window.supabaseSession && window.supabaseSession.access_token) body.ownerId = window.supabaseSession.user.id;
+      fetch(base + "/test-mode", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          if (data.error) showToast("Test Mode", data.error, "error");
+          else showToast("Test Mode", "Done.", "success");
+        })
+        .catch(function() { showToast("Test Mode", "Request failed.", "error"); });
+    }
+  }).catch(function() {});
+})();
 
 // Handle territory purchase success redirect
 (function() {

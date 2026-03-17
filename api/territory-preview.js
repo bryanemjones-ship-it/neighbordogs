@@ -72,8 +72,23 @@ export default async function handler(req, res) {
     const geo = await geocode(address);
     if (!geo) return res.status(400).json({ error: "Address not found" });
 
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    const supabaseUrl =
+      process.env.SUPABASE_URL ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    const supabaseKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl) {
+      throw new Error("Missing SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL");
+    }
+
+    if (!supabaseKey) {
+      throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY / SUPABASE_ANON_KEY / NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    }
+
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     let benchmark = { base_opportunity: 5000 };
