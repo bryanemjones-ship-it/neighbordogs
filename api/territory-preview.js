@@ -35,21 +35,6 @@ async function geocode(address) {
     if (state && county) break;
   }
 
-  if (!state || !county) {
-    const addr = (m.matchedAddress || "").toLowerCase();
-
-    if (!state && addr.includes("nc")) state = "37";
-    if (!state && addr.includes("wy")) state = "56";
-    if (!state && addr.includes("ut")) state = "49";
-
-    if (!county) {
-      if (addr.includes("wake")) county = "183";
-      if (addr.includes("tyrrell")) county = "177";
-      if (addr.includes("niobrara")) county = "027";
-      if (addr.includes("san juan")) county = "037";
-    }
-  }
-
   return { lat: m.coordinates.y, lng: m.coordinates.x, state, county, formatted: m.matchedAddress || address };
 }
 
