@@ -9,7 +9,12 @@ const BENCHMARK_RADIUS_MILES = 1.5;
 
 async function geocode(address) {
   const CENSUS_GEOCODE = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress";
-  const q = new URLSearchParams({ address, benchmark: "Public_AR_Current", format: "json" });
+  const q = new URLSearchParams({
+    address,
+    benchmark: "Public_AR_Current",
+    vintage: "Current_Current",
+    format: "json"
+  });
   const r = await fetch(`${CENSUS_GEOCODE}?${q.toString()}`);
   const data = await r.json();
   console.log("GEOCODE_RAW_RESPONSE", JSON.stringify(data, null, 2));
