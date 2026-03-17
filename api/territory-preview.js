@@ -8,39 +8,44 @@ const BENCHMARK_ADDRESS = "5324 Inglewood Lane, Raleigh, NC 27609";
 const BENCHMARK_RADIUS_MILES = 1.5;
 
 async function geocode(address) {
-  const CENSUS_GEOCODE = "https://geocoding.geo.census.gov/geocoder/locations/onelineaddress";
+  const CENSUS_GEOCODE = "https://geocoding.geo.census.gov/geocoder/geographies/onelineaddress";
   const q = new URLSearchParams({
     address,
     benchmark: "Public_AR_Current",
     vintage: "Current_Current",
-    format: "json"
+    format: "json",
   });
+
   const r = await fetch(`${CENSUS_GEOCODE}?${q.toString()}`);
   const data = await r.json();
-  console.log("GEOCODE_RAW_RESPONSE", JSON.stringify(data, null, 2));
   const matches = data.result?.addressMatches || [];
   if (!matches.length) return null;
+
   const m = matches[0];
-  console.log("GEOCODE_MATCH", JSON.stringify(m, null, 2));
   const geos = m.geographies || {};
 
   let state = null;
   let county = null;
 
-  for (const [key, value] of Object.entries(geos)) {
+  for (const value of Object.values(geos)) {
     if (!Array.isArray(value) || !value.length) continue;
 
     for (const row of value) {
       if (!state && row?.STATE) state = row.STATE;
       if (!county && row?.COUNTY) county = row.COUNTY;
-
       if (state && county) break;
     }
 
     if (state && county) break;
   }
 
-  return { lat: m.coordinates.y, lng: m.coordinates.x, state, county, formatted: m.matchedAddress || address };
+  return {
+    lat: m.coordinates.y,
+    lng: m.coordinates.x,
+    state,
+    county,
+    formatted: m.matchedAddress || address,
+  };
 }
 
 async function countyHousing(stateFips, countyFips) {
