@@ -736,21 +736,11 @@
       <h1 style="font-size:26px; font-weight:700; margin:0 0 4px; letter-spacing:-0.5px;">NeighborDogs</h1>
       <div style="font-size:13px; color:var(--muted); margin-bottom:14px;">Exclusive territories for dog walking businesses &middot; USA</div>
       <div class="stack" style="gap:10px; max-width:320px; margin:0 auto 20px;">
-        <button class="hero-btn blue" type="button" onclick="go('screenTerritoryMap')">
-          <div class="hero-icon">&#128506;</div>
-          <div class="hero-text"><h3>View territory map</h3><p>See owned territories</p></div>
-          <span class="hero-chevron">&#8250;</span>
-        </button>
-        <button class="hero-btn green" type="button" onclick="go('screenTerritoryBuy')">
+        <button class="hero-btn blue" type="button" onclick="go('screenOpportunity')">
           <div class="hero-icon">&#128725;</div>
-          <div class="hero-text"><h3>Buy a territory</h3><p>Enter your address</p></div>
+          <div class="hero-text"><h3>Buy a Dog Walking Business</h3></div>
           <span class="hero-chevron">&#8250;</span>
         </button>
-        <div id="ndAuthRow" class="row" style="justify-content:center; gap:10px;">
-          <button id="ndSignInBtn" class="btn primary" type="button" onclick="go('screenSignIn')">Sign in</button>
-          <button id="ndDashboardBtn" class="btn secondary hidden" type="button" onclick="go('screenDashboard')">Dashboard</button>
-          <button id="ndLogoutBtn" class="btn hidden" type="button" onclick="ndLogout()">Log out</button>
-        </div>
       </div>
     </div>
 
@@ -981,6 +971,94 @@
     </div>
   </section>
 
+  <!-- ═══ NeighborDogs: Opportunity page ═══════════════════════ -->
+  <section id="screenOpportunity" class="screen">
+    <div class="subnav">
+      <button class="btn back" onclick="go('screenHome')">&#8592;</button>
+      <span class="icon">&#128062;</span>
+      <h2>Opportunity</h2>
+    </div>
+    <div class="content">
+      <div class="card stack" style="max-width:var(--max);">
+        <p style="margin:0 0 1em;">Start your own dog walking business.</p>
+        <p style="margin:0 0 1.5em;">Without the usual risk.</p>
+        <p style="margin:0 0 1em;">—</p>
+        <p style="margin:0 0 0.5em;">Most people don't start</p>
+        <p style="margin:0 0 1em;">because it feels complicated.</p>
+        <p style="margin:0 0 0.3em;">Scheduling.</p>
+        <p style="margin:0 0 0.3em;">Payments.</p>
+        <p style="margin:0 0 0.3em;">Reminders.</p>
+        <p style="margin:0 0 0.3em;">Reports.</p>
+        <p style="margin:0 0 1em;">Accounting.</p>
+        <p style="margin:0 0 1em;">We handle it.</p>
+        <p style="margin:0 0 1em;">—</p>
+        <p style="margin:0 0 0.5em;">This is a business in a box.</p>
+        <p style="margin:0 0 0.3em;">• Protected neighborhood territory</p>
+        <p style="margin:0 0 0.3em;">• Ongoing customer leads</p>
+        <p style="margin:0 0 0.3em;">• Your own dog walking business</p>
+        <p style="margin:0 0 0.3em;">• Software built specifically for dog walkers</p>
+        <p style="margin:0 0 1em;">Everything is set up for you.</p>
+        <p style="margin:0 0 1em;">—</p>
+        <p style="margin:0 0 0.5em;">The hard parts are already solved.</p>
+        <p style="margin:0 0 0.3em;">• Scheduling runs automatically</p>
+        <p style="margin:0 0 0.3em;">• Payments are handled</p>
+        <p style="margin:0 0 0.3em;">• Reminders are sent</p>
+        <p style="margin:0 0 0.3em;">• Reports are generated</p>
+        <p style="margin:0 0 0.3em;">• Accounting exports to QuickBooks</p>
+        <p style="margin:0 0 0.5em;">No spreadsheets.</p>
+        <p style="margin:0 0 0.3em;">No chasing clients.</p>
+        <p style="margin:0 0 1em;">No chaos.</p>
+        <p style="margin:0 0 1em;">—</p>
+        <p style="margin:0 0 0.5em;">So what do you focus on?</p>
+        <p style="margin:0 0 0.3em;">Clients.</p>
+        <p style="margin:0 0 0.3em;">Walkers.</p>
+        <p style="margin:0 0 1em;">Growing your business.</p>
+        <p style="margin:0 0 1em;">—</p>
+        <p style="margin:0 0 0.5em;">Your customers get a better experience.</p>
+        <p style="margin:0 0 0.3em;">• Book in seconds</p>
+        <p style="margin:0 0 0.3em;">• Instant confirmation</p>
+        <p style="margin:0 0 0.3em;">• Day-before reminders</p>
+        <p style="margin:0 0 0.3em;">• "Walker on the way" alerts</p>
+        <p style="margin:0 0 0.3em;">• Live GPS tracking</p>
+        <p style="margin:0 0 0.3em;">• Photos during the walk</p>
+        <p style="margin:0 0 0.3em;">• Post-walk report cards</p>
+        <p style="margin:0 0 1em;">It just works.</p>
+        <p style="margin:0 0 1em;">—</p>
+        <p style="margin:0 0 0.5em;">This is a real business.</p>
+        <p style="margin:0 0 0.3em;">One you can grow.</p>
+        <p style="margin:0 0 0.3em;">One you can be proud of.</p>
+        <p style="margin:0 0 1em;">One you can sell.</p>
+        <p style="margin:0 0 0.5em;">Example:</p>
+        <p style="margin:0 0 0.3em;">35 clients</p>
+        <p style="margin:0 0 0.3em;">× $25 per walk</p>
+        <p style="margin:0 0 0.3em;">× ~20 walks per month</p>
+        <p style="margin:0 0 0.5em;">≈ $17,500/month in revenue</p>
+        <p style="margin:0 0 0.3em;">Subtract $149/month for NeighborDogs.</p>
+        <p style="margin:0 0 0.3em;">Expand with a small team → significantly higher.</p>
+        <p style="margin:0 0 1em;">Service businesses like this often sell for 2–3× earnings.</p>
+        <p style="margin:0 0 1em;">—</p>
+        <p style="margin:0 0 0.5em;">Simple pricing.</p>
+        <p style="margin:0 0 0.5em;">$149 per month</p>
+        <p style="margin:0 0 0.3em;">No franchise fees.</p>
+        <p style="margin:0 0 0.3em;">No percentage of your walks.</p>
+        <p style="margin:0 0 1em;">Cancel anytime.</p>
+        <p style="margin:0 0 1em;">—</p>
+        <p style="margin:0 0 0.5em;">Requirements:</p>
+        <p style="margin:0 0 0.3em;">• General liability insurance</p>
+        <p style="margin:0 0 0.3em;">• Willingness to serve your customers well</p>
+        <p style="margin:0 0 1em;">That's it.</p>
+        <p style="margin:0 0 1em;">—</p>
+        <p style="margin:0 0 0.3em;">Open the app.</p>
+        <p style="margin:0 0 0.3em;">See your schedule.</p>
+        <p style="margin:0 0 1em;">Walk the dogs.</p>
+        <p style="margin:0 0 0.5em;">We handle everything else.</p>
+        <p style="margin:0 0 1em;">—</p>
+        <p style="margin:0 0 0.5em;">Own your neighborhood.</p>
+        <button class="btn primary full" type="button" onclick="go('screenTerritoryBuy')" style="margin-top:20px;">Check your address</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ═══ NeighborDogs: Territory map (owned only) ═══════════════════════ -->
   <section id="screenTerritoryMap" class="screen">
     <div class="subnav">
@@ -999,7 +1077,7 @@
   <!-- ═══ NeighborDogs: Buy territory (enter address) ═══════════════════════ -->
   <section id="screenTerritoryBuy" class="screen">
     <div class="subnav">
-      <button class="btn back" onclick="go('screenHome')">&#8592;</button>
+      <button class="btn back" onclick="go('screenOpportunity')">&#8592;</button>
       <span class="icon">&#128725;</span>
       <h2>Buy a territory</h2>
     </div>
