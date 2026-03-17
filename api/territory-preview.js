@@ -116,8 +116,20 @@ export default async function handler(req, res) {
     const targetAreaSqMi = baseOpportunity / density;
     const radiusMiles = Math.sqrt(targetAreaSqMi / Math.PI);
 
-    const { data: subs } = await supabase.from("territory_subscriptions").select("territory_id, territories(center_lat, center_lng, radius_miles)").eq("status", "active");
-    const owned = (subs || []).map((s) => s.territories).filter(Boolean);
+    let owned = [];
+
+    try {
+      const { data: subs, error } = await supabase
+        .from("territory_subscriptions")
+        .select("territory_id, territories(center_lat, center_lng, radius_miles)")
+        .eq("status", "active");
+
+      if (!error && subs) {
+        owned = subs.map((s) => s.territories).filter(Boolean);
+      }
+    } catch (e) {
+      owned = [];
+    }
 
     const newPoly = circleToPolygon(geo.lat, geo.lng, radiusMiles);
     let maxOverlap = 0;
