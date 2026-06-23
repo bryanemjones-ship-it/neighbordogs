@@ -1,0 +1,200 @@
+@import "../../admin/components/admin.css";
+
+.client-booking {
+  --max: 720px;
+  --blue: #1e6fd4;
+}
+
+.client-booking {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 18px;
+  color: var(--text);
+}
+
+.client-booking .subnav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 0 16px;
+}
+
+.client-booking .subnav h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.client-booking .subnav .icon {
+  font-size: 20px;
+}
+
+.client-booking .btn.back {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  font-size: 18px;
+}
+
+.client-booking select {
+  width: 100%;
+  padding: 13px 15px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 14px;
+  font-size: 16px;
+  font-family: inherit;
+  background: rgba(255, 255, 255, 0.46);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--text);
+  outline: none;
+  box-shadow: 0 1px 6px rgba(28, 55, 100, 0.07) inset;
+}
+
+.client-booking select:focus {
+  background: rgba(255, 255, 255, 0.68);
+  border-color: #fff;
+  box-shadow: var(--focus), 0 1px 6px rgba(28, 55, 100, 0.07) inset;
+}
+
+.client-booking .pay-method {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.46);
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.client-booking .pay-method:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.client-booking .pay-method.active {
+  border-color: var(--blue);
+  background: rgba(59, 130, 246, 0.06);
+}
+
+.client-booking .pay-method-icon {
+  font-size: 22px;
+  flex-shrink: 0;
+  width: 32px;
+  text-align: center;
+}
+
+.client-booking .pay-method-label {
+  flex: 1;
+  font-size: 15px;
+}
+
+.client-booking .pay-method-check {
+  display: none;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.client-booking .pay-method.active .pay-method-check {
+  display: block;
+}
+
+.client-booking .btn-weekly-promo {
+  width: 100%;
+  padding: 16px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: linear-gradient(160deg, #22a870, #16845a);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 6px 22px rgba(22, 132, 90, 0.35);
+  transition: transform 0.18s;
+}
+
+.client-booking .btn-weekly-promo:hover {
+  transform: translateY(-1px);
+}
+
+.client-booking .btn-weekly-promo .save-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 12px;
+}
+
+.client-booking .callout {
+  padding: 12px;
+  border-radius: 12px;
+  background: rgba(34, 114, 216, 0.06);
+  border: 1px solid rgba(34, 114, 216, 0.15);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.client-booking .trust-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(30, 168, 112, 0.1);
+  font-size: 13px;
+}
+
+.client-booking .success-banner {
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.client-booking .success-banner h3 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+
+.client-booking .msg-warn {
+  color: #c8820a;
+}
+
+.client-booking .msg-error {
+  color: var(--red);
+}
+
+.client-booking .msg-info {
+  color: var(--muted);
+}
+
+.client-booking-bg {
+  min-height: 100vh;
+  background: linear-gradient(160deg, #bcd4e8 0%, #c8def4 35%, #bed4ec 65%, #aac4de 100%);
+}
+
+.client-booking-bg header {
+  background: rgba(175, 208, 232, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.52);
+  backdrop-filter: blur(30px) saturate(180%);
+}
+
+.client-booking-bg header .wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.client-booking-bg header h1 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}

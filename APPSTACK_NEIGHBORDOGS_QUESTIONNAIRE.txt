@@ -1,0 +1,1936 @@
+APPSTACK NEIGHBORDOGS — PRODUCT INTAKE QUESTIONNAIRE
+Completed: 2026-04-17
+Product: NeighborDogs (rebuild on AppStack factory stack)
+Prior version: Single-HTML-file app with PHP API, currently live,
+               one paying owner at $149/month
+Target stack: Next.js + Supabase + Stripe + Resend + Twilio +
+              Vercel + Cloudflare + i18n (6 languages) + Liquid Glass
+
+TERMINOLOGY LOCKED FOR THIS PRODUCT:
+- Owner = the person who pays AppStack $149/month for a territory.
+  Runs the business. Owns the territory as a sellable asset.
+- Team member = works under an owner, scoped to the owner's territory.
+- Customer = the person who wants their dog walked. Pays the owner.
+- AppStack admin = Bryan. Platform-level only.
+
+==================================================
+PART 1 — THE PROBLEM
+==================================================
+
+1.1 What problem does this app solve in one sentence?
+
+Running a solo dog walking business — scheduling, GPS-tracked
+walks, photo reports, payments, customers — without hiring a
+manager or paying franchise fees.
+
+1.2 Who has this problem?
+
+A solo owner running a dog walking business in their own
+neighborhood. Typically a retiree, a career-changer, or someone
+building a side business. Low-to-moderate tech sophistication.
+Uses a phone in the field, a laptop at home. Not a developer.
+Wants the business to run itself between walks.
+
+1.3 What does the user currently do to solve this problem?
+
+Spreadsheets, texts, paper notes, Venmo. Or they pay for Time
+To Pet ($50+/month) but get no territory protection and no
+resale value. Or they join Rover/Wag and give up 20-40% to the
+marketplace.
+
+1.4 What is the cost of NOT solving this problem?
+
+Lost walks from scheduling mistakes. No proof of service when
+a customer disputes. No way to sell the business when they're
+done. Constant phone-tag with customers. Burnout.
+
+1.5 What is ONE thing the user will do in the app more than
+    anything else?
+
+Complete a walk — arrive, start GPS tracking, finish, upload
+photos, send the report card.
+
+1.6 What does success look like after using the app?
+
+A route of recurring customers who book themselves, pay
+automatically, and receive a GPS-tracked report with photos
+after every walk. A territory that's theirs. An asset they
+can sell.
+
+1.7 Compliance, legal, regulatory constraints?
+
+General liability insurance required before territory activates.
+Liability waiver signed at customer registration (refined later
+in Part 4 — signed at meet and greet). No employee/contractor
+classification issues — owner is the independent business
+owner, AppStack is the platform.
+
+==================================================
+PART 2 — THE USER
+==================================================
+
+2.1 Is there one type of user or multiple?
+
+Four distinct user types:
+- Owner (territory owner — the dog walker running the business)
+- Team member (works under an owner, scoped to that territory)
+- Customer (dog owner booking walks)
+- AppStack admin (Bryan — platform-level oversight, territory
+  approvals, resale marketplace)
+
+2.2 For each user type: primary job to be done?
+
+- Owner: complete walks, manage customers, get paid, grow the
+  route
+- Team member: complete walks assigned to them
+- Customer: book walks, see proof of service, pay
+- AppStack admin: approve territories, manage resales, monitor
+  platform health
+
+2.3 For each user type: what do they NOT need to see or do?
+
+- Owner: does not see other owners' territories, customers, or
+  revenue
+- Team member: does not see billing, territory purchase, or
+  resale marketplace
+- Customer: does not see owner business data, other customers,
+  or any admin function
+- AppStack admin: does not need to perform walks or manage
+  individual customers
+
+2.4 Are users individuals or do they belong to
+    organizations/teams?
+
+Owners are individuals who own a territory. A territory is the
+team. Team members belong to a territory. Customers are
+individuals attached to a territory.
+
+2.5 Can a user belong to more than one team/organization?
+
+An owner can own multiple territories. A team member can be on
+multiple territories simultaneously. A customer belongs to one
+territory (the one serving their address).
+
+2.6 What is the minimum viable user?
+
+A solo owner with one territory and no team members, walking
+their own customers. No team management, no resale, no
+multi-territory dashboard needed to get value.
+
+2.7 What does the user's typical session look like?
+
+- Owner: multiple times per day. Morning route planning, walk
+  execution, end-of-day review. In the field on a phone.
+- Customer: weekly. Books a walk, gets a report, views gallery.
+- AppStack admin: weekly. Territory approvals, resale contracts,
+  platform monitoring.
+
+2.8 Device and browser?
+
+- Owner: phone in the field, laptop at home. Mobile-first
+  required. Modern Chrome/Safari.
+- Customer: phone primarily.
+- AppStack admin: desktop.
+
+2.9 Is the app used in the field or at a desk?
+
+Field. The owner is outdoors with a dog on a leash, in variable
+weather, often with one hand. GPS tracking runs in the active
+foreground session. Bad connectivity must degrade gracefully.
+
+==================================================
+PART 3 — THE DATA
+==================================================
+
+3.1 What is the central entity?
+
+The walk. Everything else (customers, dogs, territories, report
+cards, photos, payments) exists in service of the walk.
+
+3.2 What data does the walk contain?
+
+- Walk ID
+- Territory ID
+- Owner ID
+- Performer ID (owner or team member who performed it)
+- Customer ID
+- Dog(s) on the walk
+- Walk type (20 min / 30 min / 60 min / emergency / buddy)
+- Scheduled date and time
+- Scheduled duration
+- Actual start time
+- Actual end time
+- Actual duration
+- GPS route (array of lat/lng points with timestamps)
+- Distance walked
+- Max/avg speed
+- Pee status
+- Poop status
+- Walk notes
+- Photos (up to 2)
+- Weather on walk date (forecast captured at booking)
+- Status (scheduled / en route / in progress / completed /
+  attempted / cancelled / refunded)
+- Payment status (unpaid / paid / refunded)
+- Payment method (Stripe — all walk payments via Stripe per
+  Part 17 scope decision)
+- Price charged
+- On-my-way SMS sent timestamp
+- Access problem flag
+- Created at / updated at
+
+3.3 Required vs. optional?
+
+Required: walk ID, territory ID, owner ID, customer ID, dog(s),
+walk type, scheduled date/time, status, payment status, price.
+
+Optional: everything captured during/after the walk — GPS
+route, actual times, pee/poop, notes, photos, weather.
+
+3.4 Can one user have many walks? How many is typical?
+
+An owner performs many walks. Target density: 5-15 walks per
+day at maturity. A customer may have many walks — a weekly
+recurring customer has ~50/year. Over a territory lifetime
+(3-5 years before resale), an owner could accumulate
+5,000-15,000 walks.
+
+3.5 Does the entity have a lifecycle? Define every state.
+
+- Scheduled — booked, not yet started
+- En route — walker started "On My Way"
+- In progress — GPS tracking active
+- Completed — walk finished, report card sent
+- Attempted — walker arrived, no access, no walk performed
+- Cancelled — cancelled before start
+- Refunded — completed or attempted walk refunded after the fact
+
+3.6 What events cause state changes?
+
+- Scheduled → En route: walker taps "On My Way"
+- En route → In progress: walker taps "Start Walk" (GPS begins)
+- In progress → Completed: walker taps "End Walk" and submits
+  report card
+- Scheduled/En route → Attempted: walker taps "No Access"
+- Scheduled → Cancelled: owner or customer cancels before start
+- Completed/Attempted → Refunded: owner or admin issues refund
+
+3.7 Deadlines or time windows?
+
+- Emergency walks have a same-day time window (must be
+  completed today)
+- Report card must be submitted before the walk can be marked
+  Completed
+- "On My Way" SMS should fire before walk start time (customer
+  expectation, not a hard deadline)
+
+3.8 Secondary entities attached to the walk?
+
+- Customer (owner info, address, access notes)
+- Dog(s) — name, breed, notes, behavioral flags.
+  NO MEDICATIONS FIELD (per Part 3 correction — AppStack does
+  not store dog medication information under any circumstances)
+- Territory (the geographic container)
+- Report card (pee/poop/notes/photos — 1:1 with walk)
+- GPS route (points — 1:many with walk)
+- Photos (1:many with walk, also flow into customer gallery)
+- Payment record (1:1 with walk, Stripe)
+- Refund record (0 or 1 per walk)
+
+3.9 What data comes from outside the app?
+
+- Geocoding (address → lat/lng) from a geocoding API
+- Weather forecast from Open-Meteo
+- SMS delivery status from Twilio
+- Stripe webhook events (subscription, walk payment, refund,
+  resale)
+- Supabase magic link delivery
+
+3.10 What data must be preserved even after the user leaves?
+
+- All completed walks (proof of service, resale asset)
+- All report cards and photos (customer history)
+- All payment records (tax, dispute resolution)
+- Territory history (for resale marketplace provenance)
+- Customer database (transfers with territory on resale)
+
+3.11 What data must NEVER be deleted?
+
+- Payment records — tax and dispute resolution
+- Liability waiver signatures — legal defense if a dog injury
+  claim arises
+- Territory resale contracts — non-compete enforcement,
+  ownership chain
+
+==================================================
+PART 4 — PLATFORM RULES
+==================================================
+
+4.1 Does the app depend on rules or policies set by a
+    third-party platform?
+
+Partially. Not a booking platform like Airbnb. But the app
+depends on:
+- Stripe rules (payment processing, refund windows, chargeback
+  timelines, Stripe Connect requirements for walk payments)
+- Twilio rules (SMS character limits, opt-out compliance,
+  A2P 10DLC registration)
+- Open-Meteo rate limits and data freshness
+- Insurance carrier requirements for owner general liability
+  policies
+- State/local rules on dog walking as a business activity
+  (varies, mostly unregulated)
+
+4.2 List every rule that affects the app's logic.
+
+- Stripe: 120-day chargeback window on card payments
+- Stripe Connect: owner onboarding requirements, identity
+  verification, payout scheduling
+- Twilio: 160 character SMS limit (Latin scripts); A2P 10DLC
+  registration required for business SMS in US
+- Twilio: opt-out keywords (STOP, UNSUBSCRIBE) must be honored
+  automatically
+- Insurance: COI must be on file and unexpired before territory
+  activates
+- Insurance: policy must explicitly cover team members operating
+  under the owner's business (per Part 14 addition)
+- Insurance: $1M per occurrence minimum recommended (not
+  enforced by law, enforced by AppStack policy)
+- Liability waiver: must be signed by customer at meet and
+  greet before first walk
+- Geocoding: service radius enforced server-side (1.5 mile
+  default in NeighborDogs today)
+
+4.3 How often do these rules change? Who monitors?
+
+Platform/app health function required (same pattern as HostClaim
+admin panel). Monitors third-party rule changes, integration
+status, and policy-relevant alerts across the app. This is a
+required module at the factory level.
+
+- Stripe: rare, announced with notice. Changes surfaced via
+  the platform health panel.
+- Twilio: A2P 10DLC rules have changed frequently — monitored
+  via the platform health panel.
+- Insurance: carrier-specific, owner's responsibility to keep
+  current. App tracks COI status and expiry.
+- AppStack-set rules (service radius, COI minimums): set by
+  Bryan, changed by Bryan, logged to platform health.
+
+4.4 Rules that differ by geography, platform tier, or user
+    type?
+
+- Geography: SMS compliance differs by country. A2P 10DLC is
+  US-specific. EU has GDPR implications for customer data.
+  Canada has CASL for email.
+- User type: owners have insurance requirements, team members
+  don't, customers don't.
+- Platform tier: not applicable — $149/month flat for all
+  owners.
+
+4.5 Rules the app must enforce on behalf of the platform?
+
+- Liability waiver must be signed at meet and greet before
+  customer can book walks
+- COI must be on file and current before territory activates
+- Owner service radius enforced on customer registration
+  (prevents out-of-area signups)
+- Stripe subscription must be current for territory to remain
+  active
+- SMS opt-outs must be honored across all future messages
+
+4.6 Information presented that could be incorrect due to
+    policy changes?
+
+- Weather forecast (external data, could be stale or wrong)
+- GPS accuracy varies by device
+- Territory home count estimates are approximations
+- Insurance COI status is only as current as the last upload —
+  expired policies are a risk
+
+Users warned when COI is within 30 days of expiry and when it
+has expired.
+
+==================================================
+PART 5 — AUTHENTICATION AND ACCESS
+==================================================
+
+5.1 How do users sign up?
+
+Magic link across all user types (Supabase magic link).
+
+- Owners: Supabase magic link (passwordless email)
+- Team members: invited by owner via email, accept with magic
+  link
+- Customers: self-registration at owner's customer app URL,
+  magic link
+- AppStack admin: Bryan's account, magic link
+
+One auth pattern across the whole app. Customer flow matches
+owner flow — simpler, no password management.
+
+5.2 Is email verification required before first login?
+
+Magic link inherently verifies email. No separate verification
+step needed.
+
+5.3 Is there a trial period? Credit card at trial start?
+
+- Owners: no trial. Territory purchase is a Stripe subscription
+  from day one. COI upload gates activation, not payment.
+- Customers: no subscription. Pay per walk via Stripe.
+
+5.4 What happens when a subscription expires?
+
+30-day grace period with staged reminders:
+- Day 1: payment failed email
+- Day 7: reminder, territory still active
+- Day 14: warning, 16 days until deactivation
+- Day 21: urgent, 9 days until deactivation
+- Day 28: final notice, 2 days
+- Day 30: territory deactivates
+
+Deactivated territory:
+- Cannot accept new customer registrations
+- Cannot book new walks
+- Existing walks in progress complete normally
+- Customer database preserved during lapse, restored on
+  reactivation
+- Team member access suspends with territory
+
+Rationale for 30 days (not 60): covers card replacement cycle,
+short vacation, or holiday. Most SaaS uses 7-14 days. 30 is
+already generous for $149/month.
+
+5.5 Can accounts be deleted? Archived? Difference?
+
+- Owner account: can be deleted (GDPR) or archived (territory
+  sold through resale marketplace)
+- Deleted = data purged per retention policy
+- Archived = data retained, account inactive, territory either
+  sold or released back to marketplace
+- Team member: removed by owner, no account deletion (user
+  record remains)
+- Customer: can be deleted on request, archived by default when
+  inactive
+
+5.6 If a user deletes their account, what happens to data?
+
+- Owner deletes: territory released, customer database
+  transferred to new owner if territory is sold; if released
+  back to marketplace, customers notified and given option to
+  re-register with new owner
+- Customer deletes: personal data purged, walk history
+  anonymized but retained for owner's tax/dispute records
+- Retention period for purged data: 30 days soft delete, then
+  hard delete
+- Payment records and liability waivers: retained beyond
+  account deletion for legal reasons (see 3.11)
+
+5.7 Admin users — what can AppStack admin (Bryan) see?
+
+AppStack is the platform, not the service provider. Seeing
+customer data creates dispute exposure. Owners are independent.
+Their customers are not AppStack's customers.
+
+AppStack admin SEES only platform-level data:
+- Territory status (active / lapsed / deactivated)
+- Subscription payment status (current / past due / lapsed)
+- COI status (current / expiring within 30 days / expired)
+- Territory resale listings and completed transactions
+- Platform-wide metrics (active territory count, MRR, churn)
+- Integration health (Stripe webhooks, Twilio delivery,
+  Supabase uptime)
+
+AppStack admin DOES NOT SEE:
+- Customer personal data
+- Customer payment details
+- Walk report cards, photos, or GPS routes
+- Owner-customer communications
+- Individual walk records
+
+Consequence: customer-level refunds (customer disputing a walk
+charge) are handled by the owner, not AppStack. AppStack only
+issues territory subscription refunds (owner-to-AppStack).
+
+5.8 SSO for enterprise customers?
+
+No. Not in v1. Not in any foreseeable version — user is an
+independent owner, not an enterprise.
+
+==================================================
+PART 6 — TEAMS AND PERMISSIONS
+==================================================
+
+6.1 Is the app solo-user only, or do teams exist?
+
+Teams exist. An owner can work solo (most common at start) or
+invite team members.
+
+6.2 Is team membership required or optional?
+
+Optional. An owner can run their territory solo forever. Team
+membership is a growth feature.
+
+6.3 Roles within a team?
+
+Two roles:
+
+Owner:
+- Everything: manage customers, schedule walks, perform walks,
+  view all data, manage billing, upload COI, list territory for
+  resale, invite/remove team members
+
+Team member:
+- Perform walks assigned to them
+- View their assigned walks and the customer/dog info needed to
+  perform them
+- Submit report cards and photos
+- Mark walks as attempted if no access
+- Capture customer waivers at meet and greet (per Part 12.3)
+- Cannot: see billing, see territory financials, manage
+  customers, invite other team members, list territory for
+  resale, upload COI, access admin panel
+
+6.4 Who can invite members? Who can remove them?
+
+Only the owner. Team members cannot invite or remove other team
+members.
+
+6.5 Seat limit?
+
+No plan tiers. All territories are $149/month flat. Unlimited
+team members per territory.
+
+Open question: does unlimited team members create abuse risk?
+Keeping for v1 per existing NeighborDogs behavior. Revisit if
+abuse emerges.
+
+6.6 What happens to team data when the owner cancels?
+
+Non-compete clause extends to team members to close the end-
+around-sale loophole.
+
+- Subscription lapse → territory deactivates → team members
+  lose access
+- Team member user records retained (may join another territory
+  later)
+- Walk history performed by team members stays attached to the
+  territory (resale asset)
+- If territory is sold, team members do NOT transfer — new
+  owner must re-invite
+
+End-around-sale prevention:
+- A team member CAN become an owner — but only through the
+  AppStack resale marketplace (10% fee preserved, customer
+  database transferred cleanly, non-compete travels)
+- When an owner cancels, territory enters 90-day protected
+  window
+- During 90 days, territory listed in resale marketplace at
+  system-calculated floor price (2x trailing annual AppStack
+  fees = $3,576)
+- Team members who worked that territory in last 12 months get
+  first right of refusal during the 90 days
+- If no purchase in 90 days, territory releases back to general
+  marketplace
+- Team members blocked from purchasing any NEW overlapping
+  territory (bypassing resale) for 12 months after owner's
+  cancellation
+
+Legal note: 12-month non-compete on independent contractors
+varies by state. North Carolina allows reasonable non-competes
+with consideration. Geographic scope tied to the actual
+territory is defensible. Lawyer review required before first
+team member signs. Captured as factory-level legal to-do.
+
+6.7 Can a team member be on multiple teams?
+
+Yes, simultaneously. No restriction. Team member on Territory A
+and Territory B is free to do so. Non-compete in 6.6 still
+applies independently per territory — being on multiple
+territories doesn't change the end-around-sale block, each
+territory's 12-month clock runs independently.
+
+6.8 What does a team member see on first login?
+
+Simplified dashboard:
+- Walks assigned to them today
+- Walks assigned to them this week
+- Their walk history
+- Basic profile (name, photo, contact info visible to owner)
+
+Does NOT see:
+- Other team members' walks
+- Territory financials
+- Customer contact info beyond what's needed for the walk
+- Any admin or billing UI
+
+==================================================
+PART 7 — MONETIZATION
+==================================================
+
+7.1 Revenue model?
+
+Two revenue streams:
+
+1. Subscription — $149/month per territory, flat, paid by
+   owner to AppStack
+2. Marketplace fee — 10% of resale price when a territory is
+   sold through the AppStack marketplace
+
+No percentage of owner walk revenue. No franchise fee. No
+setup fee.
+
+Economics note: 10% marketplace fee is low compared to
+traditional franchise (4-8% ongoing royalty forever). AppStack's
+take-ratio to owner's revenue over a 4-year territory lifecycle:
+~6%. Raise to 12-15% possible after 50+ owners exist and
+platform value is obvious — not before. Early adopters keep 10%.
+
+7.2 Subscription plan tiers?
+
+One tier. $149/month. Includes:
+- Territory exclusivity
+- Full platform access (customer management, scheduling, GPS,
+  reports, photos, team management, resale marketplace listing)
+- Unlimited customers
+- Unlimited team members
+- Unlimited walks
+- All features — no paywall inside the app
+
+7.3 Pay-per-use?
+
+Not applicable to owner. Owner pays flat $149/month regardless
+of walk volume.
+
+Customers pay the owner per walk. All walk payments processed
+via Stripe (see Part 17 scope decision). AppStack takes nothing
+from customer-owner walk payments.
+
+7.4 Free tier?
+
+No. Territory purchase is the commitment. COI upload gates
+activation, not payment.
+
+7.5 Plan limits mid-task?
+
+Not applicable — no usage limits. Only hard gate is territory
+boundary (customer at non-qualifying address cannot register).
+
+7.6 Annual billing discount?
+
+Yes. Annual option at launch: $1,490/year (saves $298,
+equivalent to 2 months free). Reduces churn, smooths cash
+flow. Available from day one.
+
+7.7 Enterprise plans?
+
+No. A multi-territory owner just buys multiple territories at
+$149 each.
+
+7.8 Features gated behind plans?
+
+Nothing. One tier. All features unlocked on payment + COI
+activation.
+
+7.9 Pay-per-item alongside subscription?
+
+Not applicable. Territory is the unit.
+
+7.10 Statement descriptor on credit card statement?
+
+NEIGHBORDOGS (Stripe descriptor limit 22 characters).
+Customer sees the brand, not the parent LLC.
+
+7.11 Refunds?
+
+Owner refunds (AppStack to owner):
+- First 30 days: full refund on request, no questions asked
+- After 30 days: no refund on monthly subscription
+- If COI lapses and territory deactivates: no refund for the
+  period deactivated
+- Annual plan: prorated refund in first 30 days, otherwise no
+  refund
+
+Customer refunds (owner to customer) — owner-initiated:
+- Owner opens any completed, attempted, or cancelled walk
+- Taps "Issue Refund"
+- Chooses: full refund or partial refund (with amount)
+- Processed via Stripe (all walk payments are Stripe per Part 17)
+- Customer sees refund on their card in 5-10 business days
+- Walk status updates to "Refunded"
+- Customer notified automatically
+- AppStack is NOT involved in the refund decision
+
+Resale marketplace: once a resale transaction completes,
+AppStack's 10% fee is non-refundable. Owner-to-owner disputes
+are between the parties.
+
+==================================================
+PART 8 — NOTIFICATIONS AND COMMUNICATION
+==================================================
+
+8.1 Events that trigger an email?
+
+Owner emails:
+- Magic link login
+- Territory purchase confirmation
+- COI uploaded / approved / expiring in 30 days / expired
+- Subscription payment succeeded / failed / past due / final
+  notice
+- Team member invite accepted
+- Customer registered in their territory
+- Resale listing created / offer received / sale completed
+- Monthly summary (walks completed, revenue, new customers)
+
+Team member emails:
+- Team invite (with magic link)
+- Removed from team
+- Walk assigned
+
+Customer emails:
+- Magic link login
+- Meet and greet confirmed
+- Walk booking confirmed
+- Walk report card ready (with link to report)
+- Refund issued
+- Owner cancelled a scheduled walk
+
+AppStack admin emails (Bryan):
+- New territory purchase (requires approval)
+- New COI uploaded (requires approval)
+- Resale transaction completed
+- Platform health alerts (Stripe webhook failures, Twilio
+  delivery drops, Supabase errors)
+
+8.2 Events that trigger an SMS?
+
+Customer SMS:
+- "On My Way" — walker starts trip to customer's home
+- Access problem — walker arrived, no access
+- In-walk photo — walker snaps a photo during the walk, SMS
+  sends with link to view (new feature in rebuild)
+- Walk complete notification (optional, per customer preference)
+
+Owner SMS:
+- Emergency walk booking request
+- Team member marked a walk attempted (no access)
+
+No SMS for marketing. No SMS for AppStack administrative events
+to owner (those go to email).
+
+8.3 Events that trigger in-app notifications?
+
+Owner in-app:
+- New customer registration pending meet and greet
+- Emergency walk request
+- Team member submitted a report card
+- COI expiring within 30 days
+- Subscription payment issue
+
+Customer in-app:
+- Report card ready
+- Walk reminder (24h before)
+- Refund issued
+
+Team member in-app:
+- New walk assigned
+- Walk schedule changed
+
+8.4 Time-based notifications?
+
+- Walk reminder to customer: 24 hours before scheduled start
+- COI expiry warning: 30 days, 14 days, 7 days, 1 day before
+  expiry
+- Subscription past due sequence: day 1, 7, 14, 21, 28, 30
+  (per Part 5.4)
+- Monthly owner summary: first of the month, for the previous
+  month
+
+8.5 Opt-outs — clear by recipient:
+
+OPT-OUT ALLOWED:
+
+- Owner can opt out of: marketing emails (none planned for v1,
+  structure built for future), monthly summary emails
+- Customer can opt out of: marketing emails (none planned for
+  v1), optional walk-complete SMS, in-walk photo SMS
+- Team member can opt out of: marketing emails (none planned
+  for v1)
+
+MANDATORY, CANNOT OPT OUT:
+
+- Owner receives: magic link login emails, payment/billing
+  emails, COI status emails, territory status emails, resale
+  transaction emails
+- Customer receives: magic link login emails, meet-and-greet
+  confirmation emails, walk booking confirmations, report
+  card emails, "On My Way" SMS, access problem SMS, refund
+  issued emails
+- Team member receives: magic link login emails, team invite
+  emails, walk assignment emails, removal-from-team emails
+- AppStack admin (Bryan) receives: territory purchase approval
+  requests, COI approval requests, resale transaction
+  completions, platform health alerts
+
+Mandatory items cannot be disabled because they are the product
+or required for the account to function.
+
+8.6 Email from address + branded subdomains:
+
+Corporate:
+- hello@neighbordogs.com (customer-facing and owner-facing)
+- admin@neighbordogs.com (AppStack admin alerts)
+
+Factory rule: every Neighbor* vertical gets its own
+hello@neighbor[vertical].com.
+
+Branded subdomains (new in rebuild):
+- Each owner gets a personalized subdomain at activation
+- Uses slugified business name: "Diane's Dog Walking" →
+  dianes-dog-walking.neighbordogs.com
+- "Two Dianes" problem solved by business name (not personal
+  name)
+- Validation: lowercase letters, numbers, hyphens; 3-40
+  characters; no leading/trailing hyphen; blocklist (admin,
+  api, app, www, mail, help, support, billing, neighbordogs,
+  appstack, ~50 others); profanity filter; unique
+- Vercel wildcard SSL handles certs automatically
+- Cloudflare wildcard DNS
+
+No self-service subdomain changes. AppStack admin handles rare
+change requests (rebrand, business name change). Old URL
+redirects to new for 12 months so nothing breaks.
+
+Email in v1: use hello@neighbordogs.com with display name set
+to owner's business name ("Diane's Dog Walking via
+NeighborDogs"). No custom per-owner email addresses in v1 —
+DNS complexity not worth it.
+
+Factory-level module: "Branded Subdomain Routing" — reusable
+across every Neighbor* vertical.
+
+8.7 Emails in user's language?
+
+Yes. Multilingual infrastructure ported from HostClaim (MOD-040).
+6 languages supported (en, de, es, fr, it, pt). Locale stored
+on user profile drives email template language.
+
+Markets verified international: Europe had 34M dog walking app
+users in 2023 (UK 11.4M, Germany 6.2M, France 5.7M). Australia,
+Japan also significant. The 6 AppStack languages cover every
+major dog walking market.
+
+v1 launch: infrastructure active, content English-only. Other
+5 languages added as expansion happens.
+
+Preferred language function (ported from HostClaim):
+- Every user type has preferred language on profile
+- Owner: set at territory activation
+- Team member: set at invite acceptance
+- Customer: set at registration
+- AppStack admin: English (Bryan)
+- Language picker in app (globe icon, dropdown)
+- Change takes effect immediately across all future
+  communications
+- No forced alignment between owner and customer — each user
+  receives content in their own language
+
+8.8 Communication to third parties on user's behalf?
+
+No. Unlike HostClaim, NeighborDogs IS the platform. All
+communication is between AppStack, owner, team member, and
+customer. No third party.
+
+==================================================
+PART 9 — FILES AND MEDIA
+==================================================
+
+Note: Much of the photo storage function ported directly from
+HostClaim (MOD-025 File/Photo Storage, MOD-055 Document/Photo
+Stamping, booking_photos table pattern).
+
+9.1 File upload types?
+
+Photos:
+- Customer: dog photos during registration (profile photos,
+  optional)
+- Owner: in-walk photos (2 per walk per report card), meet-
+  and-greet photos (optional), profile photo
+- Team member: in-walk photos during their walks
+
+PDFs:
+- Owner: general liability insurance certificate (COI) upload
+  at activation and renewal
+
+No video uploads in v1.
+
+9.2 Maximum file size?
+
+- Photos: 10MB per image (phone cameras produce 3-8MB JPEGs)
+- COI PDFs: 5MB
+
+Client-side compression if phone produces larger file.
+
+9.3 Public or private files?
+
+Photos:
+- In-walk photos: shareable via tokenized URL (customer
+  gallery pattern). Not guessable, not indexed, viewable by
+  anyone with the link. Customers share to social media.
+- Dog profile photos: private to the owner-customer
+  relationship. Signed URLs only.
+- Owner and team member profile photos: public-ish (shown to
+  customers in that territory).
+
+COI PDFs: fully private. Signed URLs only. Viewable by owner
+who uploaded and AppStack admin.
+
+9.4 Files modified after upload?
+
+Photos:
+- EXIF stripped on upload (privacy)
+- Resized to web-optimized display sizes
+- Original preserved separately
+
+COI PDFs: not modified.
+
+9.5 Originals preserved separately from modified versions?
+
+Yes for photos. Original in separate private bucket. Display
+versions (thumbnail, medium, large) generated on upload.
+Original available for disputes, court, insurance claims.
+
+COI PDFs: stored as uploaded.
+
+9.6 Files deleted when entity deleted?
+
+- Walk deleted → walk photos deleted
+- Dog deleted → dog profile photo deleted
+- Customer account deleted → all customer-attributed files
+  deleted (per retention rules)
+- Owner account deleted → COI, profile photo, walk photos
+  deleted after retention period
+- Territory resold → walk photos transfer with territory,
+  owner's personal profile photo deleted
+
+Soft delete 30 days, then hard delete.
+
+9.7 Files generated for download?
+
+- Report card PDF (customer per walk)
+- Customer gallery ZIP (all dog's photos)
+- Walk history CSV (owner — tax/records)
+- Monthly revenue CSV (owner)
+- QuickBooks-formatted CSV (owner — see Part 17 scope)
+- Xero-formatted CSV (owner — see Part 17 scope)
+- COI renewal reminder letter (email attachment)
+- Resale transaction record PDF (both parties)
+
+9.8 Camera access on mobile?
+
+Yes. In-walk photos captured in app. Camera permission
+requested at first use. Denied permission falls back to file
+picker.
+
+9.9 GPS/location metadata from photos?
+
+Option B (decided):
+- App reads GPS at photo capture time
+- Stored on the WALK RECORD as proof photo was taken on-route
+- EXIF stripped from photo file (both display and original)
+- GPS is a walk record field, not photo metadata
+
+Protects customer home address privacy if photos are shared
+externally. Preserves proof-of-location for owner disputes.
+
+==================================================
+PART 10 — INTEGRATIONS
+==================================================
+
+10.1 Third-party services?
+
+Required:
+- Supabase — auth, database, storage
+- Stripe — owner subscription billing, walk payment
+  processing (Stripe Connect Standard per owner), resale
+  transaction processing
+- Resend — transactional email
+- Twilio — transactional SMS
+- Vercel — hosting
+- Cloudflare — DNS, wildcard subdomain routing
+- Geocoding API — address to lat/lng (Mapbox or Google Maps,
+  decision needed)
+- Open-Meteo — weather forecast (free, no API key)
+
+Optional / IN for v1 per Part 17 correction:
+- QuickBooks CSV export format
+- Xero CSV export format
+- Google Calendar / Apple Calendar outbound iCal feed
+  (MOD-057, owner-only for v1)
+
+Deferred:
+- QuickBooks/Xero direct API integration (v2)
+- Customer-side calendar iCal feed (v2)
+
+10.2 Required or optional per integration?
+
+All required are required for core function. Broken Supabase
+= broken app. Broken Stripe = cannot accept subscription or
+walk payments.
+
+10.3 Data in / data out per integration?
+
+Supabase:
+- In: all app data
+- Out: app reads data back
+
+Stripe:
+- Out: subscription creation, updates, refund requests,
+  Stripe Checkout for walks, Stripe Checkout for resale,
+  Connect account creation for owners
+- In: webhook events (subscription.created,
+  invoice.payment_succeeded, invoice.payment_failed,
+  customer.subscription.deleted, payment_intent.succeeded,
+  charge.refunded, account.updated for Connect)
+
+Resend:
+- Out: transactional email payloads
+- In: delivery status webhook (optional, for logging)
+
+Twilio:
+- Out: SMS payloads
+- In: delivery status webhook, inbound opt-out keywords
+
+Geocoding:
+- Out: address string
+- In: lat/lng, validation
+
+Open-Meteo:
+- Out: lat/lng + date
+- In: forecast
+
+10.4 What happens when an integration fails?
+
+Supabase down: app non-functional. Maintenance page. Admin
+alert.
+
+Stripe down:
+- New subscriptions: error, retry later
+- Existing subscriptions: Stripe handles retries
+- New walk payments: customer gets clear error, can retry
+- Webhook delay: state reconciles when webhooks resume
+
+Resend down: queue + retry (HostClaim pattern). Main flow
+never blocks on email.
+
+Twilio down: queue + retry. Critical SMS ("On My Way", access
+problem) fallback to email. Main flow never blocks on SMS.
+
+Geocoding down: customer registration blocks. Clear error.
+
+Open-Meteo down: booking proceeds without weather, fetched
+later if service returns.
+
+10.5 External APIs with rate limits, costs, freshness?
+
+- Supabase: project tier limits (paid tier from day one)
+- Stripe: no rate limit concerns at realistic scale
+- Resend: Pro tier (same account as HostClaim)
+- Twilio: pay-per-SMS, A2P 10DLC registration required. US
+  outbound cost: ~$0.0079/SMS. Budget item.
+- Geocoding (Mapbox): 100k requests/month free, then paid.
+  Monitor at scale.
+- Open-Meteo: free, fair-use policy.
+
+10.6 Webhooks?
+
+Yes:
+- Stripe (subscription, payment, refund, Connect, resale)
+- Twilio (delivery, opt-out)
+- Resend (optional)
+
+Signature verification on every route. Idempotency by event ID.
+
+10.7 Scheduled syncs?
+
+- Nightly: COI expiration check → reminder emails at 30/14/7/
+  1 day marks
+- Nightly: subscription past-due sequence (day 1, 7, 14, 21,
+  28, 30)
+- Nightly: territory deactivation for subscriptions 30+ days
+  past due
+- Monthly (first of month): owner summary emails
+- Every 15 minutes: walk reminder SMS for walks starting in
+  24 hours
+- Every 10 minutes during active walks: buffer GPS points to
+  storage
+
+Vercel Cron for daily jobs. GPS buffering is in-session.
+
+Customer calendar view ("My Walks"):
+- New feature in rebuild
+- In-app calendar showing customer's booked walks for their
+  dog(s)
+- Past, today, upcoming walks color-coded
+- Monthly view + list view toggle
+- Tap any walk for status and details
+- Rebook button on completed walks
+- Cancel button on scheduled walks (within window)
+- Reuses MOD-031 Booking Calendar UI
+- Reusable across every Neighbor* vertical
+
+==================================================
+PART 11 — INTERNATIONALIZATION
+==================================================
+
+11.1 Launch languages?
+
+Infrastructure: all 6 factory languages active (en, de, es, fr,
+it, pt).
+Content at v1 launch: English only.
+Other 5 languages: infrastructure ready, content added when
+NeighborDogs expands beyond North America.
+
+11.2 Who translates?
+
+Native speaker review via Fiverr/Upwork (HostClaim pattern).
+AI-generated first pass for efficiency, human review for
+accuracy and tone.
+
+Factory principle: no language ships without native speaker
+review. "Baby Groot meets Apple" voice doesn't carry through
+AI alone.
+
+11.3 Frequently-changing copy translated?
+
+Legal text (Terms, Privacy, liability waiver, service
+agreement): translated per language. Changes propagate.
+
+Owner-set content (business names, customer notes, dog names):
+never translated. Stored in original language.
+
+Prices: USD only at launch. Local currency on expansion.
+
+11.4 RTL languages?
+
+No. All 6 factory languages are LTR. RTL infrastructure not
+built, not planned for Neighbor* portfolio.
+
+11.5 Does locale affect more than language?
+
+Yes:
+- Language (UI copy)
+- Date format
+- Time format (12h vs 24h)
+- Currency (USD at launch, expansion currencies later)
+- Phone format (E.164 storage, locale-formatted display)
+- Address format
+- SMS character budget (per locale script)
+- Legal jurisdiction for Terms/waiver
+
+11.6 URL locale prefix vs domain?
+
+Locale-prefixed within the subdomain:
+- dianes-dog-walking.neighbordogs.com/en/book
+- dianes-dog-walking.neighbordogs.com/es/book
+
+Matches HostClaim's app/[locale]/... pattern.
+
+Detection order:
+1. URL path segment (explicit choice)
+2. User's stored locale preference
+3. Browser Accept-Language header
+4. Default: English
+
+11.7 Missing translation fallback?
+
+Fall back to English. Display English string. Log missing key
+to admin panel. Never show raw translation key to user.
+
+Preferred language function (ported from HostClaim):
+- Every user type has preferred language on profile
+- Independent per user — owner's language does not force
+  customer's language
+- Globe icon / picker in app nav
+- Applies to UI, email, SMS, report cards, calendar
+- Ported as-is — MOD-040 handles it
+
+==================================================
+PART 12 — MOBILE AND PWA
+==================================================
+
+12.1 Native app required or mobile web sufficient?
+
+Mobile web, installable as PWA. No native apps in v1 or
+planned v2.
+
+NeighborDogs today is already a PWA. Factory standard (MOD-060)
+handles this.
+
+PWA limitation: background GPS tracking when app is fully
+closed is limited on iOS. Mitigation:
+
+Screen-awake during active walks:
+- When walker taps "Start Walk," Wake Lock API keeps screen
+  awake for walk duration
+- No toggle, no prompt (keep the interaction minimal —
+  walker has a dog on a leash)
+- Released automatically when walker taps "End Walk"
+- Silent fallback on unsupported browsers
+- Battery is not a real concern — modern phones handle 30-60
+  minutes of screen-on easily, external batteries are cheap
+
+12.2 Installable?
+
+Yes. Web manifest with icons (192px, 512px), apple-touch-icon,
+install prompt on Android, Add-to-Home-Screen guidance on iOS.
+
+Owner app and customer app both installable. Each gets its own
+manifest based on subdomain — Diane's branded app installs as
+"Diane's Dog Walking" on the customer's home screen, not
+"NeighborDogs".
+
+12.3 Camera-required features?
+
+- In-walk photos (owner/team member)
+- Meet-and-greet photos (optional)
+- Dog profile photos (customer, optional)
+- COI upload (owner — camera or file picker)
+
+Camera permission contextually requested. Denied falls back to
+file picker.
+
+Consent structure — three distinct consents at the right moment:
+
+Consent 1: Customer liability waiver (service-level)
+- Signed at meet and greet
+- Captured on walker's phone (owner OR team member)
+- Signature pad component (finger on screen), stored as SVG/PNG
+- Attached to customer record with: walker ID who captured,
+  timestamp, GPS coordinates of capture
+- Immutable once signed — never edited, only superseded
+- Team members CAN capture waivers (no reason to restrict)
+
+Consent 2: Privacy / data use policy (platform-level)
+- Shown at account creation for every user type
+- Covers: data collection, GPS tracking during walks, photo
+  storage, email/SMS communication, EXIF stripping, retention
+- One acceptance, logged with timestamp and IP
+- GDPR-compliant consent recording
+
+Consent 3: Device permissions
+- Requested contextually on first use
+- Camera, GPS, notifications — each with brief explanation
+- Denials respected, graceful fallback where possible
+
+Factory-level: Consents 2 and 3 reusable across all verticals.
+Consent 1 waiver text changes per vertical (NeighborBins
+doesn't need dog-handling clause).
+
+12.4 GPS-required features?
+
+- Live walk tracking (walker during active walk)
+- Photo location capture (GPS at capture time, written to walk
+  record per 9.9)
+- Owner territory verification at signup
+- Customer address verification during registration
+
+GPS permission contextually requested. Denied GPS blocks walk
+start (tracking requires it) but allows other app functions.
+
+12.5 Offline behavior?
+
+Partial offline:
+- Report card drafting (syncs on reconnect)
+- Photo capture (queues locally, uploads on reconnect)
+- GPS buffering (points captured locally, sync on reconnect)
+
+Not offline:
+- Booking (requires server slot validation)
+- Customer registration (requires geocoding)
+- Stripe transactions
+- Magic link login
+- Calendar view (requires server data)
+
+Graceful degradation: "Offline — changes will sync when
+connection returns" banner. Walker continues walking. Data
+syncs on reconnect.
+
+12.6 Mobile vs desktop UX?
+
+Same codebase, responsive. No feature is desktop-only or
+mobile-only.
+
+Mobile-first surfaces:
+- Owner app (walk execution, photo capture, report cards)
+- Customer app (booking, calendar, report viewing)
+- Team member app (walk list, report submission)
+
+Desktop-optimized surfaces:
+- Owner admin views (customer list, territory map, revenue
+  dashboard, team management)
+- AppStack admin panel
+
+==================================================
+PART 13 — SEO AND MARKETING
+==================================================
+
+13.1 SEO important? Which pages rank?
+
+Yes. Two distinct funnels:
+
+Owner acquisition:
+- neighbordogs.com (homepage)
+- neighbordogs.com/how-it-works
+- neighbordogs.com/pricing
+- neighbordogs.com/territory-preview
+- neighbordogs.com/resale (browse territories for sale)
+- Blog pages targeting "how to start a dog walking business"
+
+Customer acquisition (per territory):
+- Owner's branded subdomain (e.g.,
+  dianes-dog-walking.neighbordogs.com)
+- Indexed individually, ranks for local "dog walker near me"
+- Owner fills in local SEO data (service area, neighborhoods)
+
+13.2 Target keywords?
+
+Owner funnel:
+- "start a dog walking business"
+- "dog walking franchise"
+- "own a dog walking business"
+- "dog walking business software"
+- "dog walking territory"
+- "sell my dog walking business"
+
+Customer funnel (per territory):
+- "dog walker [city/neighborhood]"
+- "dog walking service [city]"
+- "[neighborhood] dog walker"
+- "gps tracked dog walking [city]"
+
+Factory-level: every Neighbor* vertical gets its own keyword
+map. Consistent two-funnel structure.
+
+13.3 Blog / resource center?
+
+Yes.
+
+Owner blog: 20-30 foundational articles at launch. SEO-driven.
+How to start, how territories work, how to get customers,
+insurance basics, pricing, when to hire, how to sell.
+
+Customer resources: per-territory FAQ pages, templated with
+owner's name and territory, editable.
+
+13.4 Separate marketing site or combined?
+
+Combined, route-based separation:
+- neighbordogs.com/* → marketing site
+- app.neighbordogs.com → owner and team dashboard
+- [owner-subdomain].neighbordogs.com → customer-facing
+- Single Next.js codebase
+
+Matches HostClaim pattern.
+
+13.5 Key page titles and descriptions?
+
+Homepage:
+- Title: NeighborDogs — Own Your Neighborhood. Build a Dog
+  Walking Business.
+- Description: Buy an exclusive dog walking territory for
+  $149/month. Keep 100% of walk revenue. Sell your territory
+  when you're ready. Technology runs the business.
+
+How It Works:
+- Title: How NeighborDogs Works — Dog Walking Business in a Box
+- Description: Exclusive territory. GPS-tracked walks. Customer
+  self-scheduling. No franchise fees. See how to build a
+  sellable dog walking business for $149/month.
+
+Pricing:
+- Title: Pricing — NeighborDogs Dog Walking Territories
+- Description: $149/month flat. No franchise fees. No revenue
+  share. Exclusive territory. Sell when you're ready through
+  the NeighborDogs marketplace.
+
+Territory Preview:
+- Title: Find Your Territory — NeighborDogs
+- Description: Enter your address to see if your neighborhood
+  is available as an exclusive dog walking territory.
+
+Resale Marketplace:
+- Title: Dog Walking Businesses for Sale — NeighborDogs
+  Marketplace
+- Description: Browse established dog walking territories for
+  sale. Complete businesses with existing customers. Verified
+  resales through the NeighborDogs platform.
+
+Per-territory (templated):
+- Title: {Business Name} — Dog Walking in {City}
+- Description: GPS-tracked dog walking service in
+  {neighborhood}. Book walks, see live routes, get photo
+  reports. Serving {city} since {year}.
+
+All under 160 characters, outcome-first, platform-neutral per
+factory mission.
+
+13.6 Social proof?
+
+At launch:
+- First NeighborDogs owner testimonial and case study
+- First paying customer fact
+
+Collection:
+- Owner testimonials at 30, 90, 180 day marks
+- Customer testimonials after walk #10
+- Homepage shows owner testimonials, per-territory shows that
+  owner's customer testimonials
+- Video optional
+
+13.7 Primary homepage CTA?
+
+"Check Your Neighborhood" — address entry, territory
+availability, pricing, purchase.
+
+One primary CTA. Secondary CTA: "Browse Territories for Sale."
+
+Note: existing NeighborDogs pages may have converted content.
+Rebuild does not recreate from scratch — it ports into the
+Next.js + i18n + Liquid Glass structure, keeping what works.
+
+==================================================
+PART 14 — LEGAL AND COMPLIANCE
+==================================================
+
+14.1 What PII does the app collect?
+
+Owner PII:
+- Full name, email, phone, mailing address
+- Payment method (Stripe-tokenized, never in our DB)
+- COI (business name, carrier, policy number)
+- Business name, territory address, bank info for payout (via
+  Stripe Connect)
+
+Team member PII:
+- Full name, email, phone
+- Photo (optional)
+
+Customer PII:
+- Full name, email, phone, home address
+- Access instructions (gate codes, key locations —
+  HIGHLY SENSITIVE)
+- Payment method (Stripe-tokenized)
+- Dog details (name, breed, notes — tied to customer but
+  not PII themselves)
+- NO MEDICATIONS FIELD (per Part 3 correction)
+
+Walk data:
+- GPS routes (tied to customer home address — sensitive)
+- Photos (may incidentally show customer's home/yard)
+
+Insurance requirement (addition per correction):
+
+Owner's general liability insurance MUST explicitly cover
+actions performed by team members operating under the owner's
+business.
+
+COI verification at upload:
+- Policy must show: explicit coverage of employees/contractors
+  under business name, OR named additional insured structure,
+  OR rider covering hired workers
+- Human reviewer (AppStack admin) confirms policy language is
+  adequate
+- Inadequate policies rejected with clear explanation
+
+Service agreement enforcement:
+- Owner agreement: owner responsible for ensuring insurance
+  covers team members
+- Owner agrees not to invite team members until policy covers
+  their work
+- AppStack does not certify coverage adequacy — owner carries
+  responsibility
+
+Factory-level: every Neighbor* vertical with team members needs
+this structure.
+
+14.2 GDPR?
+
+Build to GDPR standard from day one. Factory standard — build
+to the stricter standard so every Neighbor* vertical ready for
+international expansion.
+
+14.3 CCPA?
+
+Yes. Build to CCPA from day one.
+
+14.4 Data retention?
+
+- Soft delete 30 days, then hard delete for customer personal
+  data on request
+- Payment records: 7 years (tax)
+- Liability waivers: indefinite (legal defense)
+- Resale contracts: indefinite (non-compete, ownership chain)
+- Walk history, photos, report cards: transfer with territory
+  on resale; deleted 90 days after territory permanently
+  released
+- Account activity logs: 2 years
+- SMS/email delivery logs: 1 year
+
+Public retention policy in app footer.
+
+14.5 Store payment info?
+
+No. Stripe handles all payment storage. We store Stripe IDs —
+never card numbers, CVVs, or bank account numbers.
+
+14.6 Required legal documents?
+
+- Terms of Service (owner as independent contractor)
+- Privacy Policy (GDPR + CCPA compliant)
+- Customer liability waiver (signed at meet and greet)
+- Team member agreement (includes non-compete)
+- Resale marketplace terms
+- Acceptable Use Policy (addition per correction)
+
+Not required for v1:
+- DPA — built template available for EU expansion
+- Evidence policy — HostClaim-specific, not applicable
+
+14.7 Disclaimers?
+
+- "NeighborDogs is not a dog walking service. Walks are
+  provided by independent owners."
+- "Owners are independent contractors, not employees of
+  AppStack LLC."
+- "GPS tracking accuracy depends on device and network
+  conditions."
+- "Weather forecasts are estimates and may change."
+- "Insurance coverage is the responsibility of each individual
+  owner."
+- "This service does not provide emergency veterinary care or
+  response."
+- "The NeighborDogs platform, the branded subdomain, the SMS
+  and email systems, and all other platform tools may not be
+  used to facilitate, distribute, advertise, or support any
+  illegal activity." (addition per correction)
+
+Acceptable Use Policy enforcement:
+- Separate AUP document or incorporated into ToS
+- No illegal services, controlled substances, unlicensed
+  activity, fraud, stalking, harassment, discriminatory
+  service refusal based on protected class
+- Violation = immediate territory deactivation, subscription
+  cancelled, customer database frozen
+- AppStack reserves right to report to law enforcement
+
+Factory-level: AUP is a core reusable module. Template once,
+customize per vertical, apply everywhere.
+
+14.8 Platform TOS restrictions?
+
+NeighborDogs does not operate on another platform's terms
+(unlike HostClaim constrained by Airbnb/VRBO). NeighborDogs IS
+the platform.
+
+Indirect constraints:
+- Stripe TOS: dog walking is clear
+- Twilio A2P 10DLC: campaign registration, use case approval
+- No App Store dependency (PWA)
+
+14.9 Legal entity?
+
+AppStack, LLC — North Carolina.
+EIN: 41-4917949 (confirmed, IRS Letter 147C, April 16, 2026).
+Owner: Bryan Jones, Sole Member.
+Registered address: 5324 Inglewood Ln, Raleigh NC 27609.
+
+On every legal page, every email footer, every checkout page.
+Factory standard.
+
+==================================================
+PART 15 — OPERATIONS
+==================================================
+
+15.1 Support?
+
+v1 (Year 1):
+- Bryan handles AppStack-level support
+- Channel: email to support@neighbordogs.com
+- In-app help widget routes to email
+- Owners handle their own customer support
+
+Year 2+:
+- VA handles tier-1 triage
+- Bryan handles escalations, disputes, platform decisions
+- Factory-level: one VA across all Neighbor* verticals
+
+Year 3 (per mission doc):
+- Support fully outsourced
+- Bryan reviews escalations only
+
+No live chat in v1. Email-only. In-app help articles deflect
+95% of tickets.
+
+15.2 Response times?
+
+- Platform-blocking: 4 hours (business hours)
+- COI approval: 24 hours
+- Resale transaction questions: 24 hours
+- General: 48 hours
+- Feature requests: logged, no response commitment
+
+Published on public support page.
+
+15.3 On-call plan?
+
+v1: Bryan is on-call.
+- Vercel failures → Slack + phone
+- Supabase downtime → email + SMS
+- Stripe webhook failures → email + SMS
+- Twilio A2P suspension → email
+- Error rate spike (>5%) → email + SMS
+
+Year 2+: retainer developer handles integration failures.
+Bryan notified of customer-visible outages.
+
+15.4 Error log monitoring?
+
+v1: Bryan reviews daily.
+v2+: VA daily, Bryan weekly summary.
+
+- Sentry or Vercel error reporting
+- Custom admin panel summaries
+- Threshold-based alerts
+
+Platform health module aggregates into single view.
+
+15.5 Third-party API updates?
+
+v1: Bryan.
+v2+: retainer developer.
+
+Subscribed to:
+- Stripe changelog + webhook version notices
+- Twilio A2P policy updates
+- Supabase platform updates
+- Next.js + Vercel major version notices
+
+Factory benefit: one fix across all apps.
+
+15.6 Staging environment + deployment?
+
+Yes.
+
+Environments:
+- development → C:\Projects\neighbordogs (local)
+- staging → staging.neighbordogs.com (Vercel preview)
+- production → neighbordogs.com + *.neighbordogs.com +
+  app.neighbordogs.com
+
+Flow:
+- Cursor executes code changes locally
+- Git push to staging branch → auto-deploys to staging
+- Manual QA on staging ("walk before you fix")
+- Merge to main → auto-deploys to production
+
+Migrations:
+- Run on staging first
+- Manual verification
+- Apply to production
+
+15.7 Production DB access?
+
+v1: Bryan only.
+v2+: retainer developer read-write, VA read-only on non-PII
+tables.
+
+Smallest circle possible.
+
+15.8 Backup + recovery?
+
+- Supabase automatic daily backups (Pro tier, 7-day retention)
+- Weekly manual backup export to separate S3 bucket (30-day)
+- Monthly cold backup to offsite (12-month)
+
+Recovery testing:
+- Quarterly restore test to staging
+- Documented runbook
+
+PITR: Supabase Pro supports 7-day. Sufficient for most scenarios.
+
+Factory-level module.
+
+==================================================
+PART 16 — SUCCESS METRICS
+==================================================
+
+Year 1 reality: most projections are theater at this sample size.
+The metrics below are what actually matter.
+
+16.1 Successful Year 1 launch?
+
+Three things:
+1. Second paying owner acquired (proves model with a stranger,
+   not just Bryan)
+2. Zero data loss incidents
+3. Platform still running end of year
+
+Everything else is bonus.
+
+16.2 Target conversion rate from signup to paid?
+
+Too small a sample in Year 1 to measure meaningfully.
+Instrument the funnel. Review starting Year 2.
+
+16.3 Expected monthly churn?
+
+Target under 5%. Realistic Year 1: 10-15% early adopter churn
+as model is tested. Mitigations built in (grace period, annual
+billing, resale marketplace, COI automation).
+
+16.4 North Star?
+
+ACTIVE TERRITORIES WITH ACTIVE CUSTOMERS.
+
+Defined as:
+1. Owner current on subscription (paying)
+2. COI current (insured)
+3. At least 1 walk completed in last 30 days (operational)
+
+Tracked from day one. Not reported seriously until 5+ active
+territories exist (noise below that).
+
+Not MRR (gameable). Not total owners (lagging churn indicator).
+
+16.5 Analytics events to track?
+
+Instrumented from day one. Reviewed seriously Year 2+.
+
+Owner funnel:
+- Homepage visit
+- Territory preview (address entered)
+- Territory preview result (available/unavailable)
+- Subscription checkout started
+- Subscription checkout completed
+- COI uploaded
+- COI approved (activated)
+- First customer registered
+- First walk completed
+- Subscription cancelled
+- Territory listed for resale
+- Territory sold
+
+Customer funnel (per territory):
+- Landing page visit (branded subdomain)
+- Registration started
+- Registration completed (meet and greet scheduled)
+- Meet and greet completed
+- First walk booked
+- First walk completed
+- Repeat walk booked
+- Customer account deleted
+
+Product usage:
+- Walks per day (by territory, aggregated)
+- GPS tracking success rate
+- Photo upload success rate
+- SMS delivery rate
+- Email open rate (per type)
+- Customer calendar views
+- Refund rate (by owner, platform-wide)
+
+Tooling: PostHog for product, Vercel for traffic.
+
+16.6 How to know a feature needs changing?
+
+Year 1: fix what visibly breaks. Walk the flows. Ship fixes.
+No data-driven feature review cycle — sample size insufficient.
+
+Year 2+: review cadence activates.
+- Weekly: errors, North Star
+- Monthly: funnel analysis
+- Quarterly: feature-level retention
+
+Action threshold Year 2+: two failed quarterly reviews =
+redesign or remove. No sunk cost fallacy.
+
+==================================================
+PART 17 — SCOPE BOUNDARIES
+==================================================
+
+17.1 Explicitly OUT of scope for v1:
+
+1. Native iOS/Android apps (PWA only)
+2. Multi-currency billing (USD only)
+3. Non-English content at launch (INFRASTRUCTURE IS IN — built
+   at factory level, ported from HostClaim; content-only defer)
+4. RTL languages
+5. Live chat support
+6. In-app owner-to-customer messaging (SMS and email instead)
+7. Video uploads (photos only)
+8. Background GPS tracking when app is fully closed
+   (foreground only)
+9. Alternative payment methods (Venmo, Cash App, Zelle REMOVED
+   — Stripe exclusively for all walk payments)
+10. [MOVED TO IN] QuickBooks/Xero CSV export — IN v1 as CSV
+    export, not full API integration. Full API = v2.
+11. [MOVED TO IN] Outbound calendar export to Google/Apple
+    Calendar — IN v1 for owners. Customer-side = v2.
+12. Team member-to-team member messaging
+13. Multi-language voice AI or chatbot
+14. SSO for enterprise
+15. Public API for third parties
+16. Ratings or reviews of owners (trust via territory
+    provenance and AppStack verification)
+17. Customer referral programs (v2+)
+18. Pet sitting, boarding, grooming add-ons (future verticals
+    or held)
+19. Customer-to-customer features
+20. Owner-to-owner community / messaging / forum
+
+17.2 Deferred decisions (recorded to prevent accidental v1
+     build):
+
+- Annual billing discount exact percentage (yes to annual, %
+  TBD pre-launch)
+- Exact subdomain validation blocklist (final list pre-launch)
+- Custom per-owner email from address (deferred — display name
+  in v1)
+- Team member non-compete exact duration and geographic scope
+  per state (12 months baseline — legal review pre-first-team-
+  member)
+- Multi-territory team member non-compete enforcement spec
+- Exact waiver language for Consents 1, 2, 3 — legal review
+  pre-launch
+- Mapbox vs Google Maps for geocoding (cost/quality decision
+  pre-launch)
+- Post-6-month language expansion priority order
+- Year 2 resale fee increase from 10% to 12-15%
+
+17.3 Minimum to migrate existing paying owner (Bryan) to new
+     stack without disrupting service:
+
+1. Auth works (magic link)
+2. Territory active (COI current, subscription current)
+3. Customer registration, meet and greet, waiver capture
+4. Walk booking, walk execution with GPS, photo upload, report
+   card delivery
+5. Stripe subscription billing migrated without double-charging
+6. Customer data migrated without loss
+7. Existing customer-facing URLs redirect to new branded
+   subdomain
+
+Everything else (full resale marketplace UI, admin dashboards,
+full marketing site, all analytics, etc.) can ship in stages
+after migration core works.
+
+17.4 Riskiest assumption + test plan?
+
+Primary: People will pay $149/month for a territory before
+proving they can make money from it.
+
+Current proof: 1 paying owner (Bryan).
+
+Test: owner #2 is a stranger who signs up cold from the public
+website. Target: one cold-signup owner within 90 days of public
+launch.
+
+Secondary: Owners will reach 100 customers. Test: track
+customers-per-territory monthly. If median territory has under
+40 customers at month 6, territory size or demand is wrong.
+
+17.5 One feature most tempted to add that is NOT in v1?
+
+Owner-to-owner community (Slack-style forum).
+Tempting: would drive retention and virality.
+Skip: biggest rabbit hole, moderation burden, not survival-
+critical. Revisit at 25+ owners.
+
+Today view (owner home screen) — IN v1:
+
+When owner opens the app, they land on Today. One screen for
+day execution.
+
+Contents:
+- Route overview header (walks today, estimated total time,
+  weather, exceptions)
+- Walks in order, one card per walk (time, customer, dog,
+  address, walk type, access notes, status, status-appropriate
+  primary button)
+- Quick actions (report access problem, emergency walk requests)
+
+Status-driven primary button on each card:
+- Scheduled → "On My Way"
+- En Route → "Start Walk"
+- In Progress → "End Walk"
+- Completed → summary, report card link
+
+Team member Today view: same screen, scoped to only walks
+assigned to that member.
+
+Factory-level reusable module: "Today View" works for every
+Neighbor* vertical. Different labels, same structure.
+
+==================================================
+APPENDIX — DECISIONS LOG
+==================================================
+
+All decisions made during questionnaire that deviate from
+default or override prior assumptions.
+
+| Date       | Decision                                                      | Reason                                                                 |
+|------------|---------------------------------------------------------------|------------------------------------------------------------------------|
+| 2026-04-17 | Terminology locked: Owner, Team member, Customer, Admin       | Respectful naming + avoids franchisee/employee legal ambiguity          |
+| 2026-04-17 | No medications field on dog record                            | AppStack does not touch medication liability                            |
+| 2026-04-17 | Waiver signed at meet and greet, not registration             | Meet and greet is the actual service entry point                        |
+| 2026-04-17 | Platform/app health module required at factory level          | Third-party rule changes need proactive monitoring                      |
+| 2026-04-17 | Magic link for all user types (including customers)           | Simpler than password, one auth pattern across app                      |
+| 2026-04-17 | Grace period on subscription lapse: 30 days                   | Covers card replacement, vacation, holidays without carrying free usage |
+| 2026-04-17 | AppStack admin sees platform-level data only                  | Seeing customer data creates dispute exposure; owners are independent   |
+| 2026-04-17 | Non-compete extends to team members (end-around-sale block)   | Protects territory asset value and platform integrity                   |
+| 2026-04-17 | Team members can be on multiple territories simultaneously    | No business reason to restrict                                          |
+| 2026-04-17 | Annual billing option at launch                               | Reduces churn, smooths cash flow                                        |
+| 2026-04-17 | Statement descriptor: NEIGHBORDOGS (not AppStack)             | Customer sees brand they subscribed to                                  |
+| 2026-04-17 | Owner-initiated refund capability for walks                   | Required for owner-customer service relationship                        |
+| 2026-04-17 | Switched subscriber → owner terminology mid-questionnaire     | "Owner" respectful, accurate, matches marketing                         |
+| 2026-04-17 | In-walk photo SMS to customer                                 | Trust signal + engagement, new in rebuild                               |
+| 2026-04-17 | Personalized branded subdomains per owner                     | Owner pride of ownership, better marketing, factory-reusable            |
+| 2026-04-17 | Subdomain uses slugified business name (not personal name)    | Solves two-Dianes collision                                             |
+| 2026-04-17 | No self-service subdomain changes (AppStack-managed)          | Prevents squatting + customer URL stability                             |
+| 2026-04-17 | Multilingual infrastructure active from v1                    | Ported from HostClaim; no incremental cost                              |
+| 2026-04-17 | EXIF stripped from photos; GPS stored on walk record (9.9 B)  | Protects customer home privacy; preserves location proof                |
+| 2026-04-17 | Customer "My Walks" calendar view                             | Reduces customer confusion; drives rebook rate                          |
+| 2026-04-17 | Preferred language per user (ported from HostClaim)           | Independent across owner/team/customer                                  |
+| 2026-04-17 | Screen-awake automatic during active walks (no toggle)        | Walker has a dog on a leash; minimize interactions                      |
+| 2026-04-17 | Team members can capture waivers at meet and greet            | No business reason to restrict                                          |
+| 2026-04-17 | Three distinct consents (liability, privacy, device)          | Each covers its own surface cleanly                                     |
+| 2026-04-17 | Outbound iCal export for owners IN v1 (customer-side v2)      | Small build, large owner quality-of-life win                            |
+| 2026-04-17 | Today view as owner home screen                               | Core execution surface, matches factory design principles               |
+| 2026-04-17 | Insurance must explicitly cover team members                  | Protects AppStack from owner inadequate coverage                        |
+| 2026-04-17 | Acceptable Use Policy required + platform can't support illegal use | Protects platform + explicit legal position                             |
+| 2026-04-17 | Stripe exclusively for walk payments (no Venmo/Cash App/Zelle)| Simpler, cleaner refunds, owner not handling payment details            |
+| 2026-04-17 | QuickBooks/Xero CSV export IN v1 (full API v2)                | Real owner need at launch; API build deferred                           |
+| 2026-04-17 | Outbound iCal IN v1 for owners                                | Already-built module, small port, real value                            |
+
+==================================================
+MODULE IMPLICATIONS
+==================================================
+
+Seven new or refined modules to document in
+APPSTACK_MODULE_LIBRARY.txt as follow-up work:
+
+1. Branded Subdomain Routing (wildcard subdomain per owner
+   per vertical)
+2. Owner-Initiated Refund (Stripe-only in rebuild)
+3. Insurance Verification (COI with team member coverage check)
+4. Field-Captured Signature + Waiver (meet and greet consent)
+5. Acceptable Use Policy + Enforcement
+6. Customer Calendar View ("My Walks" / "My [Service]" per
+   vertical)
+7. "Today" View (daily execution screen per vertical)
+
+==================================================
+END OF QUESTIONNAIRE
+==================================================

@@ -1,0 +1,38 @@
+# Active Tasks: NeighborDogs
+
+## Historical (completed foundation)
+[x] Safely quarantine legacy HTML/PHP prototype into `_legacy` folder.
+[x] Initialize clean Next.js App Router environment.
+[x] Install `@supabase/supabase-js` client library.
+[x] Create `.env.local` with isolated NeighborDogs Supabase keys.
+[x] Scaffold Next.js routing structure (marketing, client booking, operator dashboard, login).
+[x] Port global CSS variables and liquid gradient backgrounds from `_legacy/index.html` to `app/globals.css` (marketing + booking shells).
+
+## Database (partial — see supabase/migrations/)
+[ ] Execute full production schema from `Schema.txt` in Supabase (territories, customers, walkers, visit_reports).
+[x] Apply demo/booking migrations: `002_test_demo_tables.sql`, `003_bookings.sql`.
+
+## Major refactor (COMPLETE — June 2026)
+[x] Feature-based modular monolith refactor (single Next.js app, domain folders under `features/`).
+[x] Client booking flow ported (`/book` + booking API routes + Supabase persistence).
+[x] Operator admin dashboard ported (`/dashboard` + admin API routes).
+[x] Territory preview ported (`/territory-preview` + API).
+[x] Structural cleanup: deleted empty top-level `components/` and `lib/`; ESLint ignores `_legacy/**`.
+[x] Legacy monolith severed: `_legacy/` has zero live imports; reference-only.
+
+## Current architecture snapshot
+- Routes: `app/` (thin shells + `app/api/*`)
+- Domains: `features/marketing`, `features/territory`, `features/booking`, `features/admin`
+- Shared infra: `shared/lib/supabase.ts` (`@/shared/lib/supabase`)
+- Legacy reference: `_legacy/index.html` (product/behavior only — not imported)
+
+## Immediate next priorities (pick one track)
+[ ] Wire up Stripe Checkout (operator subscription + client walk payment).
+[ ] Deploy to Vercel (dedicated NeighborDogs project per AppStack isolation policy).
+[ ] Integrate orphaned marketing components into the homepage (`product-demo`, positioning, credibility, operations, feature-groups, resale-asset, start-small — see audit notes).
+
+## Deferred / follow-up (not blocking homepage work)
+[ ] Unify duplicate Supabase client in `features/territory/lib/territory-preview.ts` → `@/shared/lib/supabase`.
+[ ] Resolve `react-hooks/set-state-in-effect` lint errors in admin/booking panels.
+[ ] Extract `features/auth/` when login UI grows beyond a single page.
+[ ] Rename `.legacy-admin` CSS classes to neutral naming when convenient.

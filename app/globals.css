@@ -1,0 +1,168 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+:root {
+  --nd-cream: #fff8ec;
+  --nd-card-cream: #fffdf7;
+  --nd-butter: #ffe9a8;
+  --nd-golden: #e9a84a;
+  --nd-golden-deep: #c9923f;
+  --nd-peach: #ffd6b0;
+  --nd-coral: #f28b82;
+  --nd-collar: #5c8fd6;
+  --nd-purple: #c7b7f3;
+  --nd-grass: #4fa76b;
+  --nd-grass-dark: #459a5e;
+  --nd-mint: #cdefd8;
+  --nd-text: #2e2722;
+  --nd-text-soft: #71665d;
+  --nd-border: #eaddc8;
+  --nd-sky: #dceeff;
+  --nd-heart: #f28b82;
+  --background: var(--nd-cream);
+  --foreground: var(--nd-text);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-nd-cream: var(--nd-cream);
+  --color-nd-card-cream: var(--nd-card-cream);
+  --color-nd-butter: var(--nd-butter);
+  --color-nd-golden: var(--nd-golden);
+  --color-nd-golden-deep: var(--nd-golden-deep);
+  --color-nd-peach: var(--nd-peach);
+  --color-nd-coral: var(--nd-coral);
+  --color-nd-collar: var(--nd-collar);
+  --color-nd-purple: var(--nd-purple);
+  --color-nd-grass: var(--nd-grass);
+  --color-nd-grass-dark: var(--nd-grass-dark);
+  --color-nd-mint: var(--nd-mint);
+  --color-nd-text: var(--nd-text);
+  --color-nd-text-soft: var(--nd-text-soft);
+  --color-nd-border: var(--nd-border);
+  --color-nd-sky: var(--nd-sky);
+  --color-nd-heart: var(--nd-heart);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@keyframes bg-drift {
+  0% {
+    opacity: 1;
+    transform: scale(1) translate(0, 0);
+  }
+  50% {
+    opacity: 0.97;
+    transform: scale(1.008) translate(4px, 3px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translate(-3px, 4px);
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), -apple-system, "Helvetica Neue", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.marketing-bg {
+  background: var(--nd-cream);
+}
+
+.marketing-bg-mesh {
+  background:
+    radial-gradient(
+      ellipse 55% 45% at 10% 15%,
+      rgba(255, 233, 168, 0.35) 0%,
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 90% 12%,
+      rgba(220, 238, 255, 0.45) 0%,
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 45% 40% at 88% 85%,
+      rgba(205, 239, 216, 0.3) 0%,
+      transparent 58%
+    );
+  animation: bg-drift 32s ease-in-out infinite alternate;
+}
+
+.nd-glass {
+  background: rgba(255, 253, 247, 0.82);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  border: 1px solid var(--nd-border);
+  box-shadow: 0 6px 24px rgba(46, 39, 34, 0.04);
+}
+
+.nd-glass-warm {
+  background: rgba(255, 253, 247, 0.9);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--nd-border);
+  box-shadow: 0 4px 20px rgba(46, 39, 34, 0.04);
+}
+
+.glass-header {
+  background: rgba(255, 248, 236, 0.88);
+  border-bottom: 1px solid var(--nd-border);
+  backdrop-filter: blur(16px) saturate(120%);
+  -webkit-backdrop-filter: blur(16px) saturate(120%);
+}
+
+.nd-route-line {
+  background-image: radial-gradient(circle, var(--nd-golden) 1.5px, transparent 1.5px);
+  background-size: 14px 14px;
+  background-position: 0 0;
+  mask-image: linear-gradient(90deg, black 70%, transparent);
+}
+
+.nd-dog-tag {
+  clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+}
+
+@keyframes nd-beacon-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.88;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes nd-beacon-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  70%,
+  100% {
+    transform: scale(1.55);
+    opacity: 0;
+  }
+}
+
+.nd-beacon-pulse {
+  animation: nd-beacon-pulse 2.2s ease-in-out infinite;
+}
+
+.nd-beacon-ring {
+  animation: nd-beacon-ring 2.2s ease-out infinite;
+}
+
+.nd-route-divider {
+  background-image: radial-gradient(circle, var(--nd-golden) 1.5px, transparent 1.5px);
+  background-size: 10px 10px;
+  background-repeat: repeat-x;
+  background-position: center;
+  height: 3px;
+}

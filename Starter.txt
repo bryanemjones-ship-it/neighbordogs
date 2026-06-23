@@ -1,0 +1,73 @@
+# AppStack Bootstrap Protocol
+# Follow these exact steps when creating a new portfolio application.
+
+1. Provision Infrastructure
+   - Create a new Supabase project (save URL, Anon Key, Service Role Key).
+   - Create a new Vercel project (do not link to GitHub yet).
+
+2. Initialize Local Environment
+   - Open PowerShell.
+   - `cd C:\Projects\appstack\_APPS\`
+   - `mkdir NewAppName`
+   - `cd NewAppName`
+   - `npx create-next-app@latest . --name newappname` (use lowercase for npm compliance)
+
+3. Next.js Setup Wizard Answers
+   - TypeScript: Yes
+   - ESLint: Yes
+   - Tailwind: Yes
+   - src/ directory: No
+   - App Router: Yes
+   - Custom alias: No
+
+4. Install Baseline Dependencies
+   - `npm install @supabase/supabase-js`
+
+5. Establish Environment Variables
+   - Create `.env.local`
+   - Add Supabase credentials.
+
+6. Version Control
+   - Initialize isolated git repository if separating from the main AppStack monorepo.
+   - Push initial baseline commit.
+
+---
+
+## NeighborDogs — current project notes (June 2026)
+
+### Architecture
+- Feature-based modular monolith (see `Schema.txt` section C, `Conventions.txt` Feature-Sliced rules).
+- Domains: `features/marketing`, `features/territory`, `features/booking`, `features/admin`.
+- Shared Supabase: `shared/lib/supabase.ts` → import as `@/shared/lib/supabase`.
+
+### ESLint
+- **ESLint v9 flat config**: `eslint.config.mjs` (no `.eslintignore`).
+- `_legacy/**` is explicitly ignored in `globalIgnores` — legacy SPA is reference-only, not linted as live code.
+
+### Dev & build commands
+Standard Next.js scripts — verified working post-refactor:
+
+```powershell
+cd C:\Projects\appstack\_APPS\NeighborDogs
+npm run dev      # local development
+npm run build    # production build (15 live routes as of June 2026)
+npm run lint     # ESLint (known react-hooks/set-state-in-effect items in admin/booking panels)
+```
+
+### Live routes (post-refactor)
+- `/` — marketing homepage
+- `/territory-preview` — territory check
+- `/book` — client booking flow
+- `/dashboard` — operator admin (auth-gated)
+- `/login` — Supabase auth
+- `/api/territory-preview`, `/api/booking/*`, `/api/admin/*`
+
+### Environment (`.env.local`)
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+- Optional: `CENSUS_API_KEY` (territory preview ACS calls)
+
+### Legacy reference
+- `_legacy/index.html` — original PHP/HTML monolith; use for product behavior only.
+- Do not import from `_legacy/` in live code.

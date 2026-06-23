@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeighborDogs — Real Questions. Straight Answers.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500&family=Plus+Jakarta+Sans:wght@500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   APPSTACK NEIGHBOR PLATFORM — OPERATOR FEARS & OBJECTIONS PAGE
+   Template version: 1.0
+   Author: AppStack LLC
+
+   HOW TO ADAPT FOR OTHER VERTICALS:
+   1. Edit CONFIG block — brand, vertical name, Oh Crap equivalent
+   2. Edit FEARS array — swap any vertical-specific language
+   3. Edit MARKETING array — same across all verticals
+   4. Hero copy and stats update from CONFIG only
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-body:    'DM Sans', sans-serif;
+  --c-bg:          #fafaf8;
+  --c-surface:     #ffffff;
+  --c-border:      rgba(0,0,0,0.08);
+  --c-border-strong: rgba(0,0,0,0.15);
+  --c-text-primary:   #111111;
+  --c-text-secondary: #555555;
+  --c-text-tertiary:  #999999;
+  --c-accent:      #111111;
+  --c-accent-soft: #f4f4f2;
+  --c-signal:      #059669;   /* insured badge, trust signals */
+  --c-signal-bg:   #ECFDF5;
+}
+
+html  { scroll-behavior: smooth; }
+body  {
+  font-family: var(--font-body);
+  background: var(--c-bg);
+  color: var(--c-text-primary);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.page { max-width: 840px; margin: 0 auto; padding: 0 24px; }
+
+/* ── NAV ── */
+nav {
+  border-bottom: 1px solid var(--c-border);
+  padding: 20px 0;
+  position: sticky; top: 0;
+  background: rgba(250,250,248,0.92);
+  backdrop-filter: blur(12px);
+  z-index: 100;
+}
+.nav-inner {
+  max-width: 840px; margin: 0 auto; padding: 0 24px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.nav-logo {
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 600;
+  color: var(--c-text-primary); letter-spacing: -0.01em;
+}
+.nav-cta {
+  font-size: 13px; font-weight: 500;
+  color: var(--c-text-primary);
+  border: 1px solid var(--c-border-strong);
+  padding: 7px 16px; border-radius: 8px;
+  text-decoration: none; transition: background 0.15s;
+}
+.nav-cta:hover { background: var(--c-accent-soft); }
+
+/* ── HERO ── */
+.hero { padding: 96px 0 72px; border-bottom: 1px solid var(--c-border); }
+.eyebrow {
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--c-text-tertiary); margin-bottom: 24px;
+  opacity: 0; animation: fadeUp 0.5s ease 0.1s forwards;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 5.5vw, 64px);
+  font-weight: 600; line-height: 1.06;
+  letter-spacing: -0.03em;
+  color: var(--c-text-primary); margin-bottom: 24px;
+  opacity: 0; animation: fadeUp 0.5s ease 0.2s forwards;
+}
+.hero-sub {
+  font-size: 19px; color: var(--c-text-secondary);
+  line-height: 1.55; max-width: 580px; margin-bottom: 48px;
+  opacity: 0; animation: fadeUp 0.5s ease 0.3s forwards;
+}
+.trust-strip {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  opacity: 0; animation: fadeUp 0.5s ease 0.4s forwards;
+}
+.trust-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500;
+  background: var(--c-signal-bg); color: var(--c-signal);
+  border: 1px solid rgba(5,150,105,0.2);
+  padding: 6px 14px; border-radius: 20px;
+}
+.trust-pill svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+/* ── SECTIONS ── */
+section { padding: 80px 0; border-bottom: 1px solid var(--c-border); }
+
+.section-eyebrow {
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--c-text-tertiary); margin-bottom: 12px;
+}
+.section-headline {
+  font-family: var(--font-display);
+  font-size: clamp(26px, 3.5vw, 38px);
+  font-weight: 600; letter-spacing: -0.025em;
+  color: var(--c-text-primary); line-height: 1.15; margin-bottom: 16px;
+}
+.section-sub {
+  font-size: 16px; color: var(--c-text-secondary);
+  line-height: 1.65; max-width: 600px; margin-bottom: 48px;
+}
+
+/* ── FEAR CARDS ── */
+.fears-list { display: flex; flex-direction: column; gap: 0; }
+
+.fear-item {
+  border-top: 1px solid var(--c-border);
+  padding: 36px 0;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 48px;
+  align-items: start;
+}
+.fear-item:last-child { border-bottom: 1px solid var(--c-border); }
+
+.fear-q {
+  font-family: var(--font-display);
+  font-size: 18px; font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--c-text-primary); line-height: 1.3;
+}
+.fear-q-tag {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--c-text-tertiary); margin-bottom: 10px;
+}
+.fear-a {
+  font-size: 15px; color: var(--c-text-secondary);
+  line-height: 1.7;
+}
+.fear-a strong { color: var(--c-text-primary); font-weight: 500; }
+.fear-a p + p { margin-top: 14px; }
+
+.callout {
+  background: var(--c-accent-soft);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 18px;
+  font-size: 14px;
+  color: var(--c-text-secondary);
+  line-height: 1.6;
+}
+.callout strong { color: var(--c-text-primary); }
+
+/* ── MLM SECTION — special treatment ── */
+.mlm-section {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 16px;
+  padding: 40px 44px;
+  margin-bottom: 64px;
+}
+.mlm-headline {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 600; letter-spacing: -0.02em;
+  color: var(--c-text-primary); line-height: 1.2;
+  margin-bottom: 20px;
+}
+.mlm-body {
+  font-size: 15px; color: var(--c-text-secondary);
+  line-height: 1.75; margin-bottom: 28px; max-width: 620px;
+}
+.mlm-body p + p { margin-top: 14px; }
+.compare-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px; margin-top: 28px;
+}
+.compare-col {
+  border-radius: 10px; padding: 20px 22px;
+}
+.compare-col.bad  { background: #FEF2F2; border: 1px solid #FECACA; }
+.compare-col.good { background: var(--c-signal-bg); border: 1px solid rgba(5,150,105,0.25); }
+.compare-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 14px; font-weight: 500;
+}
+.compare-col.bad  .compare-label { color: #DC2626; }
+.compare-col.good .compare-label { color: var(--c-signal); }
+.compare-list {
+  list-style: none; display: flex; flex-direction: column; gap: 10px;
+}
+.compare-list li {
+  font-size: 13px; color: var(--c-text-secondary);
+  display: flex; align-items: flex-start; gap: 8px; line-height: 1.5;
+}
+.compare-list li::before {
+  content: ''; display: block;
+  width: 6px; height: 6px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 5px;
+}
+.compare-col.bad  .compare-list li::before { background: #FCA5A5; }
+.compare-col.good .compare-list li::before { background: #6EE7B7; }
+
+/* ── MARKETING SECTION ── */
+.marketing-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 48px;
+}
+.mkt-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 12px;
+  padding: 24px 26px;
+}
+.mkt-card.platform { border-color: rgba(5,150,105,0.3); background: var(--c-signal-bg); }
+.mkt-label {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--c-text-tertiary); margin-bottom: 12px;
+}
+.mkt-card.platform .mkt-label { color: var(--c-signal); }
+.mkt-title {
+  font-family: var(--font-display);
+  font-size: 16px; font-weight: 600;
+  color: var(--c-text-primary); margin-bottom: 10px;
+}
+.mkt-body { font-size: 13px; color: var(--c-text-secondary); line-height: 1.65; }
+
+/* ── OH CRAP SECTION ── */
+.ohcrap-card {
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.ohcrap-header {
+  padding: 32px 36px 28px;
+  border-bottom: 1px solid var(--c-border);
+}
+.ohcrap-badge {
+  display: inline-block;
+  font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: #FEF3C7; color: #92400E;
+  border: 1px solid #FCD34D;
+  padding: 4px 12px; border-radius: 5px; margin-bottom: 16px;
+}
+.ohcrap-headline {
+  font-family: var(--font-display);
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 600; letter-spacing: -0.02em;
+  color: var(--c-text-primary); line-height: 1.2; margin-bottom: 12px;
+}
+.ohcrap-sub { font-size: 15px; color: var(--c-text-secondary); line-height: 1.65; max-width: 560px; }
+.ohcrap-features {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 0;
+}
+.ohcrap-feature {
+  padding: 24px 28px;
+  border-right: 1px solid var(--c-border);
+}
+.ohcrap-feature:last-child { border-right: none; }
+.ohcrap-feature:nth-child(n+4) { border-top: 1px solid var(--c-border); }
+.of-name {
+  font-family: var(--font-display);
+  font-size: 15px; font-weight: 600;
+  color: var(--c-text-primary); margin-bottom: 6px;
+}
+.of-desc { font-size: 12px; color: var(--c-text-secondary); line-height: 1.55; }
+
+/* ── CLOSE ── */
+.close-section {
+  padding: 80px 0;
+  text-align: center;
+}
+.close-headline {
+  font-family: var(--font-display);
+  font-size: clamp(30px, 4.5vw, 52px);
+  font-weight: 600; letter-spacing: -0.03em;
+  color: var(--c-text-primary); line-height: 1.1; margin-bottom: 20px;
+}
+.close-sub {
+  font-size: 18px; color: var(--c-text-secondary);
+  line-height: 1.55; margin-bottom: 40px; max-width: 520px; margin-left: auto; margin-right: auto;
+}
+.close-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+  font-family: var(--font-body); font-size: 15px; font-weight: 500;
+  background: var(--c-text-primary); color: var(--c-bg);
+  border: none; padding: 14px 28px; border-radius: 10px;
+  cursor: pointer; text-decoration: none; transition: opacity 0.15s;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-secondary {
+  font-family: var(--font-body); font-size: 15px; font-weight: 500;
+  background: transparent; color: var(--c-text-primary);
+  border: 1px solid var(--c-border-strong);
+  padding: 14px 28px; border-radius: 10px;
+  cursor: pointer; text-decoration: none; transition: background 0.15s;
+}
+.btn-secondary:hover { background: var(--c-accent-soft); }
+
+/* ── REVEAL ── */
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.reveal.in { opacity: 1; transform: translateY(0); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 640px) {
+  .fear-item       { grid-template-columns: 1fr; gap: 16px; }
+  .compare-grid    { grid-template-columns: 1fr; }
+  .marketing-grid  { grid-template-columns: 1fr; }
+  .ohcrap-features { grid-template-columns: 1fr; }
+  .ohcrap-feature  { border-right: none; border-top: 1px solid var(--c-border); }
+  .ohcrap-feature:first-child { border-top: none; }
+  .mlm-section     { padding: 28px 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     CONFIG — Edit this block for each vertical
+     ============================================================ -->
+<script>
+const CONFIG = {
+  brand:    'NeighborDogs',
+  vertical: 'Dog Walking',
+  url:      'yourbrand.neighbordogs.com',
+
+  hero_headline_l1: 'Real questions.',
+  hero_headline_l2: 'Straight answers.',
+  hero_sub: 'You have concerns. Good. Anyone who does not is not paying attention. Here is what you need to know before you decide.',
+
+  /* Oh Crap equivalent for this vertical */
+  ohcrap_name: 'Oh Crap',
+  ohcrap_desc: 'Same-day emergency walk. Dog had an accident. Owner got stuck at work. One tap and help is on the way.',
+
+  /* Additional signature features — 5 max */
+  features: [
+    { name: 'Oh Crap',       desc: 'Emergency same-day walk. One tap. No calls.'                },
+    { name: 'Live GPS',      desc: 'Customers watch your route in real time on their phone.'    },
+    { name: 'Report Card',   desc: 'Post-walk photo report delivered automatically.'            },
+    { name: 'Self-Schedule', desc: 'Customers book their own recurring walks. You just show up.'},
+    { name: 'Group Walk',    desc: 'Walk 2–3 dogs at once. Same hour. More revenue.'            },
+    { name: 'QR T-Shirt',   desc: 'Your URL on your shirt. Every walk is a billboard.'         },
+  ],
+};
+</script>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-inner">
+    <span class="nav-logo" id="nav-brand"></span>
+    <a href="#" class="nav-cta">Check your territory</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<header class="hero">
+  <div class="page">
+    <p class="eyebrow" id="hero-eyebrow"></p>
+    <h1 id="hero-headline"></h1>
+    <p class="hero-sub" id="hero-sub"></p>
+    <div class="trust-strip">
+      <span class="trust-pill">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 1.5L2 4v4c0 3.3 2.5 6.4 6 7 3.5-.6 6-3.7 6-7V4L8 1.5z" fill="currentColor" opacity=".2"/><path d="M6 8l1.5 1.5L10 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Insured operators only
+      </span>
+      <span class="trust-pill">
+        <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Exclusive territory
+      </span>
+      <span class="trust-pill">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Sell when you're ready
+      </span>
+    </div>
+  </div>
+</header>
+
+<!-- ── SECTION 1: THE MLM QUESTION ── -->
+<section>
+  <div class="page reveal">
+    <p class="section-eyebrow">The question everyone asks first</p>
+    <h2 class="section-headline">Is this an MLM?</h2>
+    <p class="section-sub">It is a fair question. The internet is full of "business in a box" pitches that turn out to be recruiting schemes with monthly fees. Here is how to tell the difference.</p>
+
+    <div class="mlm-section">
+      <p class="mlm-headline">MLMs make money when you recruit.<br>You make money when you walk dogs.</p>
+      <div class="mlm-body">
+        <p>There is no downline. There is no commission on other operators. There is no pressure to recruit your friends. The platform earns its $149 a month from your subscription — and that is the only way it earns money from you, ever.</p>
+        <p>You are a business owner. You hire who you need, when you need them. A manager. Three walkers. Whatever the route demands. The platform is the operating system. The business is yours.</p>
+        <p><strong>The honest version of this opportunity:</strong> the platform gives you tools, a protected territory, and a tailwind. It does not give you customers. You go get those. Every successful operator wearing their t-shirt at the dog park, leaving flyers at the vet, showing up at dog shows — that is the job. The platform makes the business run. You make it grow.</p>
+      </div>
+
+      <div class="compare-grid">
+        <div class="compare-col bad">
+          <p class="compare-label">MLM</p>
+          <ul class="compare-list">
+            <li>Income depends on recruiting others</li>
+            <li>Monthly fee regardless of your activity</li>
+            <li>Products you sell to your own network</li>
+            <li>No territory — everyone competes everywhere</li>
+            <li>No asset to sell when you are done</li>
+            <li>Company owns the customer relationship</li>
+          </ul>
+        </div>
+        <div class="compare-col good">
+          <p class="compare-label">Neighbor Platform</p>
+          <ul class="compare-list">
+            <li>Income comes from customers you serve</li>
+            <li>$149/month — the software that runs your business</li>
+            <li>Real recurring service to real local customers</li>
+            <li>One operator per territory — protected, contractual</li>
+            <li>Territory is a sellable asset you own</li>
+            <li>Your customer database transfers with the sale</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 2: REAL FEARS ── -->
+<section>
+  <div class="page reveal">
+    <p class="section-eyebrow">Everything else</p>
+    <h2 class="section-headline">The concerns worth having.</h2>
+    <p class="section-sub">These are real questions from people who are thinking seriously. They deserve real answers.</p>
+
+    <div class="fears-list" id="fears-list"></div>
+  </div>
+</section>
+
+<!-- ── SECTION 3: MARKETING — your job and ours ── -->
+<section>
+  <div class="page reveal">
+    <p class="section-eyebrow">Marketing — what we do, what you do</p>
+    <h2 class="section-headline">The platform runs the engine.<br>You drive the route.</h2>
+    <p class="section-sub">This is not a passive income opportunity. It is a business. Business owners market their businesses. Here is exactly who does what.</p>
+
+    <div class="marketing-grid">
+      <div class="mkt-card platform">
+        <p class="mkt-label">The platform provides</p>
+        <p class="mkt-title">National vertical campaigns</p>
+        <p class="mkt-body">Ongoing social media presence for NeighborDogs across all major platforms. Brand awareness that rises with every operator who activates.</p>
+      </div>
+      <div class="mkt-card platform">
+        <p class="mkt-label">The platform provides</p>
+        <p class="mkt-title">Your territory on Nextdoor</p>
+        <p class="mkt-body">When your territory activates, a sponsored presence in your exact neighborhood appears on Nextdoor — the only platform where your neighbors are already talking about local services.</p>
+      </div>
+      <div class="mkt-card platform">
+        <p class="mkt-label">The platform provides</p>
+        <p class="mkt-title">Branded post library</p>
+        <p class="mkt-body">Ready-to-post social content under your business name. Before and after photos, customer report card highlights, seasonal campaigns. You post. We write.</p>
+      </div>
+      <div class="mkt-card platform">
+        <p class="mkt-label">The platform provides</p>
+        <p class="mkt-title">Strategic partnerships</p>
+        <p class="mkt-body">We pursue relationships that put your business in front of the right people — pet industry, local business networks, and community organizations that serve your customer.</p>
+      </div>
+      <div class="mkt-card">
+        <p class="mkt-label">You own</p>
+        <p class="mkt-title">Your t-shirt is your billboard</p>
+        <p class="mkt-body">Wear it at the dog park. Wear it at the vet. Wear it at every walk. Your personal URL and QR code on your back converts every conversation into a booking.</p>
+      </div>
+      <div class="mkt-card">
+        <p class="mkt-label">You own</p>
+        <p class="mkt-title">Your territory, your presence</p>
+        <p class="mkt-body">Flyers at every vet office in your territory. A face at every dog show and dog park. A handshake and a business card to every neighbor who asks what you do. This is how routes are built — one customer at a time, in person.</p>
+      </div>
+    </div>
+
+    <div class="callout" style="max-width:100%">
+      <strong>The honest expectation:</strong> Month one is slower than month six. Month six is slower than year two. The operators who build real businesses are the ones who show up — at the dog park, at the vet office, on the route — consistently. The platform amplifies what you build. It does not build it for you.
+    </div>
+  </div>
+</section>
+
+<!-- ── SECTION 4: OH CRAP FEATURES ── -->
+<section>
+  <div class="page reveal">
+    <p class="section-eyebrow">What makes customers stay — and talk</p>
+    <h2 class="section-headline">The features that become stories.</h2>
+    <p class="section-sub">Word of mouth is your best marketing. These are the moments customers tell their neighbors about.</p>
+
+    <div class="ohcrap-card">
+      <div class="ohcrap-header">
+        <div class="ohcrap-badge" id="ohcrap-badge"></div>
+        <p class="ohcrap-headline" id="ohcrap-headline"></p>
+        <p class="ohcrap-sub" id="ohcrap-sub"></p>
+      </div>
+      <div class="ohcrap-features" id="ohcrap-features"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CLOSE ── -->
+<div class="close-section">
+  <div class="page reveal">
+    <h2 class="close-headline">Your territory is waiting.<br>One operator. One neighborhood.</h2>
+    <p class="close-sub">Check availability in your zip code. If it is open, it is yours.</p>
+    <div class="close-actions">
+      <a href="#" class="btn-primary">Check my territory</a>
+      <a href="#" class="btn-secondary">See the income model</a>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ── Populate from config ── */
+document.getElementById('nav-brand').textContent = CONFIG.brand;
+document.getElementById('hero-eyebrow').textContent = CONFIG.vertical + ' · Operator Questions';
+document.getElementById('hero-headline').innerHTML =
+  CONFIG.hero_headline_l1 + '<br>' + CONFIG.hero_headline_l2;
+document.getElementById('hero-sub').textContent = CONFIG.hero_sub;
+
+/* ── FEARS — edit content here, structure is the template ── */
+const FEARS = [
+  {
+    tag:      'Fear #1',
+    q:        'What if I pay $149 and get no customers in month one?',
+    a: `<p>That is a real risk and you should think about it honestly.</p>
+        <p>Routes take 60 to 90 days to build. The first month you are laying groundwork — the vet office flyers, the dog park conversations, the first few word-of-mouth referrals. You will not have 30 clients in week one. Nobody does.</p>
+        <p>The launch pricing exists for this reason. Your first three months are priced lower specifically because you are building, not operating at full capacity. By month four you should have enough recurring clients that $149 is a small fraction of your monthly revenue, not a burden.</p>
+        <p><strong>The question to ask yourself:</strong> can I cover $149 a month for 90 days while I build a route? If the answer is yes, the business model works. If the answer is no, the timing is wrong and that is worth knowing before you start.</p>`,
+  },
+  {
+    tag:      'Fear #2',
+    q:        'What stops someone from moving into my territory?',
+    a: `<p>Your territory exclusivity is contractual. One operator per geography. The platform enforces it technically — a new operator cannot activate a territory that is already claimed, full stop.</p>
+        <p>But here is the honest version: the territory boundary is the platform's guarantee. Someone running an independent dog walking business in your neighborhood is not a violation — they were there before you. What the platform guarantees is that no other <em>Neighbor operator</em> competes in your geography.</p>
+        <p><strong>Your actual competitive advantage</strong> is route density, the platform features your competitors do not have, and the customer relationships you build. A competitor showing up is a reason to out-serve them — not a platform failure.</p>`,
+  },
+  {
+    tag:      'Fear #3',
+    q:        'The resale value sounds like a pitch. Has anyone actually sold a territory?',
+    a: `<p>Honest answer: not yet. The marketplace is new. There are no completed territory sales to point to.</p>
+        <p>What we can tell you is what transfers in a sale: the customer database, the documented recurring revenue, the established route, the operating history. A buyer is purchasing a cash-flowing neighborhood business — not a concept and not a promise.</p>
+        <p><strong>The valuation math is real.</strong> Small service businesses with recurring clients sell for 2 to 2.5 times annual net earnings. That is a documented industry multiple from BizBuySell data across thousands of transactions. Apply that to a mature territory and the exit number is significant.</p>
+        <p>The first completed territory sales will document this publicly. Until then, this is a claim backed by industry data, not by our own transaction history. You deserve to know that.</p>`,
+    callout: 'The resale marketplace is built. The contracts are ready. The 10% platform fee on sale is documented. We are waiting for operators who build to the point of wanting to exit — and then the proof will exist.',
+  },
+  {
+    tag:      'Fear #4',
+    q:        '$149 a month is $1,788 a year. That is real money.',
+    a: `<p>It is. And it should be evaluated against what it replaces.</p>
+        <p>Bookkeeping software. Scheduling tools. GPS tracking. Social media management. Report card delivery. Payment processing infrastructure. Protected territory that a traditional franchise charges $15,000 to $30,000 upfront to provide.</p>
+        <p>Sourced independently, those tools cost $534 to $939 a month. The platform delivers them for $149.</p>
+        <p><strong>The real question</strong> is not whether $1,788 a year is real money. It is whether a route of 20 recurring clients — charging $190 a month each — makes $149 irrelevant. At 20 clients you gross $3,800 a month. The platform fee is 3.9% of that. That is not a burden. That is overhead.</p>`,
+    callout: 'See the full income model — including a live walk rate slider — at the earnings page.',
+  },
+  {
+    tag:      'Fear #5',
+    q:        'What happens if I want to quit?',
+    a: `<p>Cancel anytime. No penalty. No contract term beyond the monthly billing cycle.</p>
+        <p>But before you quit, consider selling. A territory you built — even a modest one with 15 or 20 recurring clients — has value to the right buyer. The platform lists it, finds the buyer, handles the transfer. You keep 90% of the sale price.</p>
+        <p><strong>Quitting walks away from that value. Selling captures it.</strong> The difference between an operator who quits and one who sells is the difference between losing a subscription and walking away with five figures.</p>`,
+  },
+];
+
+const fearsList = document.getElementById('fears-list');
+FEARS.forEach(f => {
+  fearsList.innerHTML += `
+    <div class="fear-item reveal">
+      <div>
+        <p class="fear-q-tag">${f.tag}</p>
+        <p class="fear-q">${f.q}</p>
+      </div>
+      <div class="fear-a">
+        ${f.a}
+        ${f.callout ? `<div class="callout"><strong>Note:</strong> ${f.callout}</div>` : ''}
+      </div>
+    </div>`;
+});
+
+/* ── Oh Crap section ── */
+document.getElementById('ohcrap-badge').textContent = CONFIG.ohcrap_name;
+document.getElementById('ohcrap-headline').textContent =
+  'The feature customers tell their neighbors about.';
+document.getElementById('ohcrap-sub').textContent =
+  CONFIG.ohcrap_desc + ' Nobody forgets the first time it saves them. That story travels.';
+
+document.getElementById('ohcrap-features').innerHTML =
+  CONFIG.features.map(f => `
+    <div class="ohcrap-feature">
+      <p class="of-name">${f.name}</p>
+      <p class="of-desc">${f.desc}</p>
+    </div>`).join('');
+
+/* ── Scroll reveals ── */
+const reveals = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+}, { threshold: 0.06 });
+reveals.forEach(r => obs.observe(r));
+</script>
+
+</body>
+</html>

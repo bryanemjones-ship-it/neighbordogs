@@ -1,0 +1,99 @@
+# NeighborDogs Schema & Structure Reference
+# Purpose: Relational boundaries (Supabase) + codebase layout (features/)
+
+---
+
+## A. Data Schema (Supabase — target production model)
+
+1. territories
+   - Core geographical inventory.
+   - id (UUID, PK), anchor_address (TEXT), center_lat (FLOAT), center_lng (FLOAT), radius_miles (NUMERIC), estimated_homes (INT), monthly_price_cents (INT)
+
+2. territory_subscriptions
+   - Links AppStack buyers/operators to specific territories.
+   - id (UUID, PK), territory_id (FK), owner_id (FK auth.users), status (TEXT), monthly_cents (INT)
+
+3. customers
+   - End-users booking the walks.
+   - id (UUID, PK), email (TEXT), name (TEXT), phone (TEXT), address (TEXT), lat (FLOAT), lng (FLOAT), dogs (TEXT), dog_count (INT), approved (BOOLEAN)
+
+4. walkers
+   - Employees/contractors assigned to walks.
+   - id (UUID, PK), territory_id (FK), name (TEXT), phone (TEXT)
+
+5. bookings
+   - Individual scheduled walks.
+   - id (UUID, PK), customer_id (FK), walker_id (FK), type (TEXT), date (DATE), start_time (TIME), end_time (TIME), price_cents (INT), status (TEXT), is_emergency (BOOLEAN)
+
+6. visit_reports
+   - Post-walk data and media.
+   - id (UUID, PK), booking_id (FK), potty_pee (BOOLEAN), potty_poop (BOOLEAN), visit_note (TEXT), photo_1_url (TEXT), photo_2_url (TEXT)
+
+---
+
+## B. Applied migrations (current demo/live subset)
+
+See `supabase/migrations/`:
+- `001_neighbordogs_schema.sql` — territories, subscriptions, teams, resale (AppStack operator layer)
+- `002_test_demo_tables.sql` — `test_demo_customers`, `test_demo_walkers`, `test_demo_bookings`, etc.
+- `003_bookings.sql` — `bookings` table (used by live client booking + admin schedule API)
+
+Live booking API writes to `bookings` (see `features/booking/lib/db.ts`).
+
+---
+
+## C. Codebase Structure (feature-based modular monolith — current)
+
+Single Next.js 16 App Router application. **Do not** use root-level `components/` or `lib/`.
+
+```
+app/                          # Routes only — thin page/layout shells + HTTP API
+├── (marketing)/              # /, /territory-preview
+├── (client)/                 # /book
+├── dashboard/                # /dashboard (operator admin)
+├── login/                    # /login
+└── api/                      # Delegates to features/*/lib
+
+features/
+├── marketing/                # Homepage, demos, demo identity
+│   ├── components/
+│   └── lib/
+├── territory/                # Territory preview map, geocode, overlap pricing
+│   ├── components/
+│   └── lib/
+├── booking/                  # Client booking flow + domain logic
+│   ├── components/           # ClientBookingFlow, pickers, payment
+│   └── lib/                  # db, pricing, slots, types, models
+├── admin/                    # Operator dashboard (AdminPanel + panels)
+│   ├── components/
+│   └── lib/                  # (minimal — most admin utils in booking/lib/models)
+
+shared/
+└── lib/
+    └── supabase.ts           # @/shared/lib/supabase — browser + server clients
+
+_legacy/                      # Reference only — NOT imported by live code
+```
+
+### Domain → route mapping (live)
+
+| URL | app route | Feature module |
+|-----|-----------|----------------|
+| `/` | `app/(marketing)/page.tsx` | `features/marketing` |
+| `/territory-preview` | `app/(marketing)/territory-preview/page.tsx` | `features/territory` |
+| `/book` | `app/(client)/book/page.tsx` | `features/booking` |
+| `/dashboard` | `app/dashboard/page.tsx` | `features/admin` |
+| `/login` | `app/login/page.tsx` | (inline — future `features/auth`) |
+
+### API → feature mapping
+
+| Endpoint | Feature lib |
+|----------|-------------|
+| `/api/territory-preview` | `features/territory/lib/territory-preview.ts` |
+| `/api/booking/*` | `features/booking/lib/*` |
+| `/api/admin/*` | `features/booking/lib/db.ts` + Supabase |
+
+### Import alias
+
+- `@/*` → project root (tsconfig)
+- Supabase: **`@/shared/lib/supabase`** (not `@/lib/supabase`)

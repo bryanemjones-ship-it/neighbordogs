@@ -1,0 +1,18 @@
+# Architectural Decisions Log
+# Portfolio: AppStack
+
+1. Strict Infrastructure Isolation
+   - Decision: Every app receives its own dedicated Supabase project and Vercel project.
+   - Rationale: Ensures a clean package. If an app is sold, the keys, database, and hosting are handed over cleanly without extracting data from a shared monolithic database.
+
+2. Codebase Decoupling
+   - Decision: No upward imports from `C:\Projects\appstack\_APPS\shared`.
+   - Rationale: Modularity. Each app must contain 100% of its dependencies within its own folder to facilitate frictionless repository extraction via `git filter-repo`.
+
+3. Primary Tech Stack
+   - Decision: Next.js (App Router), TypeScript, Tailwind CSS, Supabase (Auth + PostgreSQL), Vercel (Hosting), Resend (Transactional Email).
+   - Rationale: Predictable, type-safe, and highly scalable stack with rapid deployment pipelines.
+
+4. Local-First Development
+   - Decision: All active session work is saved and executed locally in the Windows directory prior to any cloud synchronization or deployment.
+   - Rationale: Total control over the codebase and instantaneous compilation feedback during the build phase.

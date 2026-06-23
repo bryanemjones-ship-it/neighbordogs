@@ -1,0 +1,52 @@
+# Coding Conventions
+
+1. Formatting & Styling
+   - Tailwind CSS is the exclusive styling methodology.
+   - Global raw CSS is strictly reserved for variables (`globals.css`) or complex keyframe animations that Tailwind cannot handle cleanly.
+   - Feature-specific CSS (e.g. admin shell, client booking) lives beside its feature: `features/admin/components/admin.css`, `features/booking/components/client-booking.css`.
+
+2. Routing (Next.js App Router)
+   - Utilize Route Groups (folders wrapped in parenthesis like `(marketing)` or `(client)`) to logically organize pages without affecting the URL path.
+   - Standardize layouts at the group level to share navigation bars and footers.
+
+3. State & Data Fetching
+   - Leverage React Server Components for initial data payloads directly from Supabase.
+   - Use Client Components (`"use client";`) strictly at the leaf nodes of the render tree (e.g., buttons, forms, interactive maps).
+
+4. Naming Restrictions
+   - Project directory names can be PascalCase (e.g., `NeighborDog`), but the internal `package.json` name must remain entirely lowercase per npm restrictions.
+   - Supabase table names must always be plural and snake_case (e.g., `visit_reports`).
+
+---
+
+## Feature-Sliced Import Rules (NeighborDogs — mandatory since June 2026 refactor)
+
+The app is a **feature-based modular monolith**. One Next.js deploy; domains live under `features/`.
+
+**Rule 1 — Thin `app/` routes**
+   - Files under `app/` must remain thin shells: compose layouts, export metadata, and delegate to `features/*`.
+   - Business logic, domain types, and heavy UI belong in `features/<domain>/`, not in page files.
+   - API routes (`app/api/*`) may parse HTTP input/output but should delegate to `features/<domain>/lib/`.
+
+**Rule 2 — Co-locate within features**
+   - Components: `features/<domain>/components/`
+   - Domain logic, types, helpers: `features/<domain>/lib/`
+   - Example: booking pickers → `features/booking/components/`; slot/pricing/db → `features/booking/lib/`.
+
+**Rule 3 — No root `components/` or `lib/`**
+   - Do **not** create or use top-level `components/` or `lib/` directories.
+   - These were deliberately deleted after the refactor to prevent flat-structure regression.
+   - Cross-cutting infra only: `shared/lib/` (e.g. Supabase client).
+
+**Rule 4 — Cross-feature imports (allowed, sparingly)**
+   - Prefer importing within the same feature.
+   - Cross-feature imports within the monolith are OK when intentional (e.g. marketing → `features/territory/components/territory-cta`).
+   - Shared domain models used by booking + admin live in `features/booking/lib/models.ts` until a dedicated `shared/domain/` is warranted.
+
+**Rule 5 — Legacy boundary**
+   - Never import from `_legacy/`. It is product/behavior reference only.
+   - When porting behavior, read `_legacy/index.html` and implement fresh code under the appropriate `features/` module.
+
+**Rule 6 — Supabase**
+   - Import from `@/shared/lib/supabase` for client and server factories.
+   - Do not duplicate `createSupabaseServerClient()` in feature libs (territory-preview duplicate is a known exception pending cleanup).

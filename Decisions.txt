@@ -1,0 +1,46 @@
+# Architectural Decisions Log
+# Portfolio: AppStack
+
+1. Strict Infrastructure Isolation
+   - Decision: Every app receives its own dedicated Supabase project and Vercel project.
+   - Rationale: Ensures a clean package. If an app is sold, the keys, database, and hosting are handed over cleanly without extracting data from a shared monolithic database.
+
+2. Codebase Decoupling
+   - Decision: No upward imports from `C:\Projects\appstack\_APPS\shared`.
+   - Rationale: Modularity. Each app must contain 100% of its dependencies within its own folder to facilitate frictionless repository extraction via `git filter-repo`.
+
+3. Primary Tech Stack
+   - Decision: Next.js (App Router), TypeScript, Tailwind CSS, Supabase (Auth + PostgreSQL), Vercel (Hosting), Resend (Transactional Email).
+   - Rationale: Predictable, type-safe, and highly scalable stack with rapid deployment pipelines.
+
+4. Local-First Development
+   - Decision: All active session work is saved and executed locally in the Windows directory prior to any cloud synchronization or deployment.
+   - Rationale: Total control over the codebase and instantaneous compilation feedback during the build phase.
+
+---
+
+## NeighborDogs-specific decisions (append-only)
+
+5. Feature-Based Modular Monolith (June 2026)
+   - Decision: Organize NeighborDogs as a **feature-based modular monolith** inside one Next.js app — not microservices, not a flat `components/` + `lib/` tree.
+   - Structure: `app/` = routes/API shells only; `features/<domain>/` = UI + domain logic; `shared/` = cross-cutting infra.
+   - Rationale: Keeps one deployable unit (AppStack sell/transfer model) while enforcing clear domain boundaries (marketing, territory, booking, admin). Avoids premature service extraction and over-componentization.
+   - Rejected alternatives: Microservices (operational overhead, violates single-app handoff); flat component folders (unclear ownership, inverted dependencies between lib and UI).
+
+6. Deleted Top-Level `components/` and `lib/` (June 2026)
+   - Decision: Deliberately remove root-level `components/` and `lib/` after migration to `features/*`.
+   - Rationale: Force domain-driven co-location (`features/booking/components/`, `features/booking/lib/`, etc.) and prevent regression to pre-refactor structure.
+   - Rule: New code must not reintroduce root `components/` or `lib/`.
+
+7. `_legacy/` as Product Reference Only (June 2026)
+   - Decision: Retain `_legacy/` (HTML/PHP SPA monolith) strictly as product and behavior reference — never import from live code.
+   - Enforcement: ESLint flat config ignores `_legacy/**`; architecture audit confirmed zero live imports.
+   - Rationale: Preserves historical UX/pricing/booking flows for macro-port verification without coupling runtime to obsolete PHP endpoints.
+
+8. Supabase Client Location (June 2026)
+   - Decision: Single shared server/browser client factory at `shared/lib/supabase.ts`, imported as `@/shared/lib/supabase`.
+   - Note: `features/territory/lib/territory-preview.ts` still contains a duplicate local factory (behavior-identical); unify in a follow-up pass.
+
+9. Booking Persistence (June 2026)
+   - Decision: Client bookings persist to Supabase `bookings` table via `app/api/booking/*` routes (replacing PHP + localStorage fallbacks for live submit path).
+   - Admin schedule reads from same table via `app/api/admin/bookings`.
