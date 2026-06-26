@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { OperatorBookingPage } from "@/features/booking/components/OperatorBookingPage";
-import { resolveOperatorBySlug } from "@/features/booking/lib/operator-resolve";
+import {
+  resolveOperatorBySlug,
+  toPublicBookingOperator,
+} from "@/features/booking/lib/operator-resolve";
 
 type BookOperatorPageProps = {
   params: Promise<{ slug: string }>;
@@ -39,7 +42,7 @@ export default async function BookOperatorPage({ params }: BookOperatorPageProps
 
   return (
     <Suspense fallback={<div className="client-booking legacy-admin"><p className="muted">Loading…</p></div>}>
-      <OperatorBookingPage operator={operator} />
+      <OperatorBookingPage operator={toPublicBookingOperator(operator)} />
     </Suspense>
   );
 }

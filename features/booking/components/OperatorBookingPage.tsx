@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import type { ResolvedOperator } from "@/features/booking/lib/operator-resolve";
+import type { PublicBookingOperator } from "@/features/booking/lib/operator-resolve";
 import { ClientBookingFlow } from "@/features/booking/components/ClientBookingFlow";
 import "./client-booking.css";
 
 type OperatorBookingPageProps = {
-  operator: ResolvedOperator;
+  operator: PublicBookingOperator;
 };
 
 type BookingView = "entry" | "new" | "returning";

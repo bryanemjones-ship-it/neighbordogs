@@ -11,6 +11,25 @@ export type ResolvedOperator = {
   prices: LegacyPrices;
 };
 
+/** Fields safe to pass from server pages into client booking UI. */
+export type PublicBookingOperator = {
+  id: string;
+  slug: string;
+  fullName: string | null;
+  prices: LegacyPrices;
+};
+
+export function toPublicBookingOperator(
+  operator: ResolvedOperator,
+): PublicBookingOperator {
+  return {
+    id: operator.id,
+    slug: operator.slug,
+    fullName: operator.fullName,
+    prices: operator.prices,
+  };
+}
+
 export async function resolveOperatorBySlug(
   slug: string,
 ): Promise<ResolvedOperator | null> {
