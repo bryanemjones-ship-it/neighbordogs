@@ -76,12 +76,13 @@ export function ClientBookingFlow({
   const [emailInput, setEmailInput] = useState("");
   const [profileVisible, setProfileVisible] = useState(false);
   const [lookupMsg, setLookupMsg] = useState("");
+  const [lookupLoading, setLookupLoading] = useState(false);
   const [customer, setCustomer] = useState<LegacyCustomer | null>(null);
 
   const prices = useMemo(() => pricesProp ?? loadPrices(), [pricesProp]);
   const customerMaxDogs = maxDogs(customer);
 
-  const lookupCustomer = useCallback(() => {
+  const lookupCustomer = useCallback(async () => {
     const email = emailInput.trim().toLowerCase();
     setLookupMsg("");
     setProfileVisible(false);
@@ -92,9 +93,46 @@ export function ClientBookingFlow({
       return;
     }
 
-    const found = loadCustomers().find(
-      (c) => c.email?.toLowerCase() === email,
-    );
+    setLookupLoading(true);
+
+    let found: LegacyCustomer | null = null;
+
+    try {
+      const res = await fetch("/api/booking/customer-lookup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      if (res.ok) {
+        const data = (await res.json()) as {
+          ok?: boolean;
+          customer?: {
+            id?: string;
+            email?: string;
+            name?: string | null;
+            approved?: boolean;
+          };
+        };
+
+        if (data.ok && data.customer?.email) {
+          found = {
+            email: data.customer.email,
+            name: data.customer.name || undefined,
+            approved: Boolean(data.customer.approved),
+          };
+        }
+      }
+    } catch {
+      // Fall back to localStorage below.
+    }
+
+    if (!found) {
+      found =
+        loadCustomers().find((c) => c.email?.toLowerCase() === email) || null;
+    }
+
+    setLookupLoading(false);
 
     if (!found) {
       setLookupMsg("No account found — register as a new customer first");
@@ -326,9 +364,10 @@ export function ClientBookingFlow({
           <button
             type="button"
             className="btn primary full"
-            onClick={lookupCustomer}
+            onClick={() => void lookupCustomer()}
+            disabled={lookupLoading}
           >
-            Find My Profile
+            {lookupLoading ? "Looking up…" : "Find My Profile"}
           </button>
           {lookupMsg ? (
             <div className="muted tiny msg-warn">{lookupMsg}</div>
