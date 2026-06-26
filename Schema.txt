@@ -1,99 +1,144 @@
 # NeighborDogs Schema & Structure Reference
-# Purpose: Relational boundaries (Supabase) + codebase layout (features/)
+# Purpose: Verified production data paths + codebase layout (March 2026)
 
 ---
 
-## A. Data Schema (Supabase — target production model)
+## A. Verified production tables (returning-customer booking path)
 
-1. territories
-   - Core geographical inventory.
-   - id (UUID, PK), anchor_address (TEXT), center_lat (FLOAT), center_lng (FLOAT), radius_miles (NUMERIC), estimated_homes (INT), monthly_price_cents (INT)
+### public.customers
+Returning customer lookup (Find My Profile).
+- Used by: `app/api/booking/customer-lookup/route.ts`
+- Key fields: id, email, name, approved
+- NOT used for this path: test_demo_customers, test_flag
 
-2. territory_subscriptions
-   - Links AppStack buyers/operators to specific territories.
-   - id (UUID, PK), territory_id (FK), owner_id (FK auth.users), status (TEXT), monthly_cents (INT)
+### public.bookings
+Slot conflict reads and walk booking persistence.
+Verified production columns:
+- id
+- customer_id
+- walker_id
+- type
+- date
+- start_time
+- end_time
+- price_cents
+- status
+- is_emergency
+- created_at
+- customer_name
 
-3. customers
-   - End-users booking the walks.
-   - id (UUID, PK), email (TEXT), name (TEXT), phone (TEXT), address (TEXT), lat (FLOAT), lng (FLOAT), dogs (TEXT), dog_count (INT), approved (BOOLEAN)
+NOT in verified production public.bookings:
+- blocked_end_time
+- test_flag
 
-4. walkers
-   - Employees/contractors assigned to walks.
-   - id (UUID, PK), territory_id (FK), name (TEXT), phone (TEXT)
+Slot loader maps end_time as blocking end for overlap filtering after read.
 
-5. bookings
-   - Individual scheduled walks.
-   - id (UUID, PK), customer_id (FK), walker_id (FK), type (TEXT), date (DATE), start_time (TIME), end_time (TIME), price_cents (INT), status (TEXT), is_emergency (BOOLEAN)
+### public.operator_prices
+Operator walk pricing for /book/[slug] (server-side quote).
+Known north-hills example (cents): w20 2900, w30 3500, w60 4900, emergency 4900,
+buddyAddon 1000, weeklyDiscount 15.
 
-6. visit_reports
-   - Post-walk data and media.
-   - id (UUID, PK), booking_id (FK), potty_pee (BOOLEAN), potty_poop (BOOLEAN), visit_note (TEXT), photo_1_url (TEXT), photo_2_url (TEXT)
+### profiles
+Operator resolve for /book/[slug].
+- slug (e.g. north-hills)
+- stripe_connect_id (required for walk card checkout to succeed)
+Known north-hills operator id: bb52d0f0-03c4-44b7-912f-b47350d71cd0
+
+### public.walkers
+NOT required for time-slot generation. Empty row count does not block slots.
 
 ---
 
-## B. Applied migrations (current demo/live subset)
+## B. Slot generation (no DB table)
+
+Hardcoded in `features/booking/lib/slots.ts`:
+- OP_START 08:00, OP_END 18:00, SLOT_INCREMENT_MIN 30
+- `generateOperatingSlots()` produces base candidates
+- `filterAvailableSlots()` removes overlaps using public.bookings intervals
+- 15-minute buffer between appointments applied in slotRangeForWalk
+
+Flow: `GET app/api/booking/slots` -> `fetchBookingsForDate(date)` -> filter -> JSON slots
+
+---
+
+## C. Code paths (returning customer -> payment)
+
+| Step | File / route |
+|------|----------------|
+| Operator page | `app/(client)/book/[slug]/page.tsx` |
+| Entry chooser | `features/booking/components/OperatorBookingPage.tsx` |
+| Returning flow | `features/booking/components/ClientBookingFlow.tsx` |
+| Customer lookup API | `app/api/booking/customer-lookup/route.ts` |
+| Date/time picker | `features/booking/components/SingleWalkPicker.tsx` |
+| Bookings read | `features/booking/lib/db.ts` (`fetchBookingsForDate`) |
+| Slot logic | `features/booking/lib/slots.ts` |
+| Slots API | `app/api/booking/slots/route.ts` |
+| Validate API | `app/api/booking/validate/route.ts` |
+| Payment UI | `features/booking/components/PaymentConfirmation.tsx` |
+| Walk checkout API | `app/api/booking/checkout/route.ts` |
+
+localStorage `rdgw_customers_v1`: fallback only in ClientBookingFlow if API miss.
+
+---
+
+## D. Committed migrations vs production reality
 
 See `supabase/migrations/`:
-- `001_neighbordogs_schema.sql` — territories, subscriptions, teams, resale (AppStack operator layer)
-- `002_test_demo_tables.sql` — `test_demo_customers`, `test_demo_walkers`, `test_demo_bookings`, etc.
-- `003_bookings.sql` — `bookings` table (used by live client booking + admin schedule API)
+- `001_neighbordogs_schema.sql` — territories, subscriptions, profiles base
+- `002_test_demo_tables.sql` — test_demo_* (demo/admin legacy paths)
+- `003_bookings.sql` — bookings with test_flag, blocked_end_time (may differ from prod)
+- `004_operator_prices.sql`, `005_profiles_connect.sql`, `006_booking_payment_connect.sql`
 
-Live booking API writes to `bookings` (see `features/booking/lib/db.ts`).
+Production public.bookings verified without test_flag and blocked_end_time.
+Code aligned in 49c0de6 for slot reads.
 
 ---
 
-## C. Codebase Structure (feature-based modular monolith — current)
+## E. Remaining divergence (not production returning-customer path)
 
-Single Next.js 16 App Router application. **Do not** use root-level `components/` or `lib/`.
+Admin/demo helpers may still reference:
+- test_demo_customers
+- test_flag filters on bookings updates
+
+These are NOT the production returning-customer booking path fixed in ef841e1 / 49c0de6.
+
+---
+
+## F. Codebase structure (feature-based modular monolith)
 
 ```
-app/                          # Routes only — thin page/layout shells + HTTP API
-├── (marketing)/              # /, /territory-preview
-├── (client)/                 # /book
-├── dashboard/                # /dashboard (operator admin)
-├── login/                    # /login
-└── api/                      # Delegates to features/*/lib
+app/
+├── (marketing)/          /, /territory-preview
+├── (client)/book/        /book, /book/[slug]
+├── dashboard/            operator admin
+├── login/
+└── api/                  booking, admin, stripe, territory-preview
 
 features/
-├── marketing/                # Homepage, demos, demo identity
-│   ├── components/
-│   └── lib/
-├── territory/                # Territory preview map, geocode, overlap pricing
-│   ├── components/
-│   └── lib/
-├── booking/                  # Client booking flow + domain logic
-│   ├── components/           # ClientBookingFlow, pickers, payment
-│   └── lib/                  # db, pricing, slots, types, models
-├── admin/                    # Operator dashboard (AdminPanel + panels)
-│   ├── components/
-│   └── lib/                  # (minimal — most admin utils in booking/lib/models)
+├── marketing/
+├── territory/
+├── booking/              ClientBookingFlow, pickers, payment, db, slots
+└── admin/                AdminPanel + panels
 
-shared/
-└── lib/
-    └── supabase.ts           # @/shared/lib/supabase — browser + server clients
-
-_legacy/                      # Reference only — NOT imported by live code
+shared/lib/supabase.ts    browser + createSupabaseServerClient()
+_legacy/                  reference only — never import
 ```
 
-### Domain → route mapping (live)
+Import alias: `@/*` -> project root.
+Supabase: `@/shared/lib/supabase`.
 
-| URL | app route | Feature module |
-|-----|-----------|----------------|
-| `/` | `app/(marketing)/page.tsx` | `features/marketing` |
-| `/territory-preview` | `app/(marketing)/territory-preview/page.tsx` | `features/territory` |
-| `/book` | `app/(client)/book/page.tsx` | `features/booking` |
-| `/dashboard` | `app/dashboard/page.tsx` | `features/admin` |
-| `/login` | `app/login/page.tsx` | (inline — future `features/auth`) |
+### Domain -> route mapping
 
-### API → feature mapping
+| URL | app route | Feature |
+|-----|-----------|---------|
+| `/` | `app/(marketing)/page.tsx` | marketing |
+| `/territory-preview` | territory preview | territory |
+| `/book` | generic booking | booking |
+| `/book/[slug]` | operator booking | booking + operator-resolve |
+| `/dashboard` | operator admin | admin |
+| `/login` | auth | inline |
 
-| Endpoint | Feature lib |
-|----------|-------------|
-| `/api/territory-preview` | `features/territory/lib/territory-preview.ts` |
-| `/api/booking/*` | `features/booking/lib/*` |
-| `/api/admin/*` | `features/booking/lib/db.ts` + Supabase |
+### Target schema (future — Schema.txt section legacy reference)
 
-### Import alias
-
-- `@/*` → project root (tsconfig)
-- Supabase: **`@/shared/lib/supabase`** (not `@/lib/supabase`)
+territories, territory_subscriptions, customers, walkers, bookings, visit_reports
+as full production model — partial adoption in live Supabase today.

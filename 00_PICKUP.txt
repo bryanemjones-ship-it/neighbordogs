@@ -1,0 +1,119 @@
+PROJECT:
+NeighborDogs — AppStack dog-walking territory SaaS (Next.js + Supabase + Stripe).
+Operators pay $149/month for software access. Clients pay operators for walks in-app
+via Stripe Connect. NeighborDogs receives $0 from walk payments.
+
+CURRENT STATE:
+Branch: main (production-deploying via Vercel).
+Production URL: https://neighbordogs.com
+Public booking smoke path: https://neighbordogs.com/book/north-hills
+
+Latest deployed commits (booking/payment path):
+  49c0de6 fix(booking): align time slots with production bookings schema
+  ef841e1 fix(booking): look up returning customers from Supabase
+  3a14c64 fix(payments): restore Connect payments without platform fee
+  41c4d4c docs(payments): lock NeighborDogs payment model
+
+Production verified today:
+  - /book/north-hills loads.
+  - Returning Customer -> Find My Profile finds bryanemjones+testcustomer@gmail.com
+    via POST app/api/booking/customer-lookup/route.ts -> public.customers.
+  - 20 min walk selectable; Pick a Date & Time loads time slots.
+  - Continue to Payment reaches payment screen.
+  - Payment screen shows blocker:
+    "This operator has not finished Stripe Connect setup."
+  - Stripe Connect onboarding not completed for north-hills operator.
+
+Known north-hills operator:
+  slug: north-hills
+  operator id: bb52d0f0-03c4-44b7-912f-b47350d71cd0
+
+Known north-hills operator_prices (cents):
+  w20 2900, w30 3500, w60 4900, emergency 4900, buddyAddon 1000, weeklyDiscount 15
+
+DECISIONS (FINAL ONLY):
+- Operators pay NeighborDogs $149/month for software access (Stripe subscription checkout).
+- Clients pay operators for walks through the app (Stripe Connect destination charge).
+- Operators absorb Stripe card processing fees.
+- NeighborDogs receives $0 from walk payments (no percentage, commission, platform fee,
+  application fee, or cut).
+- Walk checkout must not set application_fee_amount.
+- STRIPE_WALK_PLATFORM_FEE_PERCENT is not part of this release.
+- Returning customer lookup: public.customers via app/api/booking/customer-lookup/route.ts.
+- localStorage rdgw_customers_v1 is fallback only, not production source of truth.
+- Time-slot conflicts read public.bookings using production schema (no test_flag,
+  no blocked_end_time column; end_time used for overlap blocking).
+- Slot base times are hardcoded operating slots (08:00-18:00, 30-min increments).
+- public.walkers is not required for slot generation.
+- Stripe Connect onboarding is required before operator walk card payment can complete.
+- New Customer registration remains a stub for this release.
+
+WHAT EXISTS:
+- /book/[slug] operator public booking entry (New Customer stub + Returning Customer flow).
+- app/api/booking/customer-lookup/route.ts (public.customers email lookup).
+- app/api/booking/slots/route.ts (hardcoded slots + public.bookings conflict filter).
+- app/api/booking/checkout/route.ts (Stripe Connect walk checkout).
+- app/api/booking/validate/route.ts
+- Operator admin Pricing panel with Connect onboarding button.
+- Territory $149/month Stripe subscription checkout (unchanged).
+- public.customers with approved test customer.
+- public.bookings production schema aligned with slot loader (49c0de6).
+- public.operator_prices for north-hills.
+- profiles.slug + profiles.stripe_connect_id for operator resolve (Connect not complete).
+
+WHAT DOES NOT EXIST:
+- Completed New Customer registration on /book/[slug] (stub only).
+- Completed Stripe Connect onboarding for north-hills in production.
+- Verified successful Stripe hosted walk checkout for north-hills.
+- Verified webhook paid-booking update for walk payment in production smoke test.
+- Production dependency on public.walkers for time slots.
+- Platform fee / application_fee_amount on walk checkout.
+- STRIPE_WALK_PLATFORM_FEE_PERCENT in release model.
+
+KNOWN ISSUES:
+- north-hills operator has not finished Stripe Connect setup; payment button blocked with:
+  "This operator has not finished Stripe Connect setup."
+- Live Stripe Connect platform enablement and operator onboarding still required.
+- Admin/demo code paths may still reference test_demo_customers or test_flag; not used
+  for production returning-customer booking lookup fixed today.
+- New Customer path shows "New customer setup is coming soon."
+
+LAST CURSOR PROMPT:
+You are working in:
+C:\Projects\appstack_APPS\NeighborDogs
+
+Task:
+Create/update the complete current support document set after today's production booking/payment fixes.
+
+This is a DOCUMENTATION-ONLY task.
+
+Do not modify code.
+Do not run migrations.
+Do not apply stashes.
+Do not touch .env.local.
+Do not expose or print secrets.
+Do not change Stripe logic.
+Do not change booking logic.
+Do not change Supabase logic.
+Do not commit.
+
+Use the read-only documentation inventory as source context:
+* High priority docs to update:
+  - OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt
+  - Active.txt
+  - Starter.txt
+  - Decisions.txt
+  - Schema.txt
+* Optional/minor:
+  - .env.example only if it contains stale payment/env comments.
+* Missing support doc to create if absent:
+  - 00_PICKUP.txt
+
+(Current verified facts, locked payment model, required output files, and content
+requirements as specified in the documentation update task — completed in this pass.)
+
+NEXT TASK:
+Complete Stripe Connect onboarding for north-hills, then re-test paid walk checkout
+through the payment button.
+
+Do not proceed into code changes before Stripe Connect setup is verified.

@@ -49,3 +49,20 @@
    - Decision: NeighborDogs is SaaS ($149/month operator subscription) plus in-app walk payments routed to operators via Stripe Connect. NeighborDogs receives $0 from walk payments (no platform fee, commission, or application_fee_amount). Operators absorb Stripe card processing fees. STRIPE_WALK_PLATFORM_FEE_PERCENT is not part of this release.
    - Reference: `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt` section "NEIGHBORDOGS PAYMENT MODEL — FINAL FOR THIS RELEASE".
    - Supersedes incorrect interim doc/code interpretation from d3521ac (SaaS-only / no in-app payment). Corrected in 3a14c64.
+
+11. Returning Customer Lookup — public.customers (March 2026)
+   - Decision: Production returning customer Find My Profile uses `POST app/api/booking/customer-lookup/route.ts` querying `public.customers` by case-insensitive email.
+   - Deployed: ef841e1 fix(booking): look up returning customers from Supabase.
+   - `localStorage` key `rdgw_customers_v1` via `loadCustomers()` is fallback only in ClientBookingFlow, not production source of truth.
+
+12. Time-Slot Loader — Production public.bookings Schema (March 2026)
+   - Decision: Slot conflict reads in `fetchBookingsForDate` must match verified production `public.bookings` columns. No `test_flag` filter. No `blocked_end_time` column in SELECT. Use `end_time` as blocking end for overlap filtering.
+   - Deployed: 49c0de6 fix(booking): align time slots with production bookings schema.
+   - Base slot times remain hardcoded operating slots in `features/booking/lib/slots.ts`. `public.walkers` is not required for slot generation.
+
+13. Stripe Connect Required for Walk Payment (March 2026)
+   - Decision: Operator must complete Stripe Connect onboarding (`profiles.stripe_connect_id`) before in-app walk card checkout can succeed for that operator slug.
+   - Current production blocker (north-hills): payment screen shows "This operator has not finished Stripe Connect setup."
+
+14. New Customer Registration Out of Scope (March 2026)
+   - Decision: `/book/[slug]` New Customer path remains a stub ("New customer setup is coming soon.") for this release. Returning customer path is the verified production booking entry.

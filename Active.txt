@@ -1,47 +1,42 @@
 # Active Tasks: NeighborDogs
 
-## Historical (completed foundation)
-[x] Safely quarantine legacy HTML/PHP prototype into `_legacy` folder.
-[x] Initialize clean Next.js App Router environment.
-[x] Install `@supabase/supabase-js` client library.
-[x] Create `.env.local` with isolated NeighborDogs Supabase keys.
-[x] Scaffold Next.js routing structure (marketing, client booking, operator dashboard, login).
-[x] Port global CSS variables and liquid gradient backgrounds from `_legacy/index.html` to `app/globals.css` (marketing + booking shells).
+## Current state (production — March 2026)
+- Branch: main (Vercel production deploy)
+- URL: https://neighbordogs.com/book/north-hills
+- Returning customer booking path verified through payment screen
+- Blocker: north-hills Stripe Connect onboarding not complete
+  Payment shows: "This operator has not finished Stripe Connect setup."
 
-## Database (partial — see supabase/migrations/)
-[ ] Execute full production schema from `Schema.txt` in Supabase (territories, customers, walkers, visit_reports).
-[x] Apply demo/booking migrations: `002_test_demo_tables.sql`, `003_bookings.sql`.
+## Completed today (deployed)
+[x] ef841e1 — Returning customer lookup from public.customers
+      app/api/booking/customer-lookup/route.ts
+      Verified: bryanemjones+testcustomer@gmail.com on /book/north-hills
+[x] 49c0de6 — Time slots aligned to production public.bookings schema
+      Verified: slots load; payment screen reachable after slot selection
 
-## Major refactor (COMPLETE — June 2026)
-[x] Feature-based modular monolith refactor (single Next.js app, domain folders under `features/`).
-[x] Client booking flow ported (`/book` + booking API routes + Supabase persistence).
-[x] Operator admin dashboard ported (`/dashboard` + admin API routes).
-[x] Territory preview ported (`/territory-preview` + API).
-[x] Structural cleanup: deleted empty top-level `components/` and `lib/`; ESLint ignores `_legacy/**`.
-[x] Legacy monolith severed: `_legacy/` has zero live imports; reference-only.
+## Payment model (locked)
+- Operators pay NeighborDogs $149/month (Stripe subscription).
+- Clients pay operators in-app via Stripe Connect; NeighborDogs $0 on walks.
+- No application_fee_amount; no STRIPE_WALK_PLATFORM_FEE_PERCENT.
 
-## Current architecture snapshot
-- Routes: `app/` (thin shells + `app/api/*`)
-- Domains: `features/marketing`, `features/territory`, `features/booking`, `features/admin`
-- Shared infra: `shared/lib/supabase.ts` (`@/shared/lib/supabase`)
-- Legacy reference: `_legacy/index.html` (product/behavior only — not imported)
+## Next task
+[ ] Complete Stripe Connect onboarding for north-hills operator
+[ ] Re-test paid walk checkout through Pay with Card -> Stripe hosted checkout
+[ ] Verify webhook marks booking paid
 
-## Immediate next priorities (pick one track)
-[x] Wire up Stripe Checkout — operator $149/month subscription (territory checkout).
-[x] Wire up Stripe Connect — in-app client walk payments to operators ($0 platform fee).
-[ ] Deploy to Vercel (dedicated NeighborDogs project per AppStack isolation policy).
-[ ] Complete production gates in OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt (migrations, Stripe Connect live enablement, smoke test).
-[ ] Integrate orphaned marketing components into the homepage (`product-demo`, positioning, credibility, operations, feature-groups, resale-asset, start-small — see audit notes).
+Do not proceed into code changes before Stripe Connect setup is verified.
 
-## Payment model (locked — see OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt)
-- Operators pay NeighborDogs $149/month for software access.
-- Clients pay operators for walks through the app (Stripe Connect).
-- Operators absorb Stripe card processing fees; NeighborDogs receives $0 from walks.
-- Latest commit: 3a14c64 fix(payments): restore Connect payments without platform fee
-- Prior bad patch (not desired): d3521ac disabled Connect UI incorrectly; corrected by 3a14c64.
+## Still stub / out of scope this release
+- New Customer on /book/[slug] ("coming soon")
 
-## Deferred / follow-up (not blocking homepage work)
-[ ] Unify duplicate Supabase client in `features/territory/lib/territory-preview.ts` → `@/shared/lib/supabase`.
-[ ] Resolve `react-hooks/set-state-in-effect` lint errors in admin/booking panels.
-[ ] Extract `features/auth/` when login UI grows beyond a single page.
-[ ] Rename `.legacy-admin` CSS classes to neutral naming when convenient.
+## Historical foundation (complete)
+[x] Next.js App Router, feature-based monolith, Supabase, operator dashboard
+[x] Territory preview, $149/month subscription checkout
+[x] Connect UI + in-app walk payment path (3a14c64+)
+[x] Client booking /book and /book/[slug]
+
+## Deferred follow-up
+[ ] New Customer registration flow
+[ ] Align admin customer APIs off test_demo_customers to public.customers
+[ ] Unify territory-preview Supabase client to @/shared/lib/supabase
+[ ] Marketing homepage component integration

@@ -33,48 +33,92 @@
 
 ---
 
-## NeighborDogs — current project notes (June 2026)
+## NeighborDogs — current developer context (March 2026)
+
+### Project path
+`C:\Projects\appstack\_APPS\NeighborDogs`
+
+### Production URL
+https://neighbordogs.com
+
+Public operator booking example:
+https://neighbordogs.com/book/north-hills
+
+### Current relevant commits (main)
+- `49c0de6` fix(booking): align time slots with production bookings schema
+- `ef841e1` fix(booking): look up returning customers from Supabase
+- `3a14c64` fix(payments): restore Connect payments without platform fee
+- `41c4d4c` docs(payments): lock NeighborDogs payment model
 
 ### Architecture
-- Feature-based modular monolith (see `Schema.txt` section C, `Conventions.txt` Feature-Sliced rules).
+- Feature-based modular monolith (see `Schema.txt`, `Conventions.txt`).
 - Domains: `features/marketing`, `features/territory`, `features/booking`, `features/admin`.
-- Shared Supabase: `shared/lib/supabase.ts` → import as `@/shared/lib/supabase`.
+- Supabase: `shared/lib/supabase.ts` -> `@/shared/lib/supabase`.
 
-### ESLint
-- **ESLint v9 flat config**: `eslint.config.mjs` (no `.eslintignore`).
-- `_legacy/**` is explicitly ignored in `globalIgnores` — legacy SPA is reference-only, not linted as live code.
+### Main booking routes and API paths
+| Path | Purpose |
+|------|---------|
+| `/book/[slug]` | Operator public booking (entry + returning customer flow) |
+| `app/api/booking/customer-lookup/route.ts` | Returning customer email lookup |
+| `app/api/booking/slots/route.ts` | Available time slots for a date |
+| `app/api/booking/validate/route.ts` | Slot/price validation before pay step |
+| `app/api/booking/checkout/route.ts` | Stripe Connect walk checkout session |
+| `/api/stripe/connect/onboard` | Operator Connect onboarding |
+| `/api/stripe/territory-checkout` | Operator $149/month subscription |
 
-### Dev & build commands
-Standard Next.js scripts — verified working post-refactor:
+Client UI entry: `features/booking/components/OperatorBookingPage.tsx`,
+`features/booking/components/ClientBookingFlow.tsx`,
+`features/booking/components/SingleWalkPicker.tsx`,
+`features/booking/components/PaymentConfirmation.tsx`.
 
+### Production data sources (returning customer booking path)
+| Data | Table / field | Used by |
+|------|----------------|---------|
+| Returning customer | `public.customers` | customer-lookup API |
+| Slot conflicts | `public.bookings` | slots API via fetchBookingsForDate |
+| Operator slug/prices | `profiles.slug`, `operator_prices` | operator-resolve |
+| Connect status | `profiles.stripe_connect_id` | walk checkout |
+
+NOT production source of truth:
+- `localStorage` key `rdgw_customers_v1` (fallback only in ClientBookingFlow)
+- `test_demo_customers` / `test_flag` (admin/demo paths only)
+
+### Verified production public.bookings columns
+id, customer_id, walker_id, type, date, start_time, end_time, price_cents,
+status, is_emergency, created_at, customer_name
+
+NOT in production public.bookings:
+blocked_end_time, test_flag
+
+Slot generation: hardcoded operating slots (08:00-18:00, 30-min steps), filtered
+by existing public.bookings using end_time as block end. public.walkers not required.
+
+### Locked payment model
+- Operators pay NeighborDogs $149/month for software access.
+- Clients pay operators for walks through the app via Stripe Connect.
+- Operators absorb Stripe card processing fees.
+- NeighborDogs receives $0 from walk payments.
+- No application_fee_amount; no STRIPE_WALK_PLATFORM_FEE_PERCENT.
+See `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt` and `00_PICKUP.txt`.
+
+### Current known blocker
+north-hills operator has not completed Stripe Connect onboarding.
+Payment screen: "This operator has not finished Stripe Connect setup."
+
+### Dev commands
 ```powershell
 cd C:\Projects\appstack\_APPS\NeighborDogs
-npm run dev      # local development
-npm run build    # production build (15 live routes as of June 2026)
-npm run lint     # ESLint (known react-hooks/set-state-in-effect items in admin/booking panels)
+npm run dev
+npm run build
+npm run lint
 ```
 
-### Live routes (post-refactor)
-- `/` — marketing homepage
-- `/territory-preview` — territory check
-- `/book` — client booking flow
-- `/dashboard` — operator admin (auth-gated)
-- `/login` — Supabase auth
-- `/api/territory-preview`, `/api/booking/*`, `/api/admin/*`
-
-### Environment (`.env.local`)
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
+### Environment (`.env.local` — do not commit)
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY` (server routes: customer lookup, bookings, checkout)
 - `STRIPE_SECRET_KEY`, `STRIPE_TERRITORY_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`
-- `NEXT_PUBLIC_APP_URL` (Checkout return URLs and Connect onboarding)
-- Optional: `CENSUS_API_KEY` (territory preview ACS calls)
-- NOT used: `STRIPE_WALK_PLATFORM_FEE_PERCENT` (see payment model in `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt`)
-
-### Payment model (locked — June 2026)
-See `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt` — "NEIGHBORDOGS PAYMENT MODEL — FINAL FOR THIS RELEASE".
-Latest main: `3a14c64` (Connect + in-app walk payment restored; no platform fee).
+- `NEXT_PUBLIC_APP_URL`
+- NOT used: `STRIPE_WALK_PLATFORM_FEE_PERCENT`
 
 ### Legacy reference
-- `_legacy/index.html` — original PHP/HTML monolith; use for product behavior only.
-- Do not import from `_legacy/` in live code.
+- `_legacy/index.html` — product reference only; never import in live code.
