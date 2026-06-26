@@ -3,28 +3,51 @@ FILE: OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt
 PURPOSE: Pre-merge and pre-deploy gates for Operator Commerce / Stripe Connect.
 
 ================================================================================
+NEIGHBORDOGS PAYMENT MODEL — FINAL FOR THIS RELEASE
+================================================================================
+
+- Operators pay NeighborDogs $149/month for software access.
+- Clients pay operators for walks through the app.
+- Operators receive walk payments through Stripe Connect.
+- Operators absorb Stripe card processing fees.
+- NeighborDogs receives $0 from walk payments.
+- NeighborDogs does not receive any walk percentage, commission, platform fee,
+  application fee, or cut.
+- Stripe subscription checkout is used for the $149/month operator subscription.
+- Stripe Connect is used only so operators can receive client walk payments
+  through the app.
+- Walk checkout must not set application_fee_amount.
+- STRIPE_WALK_PLATFORM_FEE_PERCENT is not part of the current release model.
+
+================================================================================
 PROJECT:
 ================================================================================
 
-NeighborDogs Operator Commerce / Stripe Connect paid walk checkout
+NeighborDogs Operator Commerce — in-app walk payment via Stripe Connect
+($0 platform fee; operator absorbs Stripe card processing fees)
 
 ================================================================================
 CURRENT STATE:
 ================================================================================
 
 Branch:
-  operator-commerce-local-audit
+  main
 
-Commits (3 ahead of main):
-  87afaa2 fix(booking): keep Stripe Connect ID server-side
-  07055e0 docs(env): document operator commerce variables
-  f2eeac3 feat(operator-commerce): add Stripe Connect walk checkout
+Latest pushed commit:
+  3a14c64 fix(payments): restore Connect payments without platform fee
+
+Recent correction (do NOT treat as desired final model):
+  d3521ac fix(payments): disable Connect flow for SaaS-only release
+  — Incorrect interpretation (SaaS-only / no in-app payment). Reverted by 3a14c64.
+
+Current desired state (as of 3a14c64):
+  - Connect UI restored (dashboard Pricing -> Connect Stripe account)
+  - In-app walk payment restored (/book/[slug] -> Pay with Card -> Stripe Checkout)
+  - Platform fee logic removed (no application_fee_amount; NeighborDogs $0 on walks)
+  - $149/month territory subscription flow untouched
 
 Build:
-  PASS (after privacy cleanup; npm run build)
-
-Merge readiness:
-  YES - code branch is merge-ready pending PRE-MERGE GATES verification
+  PASS (npm run build at time of 3a14c64)
 
 Deploy readiness:
   NO - production release not ready until MIGRATION, ENVIRONMENT, STRIPE,
@@ -35,10 +58,12 @@ DECISIONS:
 ================================================================================
 
 - Main is treated as production-deploying until proven otherwise.
-- Do not merge before ops gates are complete.
+- Do not merge before ops gates are complete (for future feature branches).
 - Do not run migrations until target DB and order are confirmed.
 - Do not apply stashes wholesale.
 - Meet & Greet/customer-registration remains excluded.
+- Walk payments happen in-app via Stripe Connect; operators must connect Stripe
+  before in-app card checkout works for their slug.
 
 ================================================================================
 PRE-MERGE GATES:
@@ -57,6 +82,9 @@ PRE-MERGE GATES:
       (no NewCustomerRegistration, register-customer.ts, /api/booking/register)
 
 [ ] Release checklist reviewed
+
+[ ] Payment model section above matches deployed code (no application_fee_amount;
+      no STRIPE_WALK_PLATFORM_FEE_PERCENT)
 
 ================================================================================
 MIGRATION GATES:
@@ -95,13 +123,15 @@ ENVIRONMENT GATES:
       STRIPE_TERRITORY_PRICE_ID
       STRIPE_WEBHOOK_SECRET
       NEXT_PUBLIC_APP_URL
-      STRIPE_WALK_PLATFORM_FEE_PERCENT (optional; default 10)
 
 [ ] Confirm NEXT_PUBLIC_APP_URL matches deployment domain
       (Checkout success/cancel and Connect return URLs depend on this)
 
 [ ] Confirm no real secrets are committed
       (.env.local and live keys stay out of repo)
+
+[ ] Confirm STRIPE_WALK_PLATFORM_FEE_PERCENT is NOT set or relied upon
+      (not part of current release model)
 
 ================================================================================
 STRIPE GATES:
@@ -118,6 +148,9 @@ STRIPE GATES:
 
 [ ] Confirm at least one operator can complete Connect onboarding
       (dashboard Pricing tab -> Connect Stripe account)
+
+[ ] Confirm walk checkout uses destination charge with on_behalf_of and does
+      NOT set application_fee_amount (NeighborDogs $0 on walks)
 
 ================================================================================
 DATA GATES:
@@ -160,6 +193,13 @@ SMOKE TEST:
       (inspect network/RSC props; UI shows "Connected to Stripe." only)
 
 ================================================================================
+KNOWN ISSUES:
+================================================================================
+
+- Live Stripe Connect still needs to be enabled/completed in Stripe before
+  connected operator onboarding can work in production.
+
+================================================================================
 KNOWN NON-BLOCKING RISKS:
 ================================================================================
 
@@ -181,4 +221,5 @@ GO / NO-GO RULE:
 NEXT TASK:
 ================================================================================
 
-Review the checklist and decide whether to begin pre-merge gate verification.
+Complete STRIPE gates (enable Connect on live Stripe account) and run production
+smoke test for operator onboarding + in-app walk checkout.

@@ -66,7 +66,14 @@ npm run lint     # ESLint (known react-hooks/set-state-in-effect items in admin/
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
+- `STRIPE_SECRET_KEY`, `STRIPE_TERRITORY_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`
+- `NEXT_PUBLIC_APP_URL` (Checkout return URLs and Connect onboarding)
 - Optional: `CENSUS_API_KEY` (territory preview ACS calls)
+- NOT used: `STRIPE_WALK_PLATFORM_FEE_PERCENT` (see payment model in `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt`)
+
+### Payment model (locked — June 2026)
+See `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt` — "NEIGHBORDOGS PAYMENT MODEL — FINAL FOR THIS RELEASE".
+Latest main: `3a14c64` (Connect + in-app walk payment restored; no platform fee).
 
 ### Legacy reference
 - `_legacy/index.html` — original PHP/HTML monolith; use for product behavior only.

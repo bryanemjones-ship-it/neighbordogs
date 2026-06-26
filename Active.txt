@@ -27,9 +27,18 @@
 - Legacy reference: `_legacy/index.html` (product/behavior only — not imported)
 
 ## Immediate next priorities (pick one track)
-[ ] Wire up Stripe Checkout (operator subscription + client walk payment).
+[x] Wire up Stripe Checkout — operator $149/month subscription (territory checkout).
+[x] Wire up Stripe Connect — in-app client walk payments to operators ($0 platform fee).
 [ ] Deploy to Vercel (dedicated NeighborDogs project per AppStack isolation policy).
+[ ] Complete production gates in OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt (migrations, Stripe Connect live enablement, smoke test).
 [ ] Integrate orphaned marketing components into the homepage (`product-demo`, positioning, credibility, operations, feature-groups, resale-asset, start-small — see audit notes).
+
+## Payment model (locked — see OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt)
+- Operators pay NeighborDogs $149/month for software access.
+- Clients pay operators for walks through the app (Stripe Connect).
+- Operators absorb Stripe card processing fees; NeighborDogs receives $0 from walks.
+- Latest commit: 3a14c64 fix(payments): restore Connect payments without platform fee
+- Prior bad patch (not desired): d3521ac disabled Connect UI incorrectly; corrected by 3a14c64.
 
 ## Deferred / follow-up (not blocking homepage work)
 [ ] Unify duplicate Supabase client in `features/territory/lib/territory-preview.ts` → `@/shared/lib/supabase`.

@@ -44,3 +44,8 @@
 9. Booking Persistence (June 2026)
    - Decision: Client bookings persist to Supabase `bookings` table via `app/api/booking/*` routes (replacing PHP + localStorage fallbacks for live submit path).
    - Admin schedule reads from same table via `app/api/admin/bookings`.
+
+10. Locked Payment Model — Operator Commerce (June 2026)
+   - Decision: NeighborDogs is SaaS ($149/month operator subscription) plus in-app walk payments routed to operators via Stripe Connect. NeighborDogs receives $0 from walk payments (no platform fee, commission, or application_fee_amount). Operators absorb Stripe card processing fees. STRIPE_WALK_PLATFORM_FEE_PERCENT is not part of this release.
+   - Reference: `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt` section "NEIGHBORDOGS PAYMENT MODEL — FINAL FOR THIS RELEASE".
+   - Supersedes incorrect interim doc/code interpretation from d3521ac (SaaS-only / no in-app payment). Corrected in 3a14c64.
