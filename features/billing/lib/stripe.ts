@@ -7,7 +7,12 @@ export function getStripeSecretKey(): string {
   if (!key) {
     throw new Error("STRIPE_SECRET_KEY is not configured");
   }
-  return key;
+  const trimmed = key.trim();
+  const normalized = /\s/.test(trimmed) ? trimmed.replace(/\s/g, "") : trimmed;
+  if (!normalized) {
+    throw new Error("STRIPE_SECRET_KEY is not configured");
+  }
+  return normalized;
 }
 
 export function getStripeTerritoryPriceId(): string {
