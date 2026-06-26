@@ -1,6 +1,10 @@
 import type Stripe from "stripe";
 import { createSupabaseServerClient } from "@/shared/lib/supabase";
 import type { TerritoryCheckoutMetadata } from "@/features/billing/lib/territory-checkout";
+import {
+  handleWalkCheckoutCompleted,
+  isWalkPaymentSession,
+} from "@/features/billing/lib/walk-webhook";
 
 function mapStripeSubscriptionStatus(
   status: Stripe.Subscription.Status,
@@ -41,6 +45,11 @@ function readCheckoutMetadata(
 export async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session,
 ): Promise<void> {
+  if (isWalkPaymentSession(session)) {
+    await handleWalkCheckoutCompleted(session);
+    return;
+  }
+
   if (session.mode !== "subscription") {
     return;
   }

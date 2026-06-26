@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Session } from "@supabase/supabase-js";
 import { AdminPanel } from "@/features/admin/components/AdminPanel";
 import { supabase } from "@/shared/lib/supabase";
 
-export default function DashboardPage() {
+function DashboardContent() {
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
   const [checkingSession, setCheckingSession] = useState(true);
@@ -91,5 +91,17 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-1 items-center justify-center bg-zinc-50 dark:bg-black">
+        <p className="text-sm text-zinc-600 dark:text-zinc-400">Loading dashboard…</p>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 }
