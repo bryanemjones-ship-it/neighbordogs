@@ -1,0 +1,184 @@
+NEIGHBORDOGS OPERATOR COMMERCE RELEASE CHECKLIST
+FILE: OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt
+PURPOSE: Pre-merge and pre-deploy gates for Operator Commerce / Stripe Connect.
+
+================================================================================
+PROJECT:
+================================================================================
+
+NeighborDogs Operator Commerce / Stripe Connect paid walk checkout
+
+================================================================================
+CURRENT STATE:
+================================================================================
+
+Branch:
+  operator-commerce-local-audit
+
+Commits (3 ahead of main):
+  87afaa2 fix(booking): keep Stripe Connect ID server-side
+  07055e0 docs(env): document operator commerce variables
+  f2eeac3 feat(operator-commerce): add Stripe Connect walk checkout
+
+Build:
+  PASS (after privacy cleanup; npm run build)
+
+Merge readiness:
+  YES - code branch is merge-ready pending PRE-MERGE GATES verification
+
+Deploy readiness:
+  NO - production release not ready until MIGRATION, ENVIRONMENT, STRIPE,
+  DATA, and SMOKE TEST gates are cleared
+
+================================================================================
+DECISIONS:
+================================================================================
+
+- Main is treated as production-deploying until proven otherwise.
+- Do not merge before ops gates are complete.
+- Do not run migrations until target DB and order are confirmed.
+- Do not apply stashes wholesale.
+- Meet & Greet/customer-registration remains excluded.
+
+================================================================================
+PRE-MERGE GATES:
+================================================================================
+
+[ ] Repo clean (no unintended uncommitted commerce or secret files)
+
+[ ] Build passes (npm run build)
+
+[ ] Stripe Connect ID not serialized to client booking UI
+      (PublicBookingOperator / toPublicBookingOperator on /book/[slug])
+
+[ ] Stashes preserved (do not pop or apply wholesale)
+
+[ ] No Meet & Greet/register route included in merge scope
+      (no NewCustomerRegistration, register-customer.ts, /api/booking/register)
+
+[ ] Release checklist reviewed
+
+================================================================================
+MIGRATION GATES:
+================================================================================
+
+[ ] Confirm target Supabase project (NeighborDogs dedicated project only)
+
+[ ] Confirm migration order 004 -> 005 -> 006
+      004_operator_prices.sql
+      005_profiles_connect.sql
+      006_booking_payment_connect.sql
+
+[ ] Confirm prior migrations/tables/functions exist
+      (001 profiles + set_updated_at; 003 bookings minimum)
+
+[ ] Confirm no legacy public policies exist from older dev runs
+      DROP IF EXISTS: operator_prices_select_public
+      DROP IF EXISTS: profiles_select_public_slug
+
+[ ] Apply migrations once only after confirmation
+      (004 policies are not re-runnable; do not repeat apply on same DB)
+
+================================================================================
+ENVIRONMENT GATES:
+================================================================================
+
+[ ] Confirm Vercel has all required Supabase env vars
+      NEXT_PUBLIC_SUPABASE_URL
+      NEXT_PUBLIC_SUPABASE_ANON_KEY
+      SUPABASE_URL
+      SUPABASE_ANON_KEY
+      SUPABASE_SERVICE_ROLE_KEY
+
+[ ] Confirm Vercel has all required Stripe env vars
+      STRIPE_SECRET_KEY
+      STRIPE_TERRITORY_PRICE_ID
+      STRIPE_WEBHOOK_SECRET
+      NEXT_PUBLIC_APP_URL
+      STRIPE_WALK_PLATFORM_FEE_PERCENT (optional; default 10)
+
+[ ] Confirm NEXT_PUBLIC_APP_URL matches deployment domain
+      (Checkout success/cancel and Connect return URLs depend on this)
+
+[ ] Confirm no real secrets are committed
+      (.env.local and live keys stay out of repo)
+
+================================================================================
+STRIPE GATES:
+================================================================================
+
+[ ] Confirm Stripe Connect is enabled on NeighborDogs Stripe platform account
+
+[ ] Confirm webhook endpoint receives checkout.session.completed
+      (payment mode for walks AND subscription mode for territory)
+
+[ ] Confirm webhook secret matches deployed endpoint
+
+[ ] Confirm test-mode checkout works before live-mode release
+
+[ ] Confirm at least one operator can complete Connect onboarding
+      (dashboard Pricing tab -> Connect Stripe account)
+
+================================================================================
+DATA GATES:
+================================================================================
+
+[ ] Seed at least one operator profile slug
+      (profiles.slug required for /book/[slug]; no slug editor in this release)
+
+[ ] Seed operator pricing row or confirm default pricing is acceptable
+      (operator_prices; dashboard Save Pricing after migration 004)
+
+[ ] Confirm returning-customer paid walk path can create checkout
+      (/book/[slug] -> Returning Customer -> Pay with Card)
+
+[ ] Confirm webhook marks booking payment_status=paid after payment
+
+================================================================================
+SMOKE TEST:
+================================================================================
+
+[ ] Operator opens dashboard pricing/connect tab
+
+[ ] Operator completes Connect onboarding
+
+[ ] Operator pricing is saved
+
+[ ] Public /book/[slug] loads
+
+[ ] Returning customer selects paid walk
+
+[ ] Stripe Checkout opens
+
+[ ] Payment succeeds in test mode
+
+[ ] Success page loads
+
+[ ] Webhook updates booking as paid
+
+[ ] No raw Stripe Connect account ID visible in browser payload
+      (inspect network/RSC props; UI shows "Connected to Stripe." only)
+
+================================================================================
+KNOWN NON-BLOCKING RISKS:
+================================================================================
+
+- Connect readiness currently checks account ID existence, not charges_enabled.
+- UI price preview may differ from server quote if DB/defaults drift.
+- Webhook has minimal reconciliation only.
+- Failed/expired/refunded payment lifecycle is not fully implemented.
+- /book without slug and Meet & Greet remain separate follow-up work.
+
+================================================================================
+GO / NO-GO RULE:
+================================================================================
+
+- Merge only after PRE-MERGE, MIGRATION, ENVIRONMENT, STRIPE, DATA, and SMOKE TEST gates are complete.
+- Deploy only after MIGRATION, ENVIRONMENT, STRIPE, DATA, and SMOKE TEST gates
+  are complete.
+
+================================================================================
+NEXT TASK:
+================================================================================
+
+Review the checklist and decide whether to begin pre-merge gate verification.
