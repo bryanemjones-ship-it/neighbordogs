@@ -13,7 +13,7 @@ export type TimeRange = {
 export type DbBookingInterval = {
   start_time: string;
   end_time: string;
-  blocked_end_time: string;
+  blocked_end_time?: string;
 };
 
 export function normalizeTime(value: string): string {

@@ -17,20 +17,21 @@ export type BookingRow = {
   customer_id: string | null;
   walker_id: string | null;
   customer_name: string | null;
-  customer_email: string | null;
+  customer_email?: string | null;
   type: string;
   date: string;
   start_time: string;
   end_time: string;
-  blocked_end_time: string;
+  blocked_end_time?: string;
   price_cents: number;
   status: string;
   is_emergency: boolean;
-  is_weekly_package: boolean;
-  service_address: string | null;
-  location_label: string | null;
-  dog_count: number;
-  buddy_addon_cents: number;
+  is_weekly_package?: boolean;
+  service_address?: string | null;
+  location_label?: string | null;
+  dog_count?: number;
+  buddy_addon_cents?: number;
+  created_at?: string;
 };
 
 export function dollarsToCents(amount: number | string): number {
@@ -50,7 +51,7 @@ export function rowToLegacyBooking(row: BookingRow): LegacyBooking {
     date: row.date,
     start: normalizeTime(row.start_time),
     end: normalizeTime(row.end_time),
-    blockedEnd: normalizeTime(row.blocked_end_time),
+    blockedEnd: normalizeTime(row.blocked_end_time || row.end_time),
     status: row.status,
     serviceAddress: row.service_address || undefined,
     walker_id: row.walker_id || undefined,
@@ -78,15 +79,17 @@ export async function fetchBookingsForDate(date: string) {
   const { data, error } = await supabase
     .from(BOOKINGS_TABLE)
     .select(
-      "id, customer_id, walker_id, customer_name, customer_email, type, date, start_time, end_time, blocked_end_time, price_cents, status, is_emergency, is_weekly_package, service_address, location_label, dog_count, buddy_addon_cents",
+      "id, customer_id, walker_id, customer_name, type, date, start_time, end_time, price_cents, status, is_emergency, created_at",
     )
     .eq("date", date)
-    .eq("test_flag", true)
     .order("start_time", { ascending: true });
 
   if (error) throw error;
 
-  return ((data || []) as BookingRow[]).filter(
-    (row) => !CANCELLED_STATUSES.includes(row.status),
-  );
+  return (data || [])
+    .filter((row) => !CANCELLED_STATUSES.includes(row.status))
+    .map((row) => ({
+      ...row,
+      blocked_end_time: row.end_time,
+    })) as BookingRow[];
 }
