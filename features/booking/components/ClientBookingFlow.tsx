@@ -6,6 +6,7 @@ import {
   loadCustomers,
   loadPrices,
   type LegacyCustomer,
+  type LegacyPrices,
 } from "@/features/booking/lib/models";
 import {
   buddyAddonTotal,
@@ -56,14 +57,28 @@ function resolveServiceLocation(
   };
 }
 
-export function ClientBookingFlow() {
+type ClientBookingFlowProps = {
+  prices?: LegacyPrices;
+  operatorName?: string | null;
+  operatorSlug?: string;
+  operatorId?: string;
+  onBack?: () => void;
+};
+
+export function ClientBookingFlow({
+  prices: pricesProp,
+  operatorName,
+  operatorSlug,
+  operatorId,
+  onBack,
+}: ClientBookingFlowProps = {}) {
   const [state, dispatch] = useReducer(bookingReducer, initialBookingState);
   const [emailInput, setEmailInput] = useState("");
   const [profileVisible, setProfileVisible] = useState(false);
   const [lookupMsg, setLookupMsg] = useState("");
   const [customer, setCustomer] = useState<LegacyCustomer | null>(null);
 
-  const prices = useMemo(() => loadPrices(), []);
+  const prices = useMemo(() => pricesProp ?? loadPrices(), [pricesProp]);
   const customerMaxDogs = maxDogs(customer);
 
   const lookupCustomer = useCallback(() => {
@@ -252,6 +267,8 @@ export function ClientBookingFlow() {
           booking={state.booking}
           selectedPayMethod={state.selectedPayMethod}
           paySummaryHtml={state.paySummaryHtml}
+          operatorSlug={operatorSlug}
+          operatorId={operatorId}
           onPayMethodChange={(method) =>
             dispatch({ type: "SET_PAY_METHOD", method })
           }
@@ -275,11 +292,22 @@ export function ClientBookingFlow() {
   return (
     <div className="client-booking legacy-admin">
       <div className="subnav">
-        <Link href="/" className="btn back" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-          ←
-        </Link>
+        {onBack ? (
+          <button type="button" className="btn back" onClick={onBack}>
+            ←
+          </button>
+        ) : (
+          <Link href="/" className="btn back" style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+            ←
+          </Link>
+        )}
         <span className="icon">🐕</span>
         <h2>Book a Walk</h2>
+        {operatorName ? (
+          <p className="muted tiny" style={{ margin: 0 }}>
+            with {operatorName}
+          </p>
+        ) : null}
       </div>
 
       {!profileVisible ? (

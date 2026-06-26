@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ApprovalsPanel } from "./panels/ApprovalsPanel";
 import { PricingPanel } from "./panels/PricingPanel";
 import { RefundsPanel } from "./panels/RefundsPanel";
@@ -32,7 +33,13 @@ const ADMIN_TABS: { id: AdminTab; label: string }[] = [
 type ToastState = { title: string; message: string } | null;
 
 export function AdminPanel() {
-  const [activeTab, setActiveTab] = useState<AdminTab>("schedule");
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab");
+  const validInitialTab = ADMIN_TABS.some((tab) => tab.id === initialTab)
+    ? (initialTab as AdminTab)
+    : "schedule";
+
+  const [activeTab, setActiveTab] = useState<AdminTab>(validInitialTab);
   const [toast, setToast] = useState<ToastState>(null);
   const [scheduleKey, setScheduleKey] = useState(0);
   const [weeklyKey, setWeeklyKey] = useState(0);

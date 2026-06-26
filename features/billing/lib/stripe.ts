@@ -34,6 +34,20 @@ export function getAppOrigin(): string {
   return origin.replace(/\/$/, "");
 }
 
+export function getWalkPlatformFeePercent(): number {
+  const raw = process.env.STRIPE_WALK_PLATFORM_FEE_PERCENT;
+  const parsed = raw ? parseInt(raw, 10) : 10;
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+    return 10;
+  }
+  return parsed;
+}
+
+export function calculateWalkPlatformFeeCents(totalCents: number): number {
+  const percent = getWalkPlatformFeePercent();
+  return Math.max(0, Math.round((totalCents * percent) / 100));
+}
+
 export function getStripeClient(): Stripe {
   if (!stripeClient) {
     stripeClient = new Stripe(getStripeSecretKey());
