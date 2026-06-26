@@ -1,9 +1,5 @@
 import type Stripe from "stripe";
-import {
-  calculateWalkPlatformFeeCents,
-  getAppOrigin,
-  getStripeClient,
-} from "@/features/billing/lib/stripe";
+import { getAppOrigin, getStripeClient } from "@/features/billing/lib/stripe";
 import { quoteWalkPriceCents } from "@/features/booking/lib/operator-prices";
 import {
   resolveOperatorById,
@@ -105,13 +101,7 @@ export async function createWalkCheckoutSession(
     isEmergency: input.isEmergency || walkType === "emergency",
   });
 
-  const platformFeeCents = calculateWalkPlatformFeeCents(quote.priceCents);
-  if (platformFeeCents >= quote.priceCents) {
-    throw new WalkCheckoutError(
-      "Platform fee exceeds walk price. Check STRIPE_WALK_PLATFORM_FEE_PERCENT.",
-      500,
-    );
-  }
+  const platformFeeCents = 0;
 
   const supabase = createSupabaseServerClient();
   const customerEmail = input.email?.trim().toLowerCase() || "";
@@ -183,7 +173,7 @@ export async function createWalkCheckoutSession(
         },
       ],
       payment_intent_data: {
-        application_fee_amount: platformFeeCents,
+        on_behalf_of: stripeConnectId,
         transfer_data: {
           destination: stripeConnectId,
         },

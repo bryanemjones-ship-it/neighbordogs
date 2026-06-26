@@ -21,6 +21,9 @@ export function PricingPanel({ showToast }: PricingPanelProps) {
   const [prices, setPrices] = useState<LegacyPrices>(DEFAULT_PRICES);
   const [pricingMsg, setPricingMsg] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [connectLoading, setConnectLoading] = useState(false);
+  const [connectMsg, setConnectMsg] = useState("");
+  const [stripeConnected, setStripeConnected] = useState(false);
 
   const adminLoadPricing = useCallback(async () => {
     setIsLoading(true);
@@ -34,9 +37,17 @@ export function PricingPanel({ showToast }: PricingPanelProps) {
       return;
     }
 
-    const loaded = await fetchOperatorPrices(supabase, user.id);
+    const [loaded, profileResult] = await Promise.all([
+      fetchOperatorPrices(supabase, user.id),
+      supabase
+        .from("profiles")
+        .select("stripe_connect_id")
+        .eq("id", user.id)
+        .maybeSingle(),
+    ]);
 
     setPrices(loaded);
+    setStripeConnected(Boolean(profileResult.data?.stripe_connect_id));
     setIsLoading(false);
   }, []);
 
@@ -74,8 +85,74 @@ export function PricingPanel({ showToast }: PricingPanelProps) {
     showToast("Saved", "Pricing updated for all customers.");
   }
 
+  async function startStripeConnect() {
+    setConnectMsg("");
+    setConnectLoading(true);
+
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        setConnectMsg("You must be logged in.");
+        return;
+      }
+
+      const response = await fetch("/api/stripe/connect/onboard", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setConnectMsg(data.error || "Could not start Stripe Connect setup.");
+        return;
+      }
+
+      if (typeof data.url === "string" && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+
+      setConnectMsg("Stripe did not return an onboarding URL.");
+    } catch {
+      setConnectMsg("Could not reach Stripe Connect.");
+    } finally {
+      setConnectLoading(false);
+    }
+  }
+
   return (
     <div id="adminPanelPricing" className="stack">
+      <div className="card stack">
+        <div className="field-label">STRIPE CONNECT PAYOUTS</div>
+        <div className="muted" style={{ fontSize: 14 }}>
+          Connect your Stripe account to accept card payments from clients. Walk
+          payments go to you; NeighborDogs does not take a cut.
+        </div>
+        {stripeConnected ? (
+          <p className="muted tiny">Connected to Stripe.</p>
+        ) : (
+          <p className="muted tiny">Not connected yet.</p>
+        )}
+        <button
+          type="button"
+          className="btn primary full"
+          onClick={startStripeConnect}
+          disabled={isLoading || connectLoading}
+        >
+          {connectLoading
+            ? "Redirecting to Stripe…"
+            : stripeConnected
+              ? "Update Stripe Connect setup"
+              : "Connect Stripe account"}
+        </button>
+        {connectMsg ? <p className="muted tiny">{connectMsg}</p> : null}
+      </div>
       <div className="card stack">
         <div className="field-label">REGULAR WALK PRICES</div>
         <div className="two">

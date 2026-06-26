@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { BookingDraft, PayMethodId } from "@/features/booking/lib/types";
-import { fmt12hr, HOLD_MIN } from "@/features/booking/lib/time-utils";
+import { fmt12hr, HOLD_MIN, walkTypeFromLabel } from "@/features/booking/lib/time-utils";
 
 const PAY_METHODS: Record<
   PayMethodId,
@@ -81,8 +81,59 @@ export function PaymentConfirmation({
   const method = PAY_METHODS[selectedPayMethod];
   const price = Number(booking.price);
   const note = `Dog walk - ${booking.type} - ${booking.nickname}`;
-  const isOperatorBooking =
+  const useStripeCheckout =
     Boolean(operatorSlug || operatorId) && !booking.isWeeklyPackage;
+
+  async function startStripeCheckout() {
+    setPaidMsg("");
+    setSubmitting(true);
+
+    try {
+      if (!booking.date || !booking.start) {
+        setPaidMsg("Schedule details are missing.");
+        return;
+      }
+
+      const walkType = walkTypeFromLabel(booking.type, booking.isEmergency);
+
+      const res = await fetch("/api/booking/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          operatorSlug,
+          operatorId,
+          walkType,
+          dogCount: booking.dogCount || 1,
+          nickname: booking.nickname,
+          email: booking.email,
+          type: booking.type,
+          date: booking.date,
+          start: booking.start,
+          end: booking.end,
+          blockedEnd: booking.blockedEnd || booking.end,
+          locationLabel: booking.locationLabel || "primary",
+          serviceAddress: booking.serviceAddress || "",
+          serviceLat: booking.serviceLat || 0,
+          serviceLng: booking.serviceLng || 0,
+          serviceMiles: booking.serviceMiles || 999,
+          isEmergency: booking.isEmergency || false,
+        }),
+      });
+
+      const data = (await res.json()) as { ok?: boolean; url?: string; error?: string };
+
+      if (!res.ok || !data.ok || !data.url) {
+        setPaidMsg(data.error || "Could not start checkout.");
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch (e) {
+      setPaidMsg(e instanceof Error ? e.message : "Could not start checkout.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   function selectPayMethod(methodId: PayMethodId) {
     const m = PAY_METHODS[methodId];
@@ -190,20 +241,20 @@ export function PaymentConfirmation({
         />
         <div className="hr" />
         <div className="muted">
-          {isOperatorBooking
-            ? "Payment is handled directly with your dog walker."
+          {useStripeCheckout
+            ? "Pay securely with card. Your operator receives the walk payment."
             : "Choose how you\u2019d like to pay, then tap \u201cI Paid\u201d when you\u2019re done."}
         </div>
 
-        {isOperatorBooking ? (
+        {useStripeCheckout ? (
           <button
             type="button"
             className="btn primary full"
             style={{ fontSize: 16 }}
             disabled={submitting}
-            onClick={markPaid}
+            onClick={startStripeCheckout}
           >
-            {submitting ? "Submitting request…" : "Request Walk"}
+            {submitting ? "Redirecting to Stripe…" : `Pay $${price.toFixed(2)} with Card`}
           </button>
         ) : (
           <>
@@ -273,7 +324,7 @@ export function PaymentConfirmation({
         {paidMsg ? <div id="paidMsg" className="muted msg-error">{paidMsg}</div> : null}
       </div>
 
-      {!isOperatorBooking && confirmOpen ? (
+      {!useStripeCheckout && confirmOpen ? (
         <div className="confirm-overlay legacy-admin">
           <div className="confirm-dialog">
             <h3>Did you pay with {method.name}?</h3>
