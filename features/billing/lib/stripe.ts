@@ -31,6 +31,14 @@ export function getStripeWebhookSecret(): string {
   return secret;
 }
 
+export function getStripeConnectWebhookSecret(): string | null {
+  const secret = process.env.STRIPE_CONNECT_WEBHOOK_SECRET;
+  if (!secret) {
+    return null;
+  }
+  return secret;
+}
+
 export function getAppOrigin(): string {
   const origin = process.env.NEXT_PUBLIC_APP_URL;
   if (!origin) {

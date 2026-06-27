@@ -156,33 +156,31 @@ export async function createWalkCheckoutSession(
 
   let session: Stripe.Checkout.Session;
   try {
-    session = await stripe.checkout.sessions.create({
-      mode: "payment",
-      customer_email: customerEmail || undefined,
-      line_items: [
-        {
-          price_data: {
-            currency: "usd",
-            product_data: {
-              name: input.type || "Dog Walk",
-              description: `${input.date} at ${input.start}`,
+    session = await stripe.checkout.sessions.create(
+      {
+        mode: "payment",
+        customer_email: customerEmail || undefined,
+        line_items: [
+          {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: input.type || "Dog Walk",
+                description: `${input.date} at ${input.start}`,
+              },
+              unit_amount: quote.priceCents,
             },
-            unit_amount: quote.priceCents,
+            quantity: 1,
           },
-          quantity: 1,
-        },
-      ],
-      payment_intent_data: {
-        on_behalf_of: stripeConnectId,
-        transfer_data: {
-          destination: stripeConnectId,
-        },
+        ],
         metadata,
+        success_url: `${origin}/book/${encodeURIComponent(slugSegment)}?checkout=success&booking_id=${bookingId}`,
+        cancel_url: `${origin}/book/${encodeURIComponent(slugSegment)}?checkout=cancelled&booking_id=${bookingId}`,
       },
-      metadata,
-      success_url: `${origin}/book/${encodeURIComponent(slugSegment)}?checkout=success&booking_id=${bookingId}`,
-      cancel_url: `${origin}/book/${encodeURIComponent(slugSegment)}?checkout=cancelled&booking_id=${bookingId}`,
-    });
+      {
+        stripeAccount: stripeConnectId,
+      },
+    );
   } catch (error) {
     await supabase.from("bookings").delete().eq("id", bookingId);
     console.error("[walk-checkout] stripe session error", error);

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
+import Stripe from "stripe";
 import {
   getStripeClient,
+  getStripeConnectWebhookSecret,
   getStripeWebhookSecret,
 } from "@/features/billing/lib/stripe";
 import {
@@ -8,12 +10,12 @@ import {
   handleSubscriptionDeleted,
   handleSubscriptionUpdated,
 } from "@/features/billing/lib/territory-webhook";
+import { isWalkPaymentSession } from "@/features/billing/lib/walk-webhook";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   const stripe = getStripeClient();
-  const webhookSecret = getStripeWebhookSecret();
   const signature = request.headers.get("stripe-signature");
 
   if (!signature) {
@@ -22,21 +24,57 @@ export async function POST(request: Request) {
 
   const rawBody = await request.text();
 
-  let event;
+  let event: Stripe.Event;
   try {
-    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Webhook signature verification failed";
-    console.error("stripe webhook signature error", message);
-    return NextResponse.json({ error: message }, { status: 400 });
+    event = stripe.webhooks.constructEvent(
+      rawBody,
+      signature,
+      getStripeWebhookSecret(),
+    );
+  } catch (platformError) {
+    const connectSecret = getStripeConnectWebhookSecret();
+    if (
+      !(platformError instanceof Stripe.errors.StripeSignatureVerificationError) ||
+      !connectSecret
+    ) {
+      const message =
+        platformError instanceof Error
+          ? platformError.message
+          : "Webhook signature verification failed";
+      console.error("stripe webhook signature error", message);
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
+
+    try {
+      event = stripe.webhooks.constructEvent(rawBody, signature, connectSecret);
+    } catch (connectError) {
+      const message =
+        connectError instanceof Error
+          ? connectError.message
+          : "Webhook signature verification failed";
+      console.error("stripe webhook signature error", message);
+      return NextResponse.json({ error: message }, { status: 400 });
+    }
   }
 
   try {
     switch (event.type) {
-      case "checkout.session.completed":
-        await handleCheckoutSessionCompleted(event.data.object);
+      case "checkout.session.completed": {
+        const session = event.data.object;
+        const connectAccountId =
+          typeof event.account === "string" ? event.account : null;
+
+        if (connectAccountId) {
+          if (!isWalkPaymentSession(session)) {
+            break;
+          }
+        } else if (isWalkPaymentSession(session)) {
+          break;
+        }
+
+        await handleCheckoutSessionCompleted(session);
         break;
+      }
       case "customer.subscription.updated":
         await handleSubscriptionUpdated(event.data.object);
         break;

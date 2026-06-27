@@ -50,7 +50,7 @@ export async function ensureStripeConnectAccount(
 
   const stripe = getStripeClient();
   const account = await stripe.accounts.create({
-    type: "express",
+    type: "standard",
     email: email || undefined,
     capabilities: {
       card_payments: { requested: true },
