@@ -19,7 +19,7 @@
 
 ---
 
-## NeighborDogs-specific decisions (append-only)
+## NeighborDogs-specific decisions
 
 5. Feature-Based Modular Monolith (June 2026)
    - Decision: Organize NeighborDogs as a **feature-based modular monolith** inside one Next.js app — not microservices, not a flat `components/` + `lib/` tree.
@@ -46,9 +46,9 @@
    - Admin schedule reads from same table via `app/api/admin/bookings`.
 
 10. Locked Payment Model — Operator Commerce (June 2026)
-   - Decision: NeighborDogs is SaaS ($149/month operator subscription) plus in-app walk payments routed to operators via Stripe Connect. NeighborDogs receives $0 from walk payments (no platform fee, commission, or application_fee_amount). Operators absorb Stripe card processing fees. STRIPE_WALK_PLATFORM_FEE_PERCENT is not part of this release.
-   - Reference: `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt` section "NEIGHBORDOGS PAYMENT MODEL — FINAL FOR THIS RELEASE".
-   - Supersedes incorrect interim doc/code interpretation from d3521ac (SaaS-only / no in-app payment). Corrected in 3a14c64.
+   - Decision: NeighborDogs is SaaS ($149/month operator subscription) plus in-app walk payments via Stripe Connect Standard accounts and direct charges. Walk payments are separate from the subscription. Operator is merchant of record; operator pays Stripe card fees; operator Stripe balance bears refunds and disputes. NeighborDogs receives $0 from walk payments (no platform fee, commission, application_fee_amount, transfer_data.destination, or on_behalf_of). STRIPE_WALK_PLATFORM_FEE_PERCENT is not part of this release.
+   - Reference: `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt` section "CLARIFIED STOREFRONT / PAYMENT MODEL".
+   - Supersedes incorrect interim doc/code interpretation from d3521ac (SaaS-only / no in-app payment). Corrected in 3a14c64. Supersedes destination-charge architecture in deployed walk-checkout code (to fix).
 
 11. Returning Customer Lookup — public.customers (March 2026)
    - Decision: Production returning customer Find My Profile uses `POST app/api/booking/customer-lookup/route.ts` querying `public.customers` by case-insensitive email.
@@ -66,3 +66,36 @@
 
 14. New Customer Registration Out of Scope (March 2026)
    - Decision: `/book/[slug]` New Customer path remains a stub ("New customer setup is coming soon.") for this release. Returning customer path is the verified production booking entry.
+
+15. Operator Storefront Model (March 2026)
+   - Decision: Each operator runs their own service storefront inside NeighborDogs; the operator is the shop manager.
+   - Operators set walk prices in NeighborDogs Admin (`operator_prices`). Customers see those prices on `/book/[slug]`.
+   - Checkout price is the current operator price at order submit (server-side re-read in walk checkout).
+   - Walk checkout uses inline Stripe `price_data`, not Stripe Dashboard Product/Price IDs, unless future code explicitly requires otherwise.
+   - Rationale: Operators control pricing in-app; Stripe handles card capture and operator payout only.
+
+16. Operator Banking — Stripe Only (March 2026)
+   - Decision: Operators connect/onboard directly with Stripe for payout and banking information.
+   - NeighborDogs stores only `profiles.stripe_connect_id` (and related Connect status), not operator banking details.
+   - Rationale: PCI/compliance boundary; Stripe is system of record for payouts.
+
+17. Current Stripe Setup — Do Not Split During Walk-Payment Fix (March 2026)
+   - Decision: Do not split Stripe accounts during the NeighborDogs walk-payment direct-charge fix. Keep the current payment fix to one variable: Standard Connect + direct charges inside the current shared AppStack/NeighborDogs Stripe setup. NeighborDogs-specific Stripe objects use ND_ or NeighborDogs naming.
+   - Connect setup model: **Build a platform** (not Build a marketplace).
+   - Stripe account separation is a separate future project and must not be combined with the current walk-payment fix. See `00_PICKUP.txt` KNOWN ISSUES for deferred separation considerations.
+
+18. Stripe Dashboard Guidance — Anti-Drift (March 2026)
+   - Decision: Future Stripe setup guidance must be **screen-by-screen only**, supported by current dashboard evidence and/or official Stripe documentation.
+   - Do not recommend Stripe dashboard clicks from generic Stripe concepts or memory.
+   - If uncertain, ask one clarification question or stop.
+   - Rationale: Prior assistant made incorrect dashboard guidance by guessing; caused setup drift and wasted operator time.
+
+19. Production Schema Verification Before Payment Code Changes (March 2026)
+   - Decision: Before changing walk checkout/webhook code, verify production `public.bookings` columns against what `walk-checkout.ts` and `walk-webhook.ts` insert/update.
+   - Known risks (read-only audit): validate route may use DEFAULT_PRICES without operator context; checkout/webhook may reference columns not in verified production schema (payment_status, stripe_*, operator_id, blocked_end_time, test_flag, platform_fee_cents, etc.).
+   - Rationale: Same failure class as pre-49c0de6 slot loader — UI appeared correct while server path assumed local/migration schema not present in production.
+
+20. Walk Payment Charge Architecture — Standard Connect + Direct Charges (March 2026)
+   - Decision: Walk payments must use Stripe Connect **Standard** accounts and **direct charges**. Operator is merchant of record. No destination charges. No `on_behalf_of`. No `transfer_data.destination`. No `application_fee_amount`. NeighborDogs is the software layer only.
+   - Current deployed code is wrong: `features/billing/lib/stripe-connect.ts` creates Express accounts; `features/billing/lib/walk-checkout.ts` uses destination charge pattern — must be corrected to match this decision.
+   - Rationale: Operator owns payment relationship, fees, refunds, and disputes; NeighborDogs receives $0 from walks.

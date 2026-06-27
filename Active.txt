@@ -2,41 +2,49 @@
 
 ## Current state (production — March 2026)
 - Branch: main (Vercel production deploy)
-- URL: https://neighbordogs.com/book/north-hills
-- Returning customer booking path verified through payment screen
+- URL: https://www.neighbordogs.com/book/north-hills
+- Returning customer path verified through payment screen (Pay with Card visible)
 - Blocker: north-hills Stripe Connect onboarding not complete
   Payment shows: "This operator has not finished Stripe Connect setup."
+- Stripe Connect platform setup in Dashboard: in progress (sandbox modal seen; not finished)
 
-## Completed today (deployed)
+## Completed (deployed + production verified)
 [x] ef841e1 — Returning customer lookup from public.customers
       app/api/booking/customer-lookup/route.ts
       Verified: bryanemjones+testcustomer@gmail.com on /book/north-hills
 [x] 49c0de6 — Time slots aligned to production public.bookings schema
       Verified: slots load; payment screen reachable after slot selection
 
-## Payment model (locked)
-- Operators pay NeighborDogs $149/month (Stripe subscription).
-- Clients pay operators in-app via Stripe Connect; NeighborDogs $0 on walks.
-- No application_fee_amount; no STRIPE_WALK_PLATFORM_FEE_PERCENT.
+## Storefront / payment model (final)
+- Each operator = shop manager of their storefront inside NeighborDogs.
+- Walk payments separate from $149/month operator subscription.
+- Walk payments: Stripe Connect Standard accounts + direct charges.
+- Operator is merchant of record; operator pays Stripe fees; operator balance bears
+  refunds/disputes; NeighborDogs $0 on walks.
+- No application_fee_amount, transfer_data.destination, or on_behalf_of.
+- Operator prices in Admin (operator_prices); checkout re-reads server-side
+  (inline price_data; not Stripe Dashboard Products/Prices for walks).
+- NeighborDogs does not store operator banking info (Stripe onboarding only).
+- CURRENT CODE WRONG: Express + destination charge — fix to Standard + direct charges.
 
-## Next task
-[ ] Complete Stripe Connect onboarding for north-hills operator
-[ ] Re-test paid walk checkout through Pay with Card -> Stripe hosted checkout
-[ ] Verify webhook marks booking paid
+## Next task (do not skip)
+[ ] Do NOT work on Stripe account separation yet
+[ ] Fix walk payments: Standard Connect + direct charges in current Stripe setup
+[ ] Onboarding/charges_enabled gate for operator before checkout
+[ ] Webhook verification + one real paid walk test
+[ ] Confirm Bryan / NeighborDogs receives $0 from walk payments
 
-Do not proceed into code changes before Stripe Connect setup is verified.
+See 00_PICKUP.txt for dashboard guidance rules (screen-by-screen only).
 
-## Still stub / out of scope this release
+## Known code risks (investigate after Connect + checkout re-test)
+[ ] app/api/booking/validate/route.ts — DEFAULT_PRICES without operator context
+[ ] walk-checkout.ts — booking insert columns vs production public.bookings
+[ ] walk-webhook.ts — payment column updates vs production public.bookings
+
+## Still stub / out of scope
 - New Customer on /book/[slug] ("coming soon")
 
-## Historical foundation (complete)
-[x] Next.js App Router, feature-based monolith, Supabase, operator dashboard
-[x] Territory preview, $149/month subscription checkout
-[x] Connect UI + in-app walk payment path (3a14c64+)
-[x] Client booking /book and /book/[slug]
-
 ## Deferred follow-up
+[ ] Fix validate/checkout/webhook schema alignment if checkout fails post-Connect
+[ ] Align admin APIs off test_demo_customers to public.customers
 [ ] New Customer registration flow
-[ ] Align admin customer APIs off test_demo_customers to public.customers
-[ ] Unify territory-preview Supabase client to @/shared/lib/supabase
-[ ] Marketing homepage component integration

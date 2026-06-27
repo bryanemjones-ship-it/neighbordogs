@@ -1,9 +1,37 @@
 # NeighborDogs Schema & Structure Reference
-# Purpose: Verified production data paths + codebase layout (March 2026)
+# Purpose: Verified production data paths, storefront payment model, codebase layout
+# Updated: March 2026
 
 ---
 
-## A. Verified production tables (returning-customer booking path)
+## A. Storefront payment data flow
+
+```
+Operator Admin (PricingPanel)
+  -> public.operator_prices (operator-controlled walk prices)
+
+Public booking (/book/[slug])
+  -> resolveOperatorBySlug (profiles.slug)
+  -> read operator_prices for display
+
+Customer submits order
+  -> POST /api/booking/checkout
+  -> walk-checkout.ts: quoteWalkPriceCents (server re-read operator_prices)
+  -> Stripe Checkout: inline price_data (NOT Stripe Dashboard Product/Price IDs)
+  -> Connect: on_behalf_of + transfer_data to profiles.stripe_connect_id
+  -> NO application_fee_amount; NeighborDogs $0 on walks
+
+Operator payout
+  -> Stripe Connect onboarding only (POST /api/stripe/connect/onboard)
+  -> NeighborDogs stores stripe_connect_id only; no banking fields
+```
+
+Display-price risk: `POST /api/booking/validate` may use DEFAULT_PRICES without operator
+context — payment screen amount can diverge from operator_prices until fixed.
+
+---
+
+## B. Verified production tables (returning-customer booking path)
 
 ### public.customers
 Returning customer lookup (Find My Profile).
@@ -12,8 +40,9 @@ Returning customer lookup (Find My Profile).
 - NOT used for this path: test_demo_customers, test_flag
 
 ### public.bookings
-Slot conflict reads and walk booking persistence.
-Verified production columns:
+Slot conflict reads and (intended) walk booking persistence.
+
+**Verified production columns:**
 - id
 - customer_id
 - walker_id
@@ -27,84 +56,107 @@ Verified production columns:
 - created_at
 - customer_name
 
-NOT in verified production public.bookings:
+**NOT in verified production public.bookings:**
 - blocked_end_time
 - test_flag
 
-Slot loader maps end_time as blocking end for overlap filtering after read.
+**Referenced by code but NOT verified in production** (investigate before checkout E2E):
+- payment_status
+- stripe_checkout_session_id
+- stripe_payment_intent_id
+- operator_id
+- stripe_connect_account_id
+- customer_email
+- platform_fee_cents
+- test_flag (insert path in walk-checkout)
+- blocked_end_time (insert path in walk-checkout)
+
+Slot loader (49c0de6): maps end_time as blocking end; no test_flag filter.
 
 ### public.operator_prices
-Operator walk pricing for /book/[slug] (server-side quote).
-Known north-hills example (cents): w20 2900, w30 3500, w60 4900, emergency 4900,
-buddyAddon 1000, weeklyDiscount 15.
+Operator walk pricing — source of truth for storefront display and checkout quote.
+- Used by: PricingPanel (write), operator-resolve + walk-checkout (read)
+- north-hills example (cents): w20 2900, w30 3500, w60 4900, emergency 4900,
+  buddyAddon 1000, weeklyDiscount 15
 
 ### profiles
-Operator resolve for /book/[slug].
+Operator resolve and Connect.
 - slug (e.g. north-hills)
-- stripe_connect_id (required for walk card checkout to succeed)
-Known north-hills operator id: bb52d0f0-03c4-44b7-912f-b47350d71cd0
+- stripe_connect_id (required for walk card checkout)
+- north-hills operator id: bb52d0f0-03c4-44b7-912f-b47350d71cd0
 
 ### public.walkers
 NOT required for time-slot generation. Empty row count does not block slots.
 
 ---
 
-## B. Slot generation (no DB table)
+## C. Slot generation (no DB table)
 
 Hardcoded in `features/booking/lib/slots.ts`:
 - OP_START 08:00, OP_END 18:00, SLOT_INCREMENT_MIN 30
-- `generateOperatingSlots()` produces base candidates
-- `filterAvailableSlots()` removes overlaps using public.bookings intervals
-- 15-minute buffer between appointments applied in slotRangeForWalk
+- `generateOperatingSlots()` -> `filterAvailableSlots()` using public.bookings intervals
+- 15-minute buffer in slotRangeForWalk
 
-Flow: `GET app/api/booking/slots` -> `fetchBookingsForDate(date)` -> filter -> JSON slots
+Flow: `GET app/api/booking/slots` -> `fetchBookingsForDate(date)` -> filter -> JSON
 
 ---
 
-## C. Code paths (returning customer -> payment)
+## D. Code paths (returning customer -> payment)
 
 | Step | File / route |
 |------|----------------|
 | Operator page | `app/(client)/book/[slug]/page.tsx` |
 | Entry chooser | `features/booking/components/OperatorBookingPage.tsx` |
 | Returning flow | `features/booking/components/ClientBookingFlow.tsx` |
-| Customer lookup API | `app/api/booking/customer-lookup/route.ts` |
+| Customer lookup | `app/api/booking/customer-lookup/route.ts` |
+| Operator prices read | `features/booking/lib/operator-prices.ts` |
 | Date/time picker | `features/booking/components/SingleWalkPicker.tsx` |
 | Bookings read | `features/booking/lib/db.ts` (`fetchBookingsForDate`) |
 | Slot logic | `features/booking/lib/slots.ts` |
 | Slots API | `app/api/booking/slots/route.ts` |
-| Validate API | `app/api/booking/validate/route.ts` |
+| Validate API | `app/api/booking/validate/route.ts` (DEFAULT_PRICES risk) |
 | Payment UI | `features/booking/components/PaymentConfirmation.tsx` |
-| Walk checkout API | `app/api/booking/checkout/route.ts` |
+| Walk checkout | `app/api/booking/checkout/route.ts` -> `features/billing/lib/walk-checkout.ts` |
+| Connect onboard | `app/api/stripe/connect/onboard/route.ts` |
+| Webhook | `app/api/stripe/webhook/route.ts` -> `features/billing/lib/walk-webhook.ts` |
+| Admin pricing | `features/admin/components/panels/PricingPanel.tsx` |
 
 localStorage `rdgw_customers_v1`: fallback only in ClientBookingFlow if API miss.
 
 ---
 
-## D. Committed migrations vs production reality
+## E. Migrations vs production reality
 
-See `supabase/migrations/`:
+`supabase/migrations/`:
 - `001_neighbordogs_schema.sql` — territories, subscriptions, profiles base
-- `002_test_demo_tables.sql` — test_demo_* (demo/admin legacy paths)
+- `002_test_demo_tables.sql` — test_demo_* (demo/admin legacy)
 - `003_bookings.sql` — bookings with test_flag, blocked_end_time (may differ from prod)
 - `004_operator_prices.sql`, `005_profiles_connect.sql`, `006_booking_payment_connect.sql`
 
 Production public.bookings verified without test_flag and blocked_end_time.
-Code aligned in 49c0de6 for slot reads.
+Slot reads aligned in 49c0de6.
+
+Payment/Connect columns in 006 may not be applied to production — verify before
+trusting walk-checkout insert or walk-webhook update paths.
 
 ---
 
-## E. Remaining divergence (not production returning-customer path)
+## F. Read-only investigation summary
 
-Admin/demo helpers may still reference:
-- test_demo_customers
-- test_flag filters on bookings updates
+**What matches storefront model:**
+- Admin writes operator_prices; public booking reads them; checkout re-quotes server-side.
+- Inline price_data; no application_fee_amount; Connect payout to operator.
+- Connect onboarding UI + API exists.
 
-These are NOT the production returning-customer booking path fixed in ef841e1 / 49c0de6.
+**Known conflicts:**
+1. validate route — operator context missing; DEFAULT_PRICES fallback.
+2. walk-checkout.ts — insert columns may exceed verified production bookings.
+3. walk-webhook.ts — update columns may exceed verified production bookings.
+4. Same anti-drift class as pre-49c0de6 slot loader failure.
 
 ---
 
-## F. Codebase structure (feature-based modular monolith)
+## G. Codebase structure (feature-based modular monolith)
 
 ```
 app/
@@ -117,15 +169,15 @@ app/
 features/
 ├── marketing/
 ├── territory/
-├── booking/              ClientBookingFlow, pickers, payment, db, slots
-└── admin/                AdminPanel + panels
+├── booking/              ClientBookingFlow, pickers, payment, db, slots, operator-prices
+├── billing/              walk-checkout, walk-webhook, stripe-connect, stripe
+└── admin/                AdminPanel + PricingPanel
 
 shared/lib/supabase.ts    browser + createSupabaseServerClient()
 _legacy/                  reference only — never import
 ```
 
 Import alias: `@/*` -> project root.
-Supabase: `@/shared/lib/supabase`.
 
 ### Domain -> route mapping
 
@@ -134,11 +186,8 @@ Supabase: `@/shared/lib/supabase`.
 | `/` | `app/(marketing)/page.tsx` | marketing |
 | `/territory-preview` | territory preview | territory |
 | `/book` | generic booking | booking |
-| `/book/[slug]` | operator booking | booking + operator-resolve |
+| `/book/[slug]` | operator storefront booking | booking + operator-resolve |
 | `/dashboard` | operator admin | admin |
 | `/login` | auth | inline |
 
-### Target schema (future — Schema.txt section legacy reference)
-
-territories, territory_subscriptions, customers, walkers, bookings, visit_reports
-as full production model — partial adoption in live Supabase today.
+Production URL: https://www.neighbordogs.com

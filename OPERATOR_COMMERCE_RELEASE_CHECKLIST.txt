@@ -1,167 +1,169 @@
 NEIGHBORDOGS OPERATOR COMMERCE RELEASE CHECKLIST
 FILE: OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt
-PURPOSE: Current production release gates for in-app walk payments via Stripe Connect.
+PURPOSE: Current production release gates for operator storefront walk payments.
 
 ================================================================================
-NEIGHBORDOGS PAYMENT MODEL — FINAL FOR THIS RELEASE
+CLARIFIED STOREFRONT / PAYMENT MODEL
 ================================================================================
 
-- Operators pay NeighborDogs $149/month for software access.
-- Clients pay operators for walks through the app.
-- Operators receive walk payments through Stripe Connect.
+- Each operator runs their own service storefront inside NeighborDogs.
+- The operator is the shop manager.
+- Operators manage walk/service prices in NeighborDogs Admin (operator_prices).
+- Customers see operator current prices on the public booking page (/book/[slug]).
+- Checkout uses current operator price when customer submits the order (server-side
+  re-read at checkout session create).
+- Walk payments are separate from the $149/month operator subscription.
+- Walk payments use Stripe Connect Standard accounts and direct charges.
+- Operator is merchant of record; operator pays Stripe card processing fees; operator
+  Stripe balance bears refunds and disputes.
+- Stripe processes the customer credit card on the operator connected account.
+- Operators connect/onboard directly with Stripe for payout/banking information.
+- NeighborDogs does not collect or store operator banking information.
+- Bryan / NeighborDogs receives $0 from walk payments — no walk fee, percentage,
+  commission, platform fee, application fee, or cut.
+- Walk checkout must not set application_fee_amount, transfer_data.destination,
+  or on_behalf_of. NeighborDogs is the software layer only.
+- Walk prices are NOT managed via Stripe Dashboard Products/Prices (code uses inline
+  price_data).
+
+LOCKED SAAS:
+- Operators pay NeighborDogs $149/month for software access (subscription checkout).
 - Operators absorb Stripe card processing fees.
-- NeighborDogs receives $0 from walk payments.
-- NeighborDogs does not receive any walk percentage, commission, platform fee,
-  application fee, or cut.
-- Stripe subscription checkout is used for the $149/month operator subscription.
-- Stripe Connect is used only so operators can receive client walk payments
-  through the app.
-- Walk checkout must not set application_fee_amount.
-- STRIPE_WALK_PLATFORM_FEE_PERCENT is not part of the current release model.
+- STRIPE_WALK_PLATFORM_FEE_PERCENT is not part of this release.
 
-Copy gates (must NOT appear in production booking/payment UX or docs):
+FORBIDDEN COPY:
 - Do not say payment happens outside the app.
 - Do not say payment is handled directly with the walker.
-- Do not say NeighborDogs takes a walk fee, cut, commission, platform fee, or
-  application fee.
+- Do not say NeighborDogs takes a walk fee/cut/commission/platform/application fee.
 
 ================================================================================
 CURRENT PRODUCTION STATE
 ================================================================================
 
-Branch: main (auto-deploy production)
-Production URL: https://neighbordogs.com
-Public booking smoke path: /book/north-hills
+Branch: main
+Production URL: https://www.neighbordogs.com
+Smoke path: /book/north-hills
 
-Latest relevant commits:
+Commits:
   49c0de6 fix(booking): align time slots with production bookings schema
   ef841e1 fix(booking): look up returning customers from Supabase
   3a14c64 fix(payments): restore Connect payments without platform fee
 
-Test operator:
-  slug: north-hills
-  operator id: bb52d0f0-03c4-44b7-912f-b47350d71cd0
-
-Test customer (public.customers):
-  bryanemjones+testcustomer@gmail.com (approved)
-
-New Customer on /book/[slug]: stub only — not a release gate for this checklist.
+Operator: north-hills (bb52d0f0-03c4-44b7-912f-b47350d71cd0)
+Test customer: bryanemjones+testcustomer@gmail.com (public.customers, approved)
 
 ================================================================================
 COMPLETED GATES (PRODUCTION VERIFIED)
 ================================================================================
 
-[x] Public operator booking page loads (/book/north-hills)
-
-[x] Returning customer lookup verified
-      POST app/api/booking/customer-lookup/route.ts -> public.customers
-      Commit: ef841e1
-
-[x] Time slots load on Pick a Date & Time
-      GET app/api/booking/slots -> public.bookings conflict read (production schema)
-      Commit: 49c0de6
-
-[x] Payment screen reachable after slot selection (Continue to Payment)
-
-[x] Locked payment model in code/docs: no application_fee_amount; no platform fee env var
-
-[x] In-app walk payment path present (/api/booking/checkout + Pay with Card UI)
+[x] /book/north-hills loads
+[x] Returning customer lookup (ef841e1 -> public.customers)
+[x] Time slots load (49c0de6 -> production public.bookings reads)
+[x] Payment screen reachable; Pay with Card visible
+[x] Operator Admin writes operator_prices; public page reads operator prices
+[x] Code: inline price_data walk checkout; no application_fee_amount
+[x] Code: Connect onboard API + Pricing panel button exists
+[x] No platform fee env var in release model
 
 ================================================================================
-REMAINING GATES (PRODUCTION NOT YET VERIFIED)
+REMAINING GATES
 ================================================================================
 
-[ ] north-hills Stripe Connect onboarding completed
-      Dashboard Pricing -> Connect Stripe account
-      profiles.stripe_connect_id set for operator bb52d0f0-03c4-44b7-912f-b47350d71cd0
+[ ] Stripe Connect platform setup completed in Stripe Dashboard
+      Model: Build a platform (NOT marketplace)
+      Resolve sandbox modal if shown before proceeding
 
-[ ] Stripe Connect platform enabled/configured on NeighborDogs Stripe account
+[ ] Walk checkout uses Standard Connect + direct charges (not destination charge)
 
-[ ] Successful Stripe hosted checkout for a walk payment (north-hills test path)
+[ ] Operator charges_enabled gate before walk card checkout
 
-[ ] Webhook checkout.session.completed marks booking payment_status=paid
+[ ] north-hills operator Connect onboarding (Standard account; profiles.stripe_connect_id)
 
-[ ] End-to-end smoke: paid walk -> success URL -> booking paid in public.bookings
+[ ] Successful Stripe hosted walk checkout (Pay with Card)
 
-Current known blocker message on payment screen:
+[ ] Webhook checkout.session.completed -> booking paid status update verified
+
+[ ] End-to-end: paid walk -> success URL -> booking reflects payment
+
+Current blocker text:
   "This operator has not finished Stripe Connect setup."
 
 ================================================================================
-PUBLIC BOOKING SMOKE TEST PATH
+STRIPE SETUP STATE (DOCUMENTED — IN PROGRESS)
 ================================================================================
 
-1. Open /book/north-hills
-2. Returning Customer
-3. Find My Profile: bryanemjones+testcustomer@gmail.com
-4. Choose 20 min walk
-5. Pick date and available time slot
-6. Continue to Payment
-7. Pay with Card -> Stripe Checkout (blocked until Connect complete)
-8. Complete payment in test/live mode as appropriate
-9. Confirm webhook updates booking as paid
+- Shared Stripe account for AppStack/NeighborDogs (intentional).
+- Use ND_ or NeighborDogs naming for NeighborDogs-specific Stripe objects.
+- Screen: "Power your platform with Connect" — choose Build a platform.
+- Test Connect -> Create test connected account -> sandbox switch modal seen.
+- No final Stripe setup action completed yet.
+
+STRIPE GUIDANCE RULE:
+Do not recommend dashboard clicks from memory. Screen evidence + official Stripe docs
+only. Ask one question or stop if uncertain.
 
 ================================================================================
-DATA GATES
+PUBLIC BOOKING SMOKE TEST
 ================================================================================
 
-[x] public.customers row for returning customer lookup
-
-[x] public.operator_prices for north-hills (w20/w30/w60/emergency/buddy/weekly discount)
-
-[x] profiles.slug = north-hills
-
-[ ] profiles.stripe_connect_id for north-hills operator
-
-[x] public.bookings schema matches slot loader (no test_flag, no blocked_end_time)
-
-Note: public.walkers row count = 0 is NOT a slot-generation blocker.
+1. /book/north-hills -> Returning Customer
+2. Find My Profile: bryanemjones+testcustomer@gmail.com
+3. Choose 20 min walk (operator price from operator_prices)
+4. Pick date + time slot
+5. Continue to Payment -> Pay with Card
+6. Complete hosted checkout (after Connect)
+7. Verify webhook / booking paid state
 
 ================================================================================
-ENVIRONMENT GATES
+READ-ONLY CODE INVESTIGATION — WHAT MATCHES
 ================================================================================
 
-[ ] STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET, STRIPE_TERRITORY_PRICE_ID set on Vercel
-
-[ ] NEXT_PUBLIC_APP_URL matches production domain
-
-[ ] SUPABASE_SERVICE_ROLE_KEY set for server routes (customer lookup, bookings read,
-      operator resolve, checkout insert)
-
-[ ] STRIPE_WALK_PLATFORM_FEE_PERCENT NOT set or relied upon
-
-================================================================================
-STRIPE GATES
-================================================================================
-
-[ ] Stripe Connect enabled on platform account
-
-[ ] Operator completes Connect onboarding (north-hills)
-
-[ ] Webhook endpoint receives checkout.session.completed (walk payment mode)
-
-[ ] Walk checkout uses Connect with on_behalf_of; does NOT set application_fee_amount
+[x] Admin writes operator-controlled prices (PricingPanel -> operator_prices)
+[x] Public booking reads operator prices (resolveOperatorBySlug -> ClientBookingFlow)
+[x] Checkout re-reads operator price server-side (walk-checkout quoteWalkPriceCents)
+[x] Walk checkout: inline price_data (not Stripe Product/Price IDs)
+[~] CURRENT CODE WRONG: Express accounts + destination charge (on_behalf_of,
+    transfer_data) — locked model is Standard Connect + direct charges
+[x] Bank/payout via Stripe only; profiles.stripe_connect_id stored
+[x] Connect: Pricing -> POST /api/stripe/connect/onboard -> Stripe URL
+[x] Webhook code exists (walk-webhook; production E2E not verified)
 
 ================================================================================
-KNOWN ISSUES
+KNOWN CONFLICTS / RISKS (FIX AFTER CONNECT VERIFIED)
 ================================================================================
 
-- north-hills Connect onboarding incomplete — blocks card checkout today.
-- Admin/demo helpers may still reference test_demo_customers or test_flag; not the
-  production returning-customer path fixed in ef841e1.
-- New Customer registration stub — separate follow-up, not blocking returning flow.
+1. app/api/booking/validate/route.ts — validateBookingPrice without operator context;
+   may use DEFAULT_PRICES; payment-screen display can diverge from operator_prices.
+
+2. features/billing/lib/walk-checkout.ts — may insert columns not in verified prod
+   public.bookings (blocked_end_time, test_flag, payment_status, operator_id, etc.).
+
+3. features/billing/lib/walk-webhook.ts — may update payment_status, stripe_* columns
+   not confirmed in verified production public.bookings.
+
+4. Same drift class as pre-49c0de6 slot loader: UI correct, server schema assumptions.
+
+5. features/billing/lib/stripe-connect.ts + walk-checkout.ts — deployed code uses
+   Express + destination charge; locked model is Standard Connect + direct charges.
+
+Do not assume extra payment/Connect columns exist until verified (information_schema
+or confirmed migration applied to production).
 
 ================================================================================
 GO / NO-GO
 ================================================================================
 
-GO for returning-customer booking UX through payment screen: YES (verified).
-GO for paid walk checkout end-to-end: NO until north-hills Connect is complete and
-  hosted checkout + webhook paid update are verified.
+GO: Returning customer UX through payment screen — YES (verified).
+NO-GO: Paid walk E2E — until Stripe Connect platform + north-hills onboarding + checkout
+  + webhook verified.
 
 ================================================================================
 NEXT TASK
 ================================================================================
 
-Complete Stripe Connect onboarding for north-hills, then re-test paid walk checkout
-through the payment button. Do not proceed into code changes before Connect setup
-is verified.
+Do not work on Stripe account separation yet. Finish NeighborDogs walk-payment fix
+first: Standard Connect, direct charges, onboarding/charges_enabled gate, webhook
+verification, one real paid walk test, and confirmation that Bryan / NeighborDogs
+receives $0 from walk payments.
+
+Stripe dashboard: screen-by-screen guidance only. Do not guess clicks.

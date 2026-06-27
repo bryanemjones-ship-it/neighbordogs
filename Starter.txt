@@ -39,10 +39,13 @@
 `C:\Projects\appstack\_APPS\NeighborDogs`
 
 ### Production URL
-https://neighbordogs.com
+https://www.neighbordogs.com
 
-Public operator booking example:
-https://neighbordogs.com/book/north-hills
+Operator storefront smoke path:
+https://www.neighbordogs.com/book/north-hills
+
+### Session pickup
+Read `00_PICKUP.txt` first for current state, NEXT TASK, and anti-drift rules.
 
 ### Current relevant commits (main)
 - `49c0de6` fix(booking): align time slots with production bookings schema
@@ -52,58 +55,74 @@ https://neighbordogs.com/book/north-hills
 
 ### Architecture
 - Feature-based modular monolith (see `Schema.txt`, `Conventions.txt`).
-- Domains: `features/marketing`, `features/territory`, `features/booking`, `features/admin`.
+- Domains: `features/marketing`, `features/territory`, `features/booking`,
+  `features/billing`, `features/admin`.
 - Supabase: `shared/lib/supabase.ts` -> `@/shared/lib/supabase`.
+
+### Storefront / payment model (final)
+- Each operator = shop manager of their storefront inside NeighborDogs.
+- Walk payments separate from $149/month operator subscription.
+- Walk payments: Stripe Connect Standard accounts + direct charges.
+- Operator is merchant of record; operator pays Stripe fees; NeighborDogs $0 on walks.
+- No application_fee_amount, transfer_data.destination, or on_behalf_of.
+- Operators set prices in Admin (`operator_prices`); checkout re-reads server-side
+  (inline `price_data` — not Stripe Dashboard Products/Prices for walks).
+- NeighborDogs stores `profiles.stripe_connect_id` only — not operator banking info.
+- Do not split Stripe accounts during the walk-payment fix (see 00_PICKUP.txt).
+- CURRENT CODE WRONG: Express + destination charge — fix to Standard + direct charges.
 
 ### Main booking routes and API paths
 | Path | Purpose |
 |------|---------|
-| `/book/[slug]` | Operator public booking (entry + returning customer flow) |
+| `/book/[slug]` | Operator public storefront booking |
 | `app/api/booking/customer-lookup/route.ts` | Returning customer email lookup |
 | `app/api/booking/slots/route.ts` | Available time slots for a date |
-| `app/api/booking/validate/route.ts` | Slot/price validation before pay step |
+| `app/api/booking/validate/route.ts` | Slot/price validation (DEFAULT_PRICES risk) |
 | `app/api/booking/checkout/route.ts` | Stripe Connect walk checkout session |
 | `/api/stripe/connect/onboard` | Operator Connect onboarding |
+| `/api/stripe/webhook` | Stripe events including walk payment |
 | `/api/stripe/territory-checkout` | Operator $149/month subscription |
 
-Client UI entry: `features/booking/components/OperatorBookingPage.tsx`,
-`features/booking/components/ClientBookingFlow.tsx`,
-`features/booking/components/SingleWalkPicker.tsx`,
-`features/booking/components/PaymentConfirmation.tsx`.
+Client UI: `OperatorBookingPage.tsx`, `ClientBookingFlow.tsx`,
+`SingleWalkPicker.tsx`, `PaymentConfirmation.tsx`.
+Admin pricing: `features/admin/components/panels/PricingPanel.tsx`.
 
-### Production data sources (returning customer booking path)
+### Production data sources (returning customer path)
 | Data | Table / field | Used by |
 |------|----------------|---------|
 | Returning customer | `public.customers` | customer-lookup API |
-| Slot conflicts | `public.bookings` | slots API via fetchBookingsForDate |
-| Operator slug/prices | `profiles.slug`, `operator_prices` | operator-resolve |
+| Slot conflicts | `public.bookings` (verified cols only) | slots API |
+| Operator slug/prices | `profiles.slug`, `operator_prices` | operator-resolve, checkout |
 | Connect status | `profiles.stripe_connect_id` | walk checkout |
 
 NOT production source of truth:
-- `localStorage` key `rdgw_customers_v1` (fallback only in ClientBookingFlow)
-- `test_demo_customers` / `test_flag` (admin/demo paths only)
+- `localStorage` `rdgw_customers_v1` (fallback only)
+- `test_demo_customers` / `test_flag` (admin/demo paths)
 
 ### Verified production public.bookings columns
 id, customer_id, walker_id, type, date, start_time, end_time, price_cents,
 status, is_emergency, created_at, customer_name
 
-NOT in production public.bookings:
-blocked_end_time, test_flag
+NOT verified in production (code may reference — confirm before E2E):
+payment_status, stripe_checkout_session_id, stripe_payment_intent_id, operator_id,
+blocked_end_time, test_flag, platform_fee_cents, customer_email, stripe_connect_account_id
 
-Slot generation: hardcoded operating slots (08:00-18:00, 30-min steps), filtered
-by existing public.bookings using end_time as block end. public.walkers not required.
+### Stripe setup (in progress)
+- Shared Stripe account for AppStack/NeighborDogs; use ND_ / NeighborDogs naming.
+- Connect: Build a platform (not marketplace).
+- Platform setup not finished; sandbox switch modal seen on Test Connect.
+- **Rule:** Stripe dashboard guidance screen-by-screen only — do not guess clicks.
 
-### Locked payment model
-- Operators pay NeighborDogs $149/month for software access.
-- Clients pay operators for walks through the app via Stripe Connect.
-- Operators absorb Stripe card processing fees.
-- NeighborDogs receives $0 from walk payments.
-- No application_fee_amount; no STRIPE_WALK_PLATFORM_FEE_PERCENT.
-See `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt` and `00_PICKUP.txt`.
+### Current blockers
+1. Stripe Connect platform setup incomplete in Dashboard.
+2. north-hills operator Connect onboarding incomplete.
+   Payment screen: "This operator has not finished Stripe Connect setup."
 
-### Current known blocker
-north-hills operator has not completed Stripe Connect onboarding.
-Payment screen: "This operator has not finished Stripe Connect setup."
+### NEXT TASK (from 00_PICKUP.txt)
+Do not work on Stripe account separation yet. Finish NeighborDogs walk-payment fix
+first: Standard Connect, direct charges, onboarding/charges_enabled gate, webhook
+verification, one real paid walk test, and confirmation that Bryan / NeighborDogs
+receives $0 from walk payments.
 
 ### Dev commands
 ```powershell
@@ -115,10 +134,16 @@ npm run lint
 
 ### Environment (`.env.local` — do not commit)
 - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` (server routes: customer lookup, bookings, checkout)
+- `SUPABASE_SERVICE_ROLE_KEY` (server routes)
 - `STRIPE_SECRET_KEY`, `STRIPE_TERRITORY_PRICE_ID`, `STRIPE_WEBHOOK_SECRET`
 - `NEXT_PUBLIC_APP_URL`
 - NOT used: `STRIPE_WALK_PLATFORM_FEE_PERCENT`
+
+### Related docs
+- `00_PICKUP.txt` — session state and NEXT TASK
+- `OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt` — release gates
+- `Decisions.txt` — locked architectural decisions
+- `Schema.txt` — tables, code paths, schema drift risks
 
 ### Legacy reference
 - `_legacy/index.html` — product reference only; never import in live code.
