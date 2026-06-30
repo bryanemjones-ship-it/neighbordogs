@@ -73,16 +73,24 @@ export async function findCustomerByEmail(email: string) {
   return data;
 }
 
-export async function fetchBookingsForDate(date: string) {
+export async function fetchBookingsForDate(
+  date: string,
+  operatorId?: string,
+) {
   const supabase = createSupabaseServerClient();
 
-  const { data, error } = await supabase
+  let query = supabase
     .from(BOOKINGS_TABLE)
     .select(
       "id, customer_id, walker_id, customer_name, type, date, start_time, end_time, price_cents, status, is_emergency, created_at",
     )
-    .eq("date", date)
-    .order("start_time", { ascending: true });
+    .eq("date", date);
+
+  if (operatorId) {
+    query = query.eq("operator_id", operatorId);
+  }
+
+  const { data, error } = await query.order("start_time", { ascending: true });
 
   if (error) throw error;
 

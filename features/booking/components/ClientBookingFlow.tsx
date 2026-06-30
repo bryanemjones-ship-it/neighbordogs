@@ -276,6 +276,8 @@ export function ClientBookingFlow({
           startTime={state.wpStartTime}
           weekStart={state.wpWeekStart}
           prices={prices}
+          operatorSlug={operatorSlug}
+          operatorId={operatorId}
           onLocationChange={(label) =>
             dispatch({ type: "SET_LOCATION", locationLabel: label })
           }

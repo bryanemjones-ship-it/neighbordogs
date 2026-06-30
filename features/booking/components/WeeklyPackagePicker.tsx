@@ -22,6 +22,8 @@ type WeeklyPackagePickerProps = {
   startTime: string;
   weekStart: string;
   prices: LegacyPrices;
+  operatorSlug?: string;
+  operatorId?: string;
   onLocationChange: (label: string) => void;
   onWpChange: (wp: WeeklyPackageDraft) => void;
   onDogCountChange: (count: number) => void;
@@ -70,6 +72,8 @@ export function WeeklyPackagePicker({
   startTime,
   weekStart,
   prices,
+  operatorSlug,
+  operatorId,
   onLocationChange,
   onWpChange,
   onDogCountChange,
@@ -182,6 +186,8 @@ export function WeeklyPackagePicker({
           locationLabel,
           weekStart: weekStartVal,
           ownerEmail: "",
+          operatorSlug,
+          operatorId,
         }),
       });
 

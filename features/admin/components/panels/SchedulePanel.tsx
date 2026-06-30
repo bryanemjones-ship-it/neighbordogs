@@ -1,18 +1,35 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   loadWalkers,
   type LegacyBooking,
   type LegacyWalker,
 } from "@/features/booking/lib/models";
 import { fmt12hr, todayISO, tomorrowISO } from "@/features/booking/lib/pricing-helpers";
+import { supabase } from "@/shared/lib/supabase";
 
 type SchedulePanelProps = {
   showToast: (title: string, message: string) => void;
 };
 
+async function adminAuthHeaders(): Promise<HeadersInit> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session?.access_token) {
+    throw new Error("Unauthorized");
+  }
+
+  return {
+    Authorization: `Bearer ${session.access_token}`,
+  };
+}
+
 export function SchedulePanel({ showToast }: SchedulePanelProps) {
+  const router = useRouter();
   const [scheduleDate, setScheduleDate] = useState(todayISO());
   const [bookings, setBookings] = useState<LegacyBooking[]>([]);
   const [walkers, setWalkers] = useState<LegacyWalker[]>([]);
@@ -22,14 +39,21 @@ export function SchedulePanel({ showToast }: SchedulePanelProps) {
   const loadSchedule = useCallback(async () => {
     setScheduleMsg("Loading…");
     try {
+      const headers = await adminAuthHeaders();
       const res = await fetch(
         `/api/admin/bookings?date=${encodeURIComponent(scheduleDate)}`,
+        { headers },
       );
       const data = (await res.json()) as {
         ok?: boolean;
         bookings?: LegacyBooking[];
         error?: string;
       };
+
+      if (res.status === 401) {
+        router.replace("/login");
+        return;
+      }
 
       if (!res.ok || !data.ok) {
         setScheduleMsg(data.error || "Could not load schedule.");
@@ -40,11 +64,15 @@ export function SchedulePanel({ showToast }: SchedulePanelProps) {
       setBookings(data.bookings || []);
       setWalkers(loadWalkers());
       setScheduleMsg("");
-    } catch {
+    } catch (error) {
+      if (error instanceof Error && error.message === "Unauthorized") {
+        router.replace("/login");
+        return;
+      }
       setScheduleMsg("Could not load schedule.");
       setBookings([]);
     }
-  }, [scheduleDate]);
+  }, [scheduleDate, router]);
 
   useEffect(() => {
     void loadSchedule();
@@ -54,12 +82,20 @@ export function SchedulePanel({ showToast }: SchedulePanelProps) {
     try {
       const res = await fetch("/api/admin/bookings", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          ...(await adminAuthHeaders()),
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           id: String(bookingId),
           walker_id: walkerId || null,
         }),
       });
+
+      if (res.status === 401) {
+        router.replace("/login");
+        return;
+      }
 
       if (!res.ok) {
         showToast("Error", "Could not assign walker.");
@@ -67,7 +103,11 @@ export function SchedulePanel({ showToast }: SchedulePanelProps) {
       }
 
       await loadSchedule();
-    } catch {
+    } catch (error) {
+      if (error instanceof Error && error.message === "Unauthorized") {
+        router.replace("/login");
+        return;
+      }
       showToast("Error", "Could not assign walker.");
     }
   }
@@ -82,12 +122,20 @@ export function SchedulePanel({ showToast }: SchedulePanelProps) {
     try {
       const res = await fetch("/api/admin/bookings", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          ...(await adminAuthHeaders()),
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           id: String(bookingId),
           status: "cancelled_by_provider",
         }),
       });
+
+      if (res.status === 401) {
+        router.replace("/login");
+        return;
+      }
 
       if (!res.ok) {
         showToast("Error", "Could not cancel walk.");
@@ -96,7 +144,11 @@ export function SchedulePanel({ showToast }: SchedulePanelProps) {
 
       showToast("Walk Cancelled", "Customer cancellation recorded.");
       await loadSchedule();
-    } catch {
+    } catch (error) {
+      if (error instanceof Error && error.message === "Unauthorized") {
+        router.replace("/login");
+        return;
+      }
       showToast("Error", "Could not cancel walk.");
     }
   }

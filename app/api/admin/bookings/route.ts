@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/shared/lib/supabase";
+import { getUserFromRequest } from "@/shared/lib/supabase-auth";
 import {
   BOOKINGS_TABLE,
   rowToLegacyBooking,
@@ -15,7 +16,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "date required" }, { status: 400 });
     }
 
-    const rows = await fetchBookingsForDate(date);
+    const user = await getUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rows = await fetchBookingsForDate(date, user.id);
     const bookings = rows.map(rowToLegacyBooking);
 
     return NextResponse.json({ ok: true, bookings });
@@ -40,6 +46,11 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "id required" }, { status: 400 });
     }
 
+    const user = await getUserFromRequest(request);
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const supabase = createSupabaseServerClient();
     const updates: Record<string, unknown> = {};
 
@@ -61,7 +72,7 @@ export async function PATCH(request: Request) {
       .from(BOOKINGS_TABLE)
       .update(updates)
       .eq("id", body.id)
-      .eq("test_flag", true)
+      .eq("operator_id", user.id)
       .select("id, status, walker_id")
       .single();
 

@@ -11,11 +11,30 @@ import {
   findCustomerByEmail,
 } from "@/features/booking/lib/db";
 import { datesForWeeklyDays } from "@/features/booking/lib/slots";
+import {
+  resolveOperatorById,
+  resolveOperatorBySlug,
+} from "@/features/booking/lib/operator-resolve";
 
 function isWeeklyPayload(
   body: Record<string, unknown>,
 ): body is WeeklyPackagePayload {
   return Array.isArray(body.days) && typeof body.walkLabel === "string";
+}
+
+async function resolveOperatorFromBody(body: Record<string, unknown>) {
+  const slug =
+    typeof body.operatorSlug === "string" ? body.operatorSlug.trim() : "";
+  const id =
+    typeof body.operatorId === "string" ? body.operatorId.trim() : "";
+
+  if (slug) {
+    return resolveOperatorBySlug(slug);
+  }
+  if (id) {
+    return resolveOperatorById(id);
+  }
+  return null;
 }
 
 type BookingInsert = {
@@ -35,7 +54,7 @@ type BookingInsert = {
   location_label: string;
   dog_count: number;
   buddy_addon_cents: number;
-  test_flag: boolean;
+  operator_id: string;
 };
 
 function buildInsertRow(
@@ -56,6 +75,7 @@ function buildInsertRow(
     location_label: string;
     dog_count: number;
     buddy_addon_cents: number;
+    operator_id: string;
   },
 ): BookingInsert {
   return {
@@ -75,7 +95,7 @@ function buildInsertRow(
     location_label: base.location_label,
     dog_count: base.dog_count,
     buddy_addon_cents: base.buddy_addon_cents,
-    test_flag: true,
+    operator_id: base.operator_id,
   };
 }
 
@@ -83,6 +103,15 @@ export async function POST(request: Request) {
   try {
     const body = (await request.json()) as Record<string, unknown>;
     const supabase = createSupabaseServerClient();
+
+    const operator = await resolveOperatorFromBody(body);
+    if (!operator) {
+      return NextResponse.json(
+        { error: "operatorSlug or operatorId required." },
+        { status: 400 },
+      );
+    }
+    const operatorId = operator.id;
 
     if (isWeeklyPayload(body)) {
       const payload: WeeklyPackagePayload = {
@@ -138,6 +167,7 @@ export async function POST(request: Request) {
           location_label: payload.locationLabel,
           dog_count: 1,
           buddy_addon_cents: 0,
+          operator_id: operatorId,
         }),
       );
 
@@ -221,6 +251,7 @@ export async function POST(request: Request) {
       location_label: payload.locationLabel,
       dog_count: payload.dogCount,
       buddy_addon_cents: dollarsToCents(payload.buddyAddon),
+      operator_id: operatorId,
     });
 
     const { data, error } = await supabase

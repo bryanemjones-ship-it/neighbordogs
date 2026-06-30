@@ -129,7 +129,6 @@ export async function createWalkCheckoutSession(
       location_label: input.locationLabel || "primary",
       dog_count: dogCount,
       buddy_addon_cents: quote.buddyAddonCents,
-      test_flag: true,
     })
     .select("id")
     .single();

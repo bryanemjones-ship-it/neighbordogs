@@ -182,6 +182,8 @@ export function PaymentConfirmation({
         dogCount: booking.dogCount || 1,
         buddyAddon: booking.buddyAddon || 0,
         email: booking.email,
+        operatorSlug,
+        operatorId,
       };
 
       const res = await fetch("/api/booking/request", {
