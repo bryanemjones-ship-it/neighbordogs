@@ -1,7 +1,92 @@
 @import "tailwindcss";
 @config "../tailwind.config.ts";
 
+/* LUMEN GRID ARTWORK EXCEPTION: icons.tsx, hero-product-visual.tsx — fixed illustration hex */
+
+/* ── Layer 1: Structural (factory-wide) ─────────────────────────────────── */
 :root {
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-7: 32px;
+  --space-8: 40px;
+  --space-9: 48px;
+  --space-10: 64px;
+
+  --radius-6: 6px;
+  --radius-10: 10px;
+  --radius-16: 16px;
+  --radius-24: 24px;
+  --radius-32: 32px;
+  --radius-full: 999px;
+
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-md: 1.0625rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.25rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+  --tracking-label: 0.08em;
+  --tracking-tight: -0.01em;
+
+  --duration-tap: 100ms;
+  --duration-hover: 140ms;
+  --duration-expand: 220ms;
+  --duration-route: 220ms;
+  --duration-success: 320ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --size-content-max: 720px;
+  --size-content-pad: 18px;
+
+  --glass-filter: blur(16px) saturate(120%);
+  --glass-filter-header: blur(16px) saturate(120%);
+  --glass-shadow: 0 6px 24px rgba(46, 39, 34, 0.04);
+  --glass-shadow-input: 0 1px 6px rgba(46, 39, 34, 0.06) inset;
+  --glass-shadow-button: 0 2px 10px rgba(46, 39, 34, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.65) inset;
+
+  /* ── Layer 2: Intent (factory-wide, fixed meanings) ───────────────────── */
+  --intent-new: #2f6bff;
+  --intent-new-deep: #2558d4;
+  --intent-new-soft: rgba(47, 107, 255, 0.08);
+  --intent-success: #1f9d66;
+  --intent-success-deep: #188a57;
+  --intent-success-soft: rgba(31, 157, 102, 0.1);
+  --intent-attention: #d78a13;
+  --intent-attention-soft: rgba(215, 138, 19, 0.1);
+  --intent-urgent: #d93b3b;
+  --intent-urgent-deep: #c02e2e;
+  --intent-urgent-soft: rgba(217, 59, 59, 0.1);
+  --intent-assist: #7657e8;
+  --intent-assist-soft: rgba(118, 87, 232, 0.1);
+
+  --neutral-950: #2e2722;
+  --neutral-900: #1a2834;
+  --neutral-700: #71665d;
+  --neutral-500: #6a8090;
+  --neutral-400: #8a9aa8;
+  --neutral-200: #eaddc8;
+  --neutral-100: #fffdf7;
+  --neutral-50: #fff8ec;
+  --neutral-white: #ffffff;
+  --neutral-overlay: rgba(0, 0, 0, 0.55);
+}
+
+/* ── Layer 3: NeighborDogs palette + semantic bridge ────────────────────── */
+:root[data-app="neighbordogs"] {
   --nd-cream: #fff8ec;
   --nd-card-cream: #fffdf7;
   --nd-butter: #ffe9a8;
@@ -19,13 +104,63 @@
   --nd-border: #eaddc8;
   --nd-sky: #dceeff;
   --nd-heart: #f28b82;
-  --background: var(--nd-cream);
-  --foreground: var(--nd-text);
+
+  --app-signature: #e9a84a;
+  --app-signature-deep: #c9923f;
+  --app-signature-soft: #ffe9a8;
+  --app-accent: #5c8fd6;
+  --app-atmosphere-a: #fff8ec;
+  --app-atmosphere-b: #fffdf7;
+  --app-atmosphere-c: #ffd6b0;
+  --app-bg-gradient: linear-gradient(
+    160deg,
+    var(--app-atmosphere-a) 0%,
+    var(--app-atmosphere-b) 50%,
+    var(--app-atmosphere-c) 100%
+  );
+
+  --color-bg: var(--app-atmosphere-a);
+  --color-bg-gradient: var(--app-bg-gradient);
+  --color-surface: rgba(255, 253, 247, 0.82);
+  --color-surface-elevated: rgba(255, 253, 247, 0.9);
+  --color-surface-input: rgba(255, 255, 255, 0.7);
+  --color-surface-input-focus: rgba(255, 255, 255, 0.88);
+  --color-surface-header: rgba(255, 248, 236, 0.88);
+  --color-text: var(--neutral-950);
+  --color-text-secondary: var(--neutral-700);
+  --color-text-muted: var(--neutral-500);
+  --color-primary: var(--app-signature);
+  --color-primary-deep: var(--app-signature-deep);
+  --color-primary-soft: var(--app-signature-soft);
+  --color-accent: var(--app-accent);
+  --color-border: var(--neutral-200);
+  --color-border-subtle: rgba(46, 39, 34, 0.08);
+  --color-border-glass: rgba(255, 255, 255, 0.75);
+  --color-new: var(--intent-new);
+  --color-success: var(--intent-success);
+  --color-attention: var(--intent-attention);
+  --color-danger: var(--intent-urgent);
+  --color-assist: var(--intent-assist);
+  --color-new-soft: var(--intent-new-soft);
+  --color-success-soft: var(--intent-success-soft);
+  --color-attention-soft: var(--intent-attention-soft);
+  --color-danger-soft: var(--intent-urgent-soft);
+  --color-focus-ring: 0 0 0 3px var(--intent-new-soft);
+  --color-overlay: var(--neutral-overlay);
+
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--color-primary);
+  --color-accent: var(--color-accent);
+  --color-new: var(--color-new);
+  --color-success: var(--color-success);
+  --color-danger: var(--color-danger);
+  --color-attention: var(--color-attention);
   --color-nd-cream: var(--nd-cream);
   --color-nd-card-cream: var(--nd-card-cream);
   --color-nd-butter: var(--nd-butter);
@@ -70,50 +205,50 @@ body {
 }
 
 .marketing-bg {
-  background: var(--nd-cream);
+  background: var(--color-bg);
 }
 
 .marketing-bg-mesh {
   background:
     radial-gradient(
       ellipse 55% 45% at 10% 15%,
-      rgba(255, 233, 168, 0.35) 0%,
+      color-mix(in srgb, var(--app-signature-soft) 35%, transparent) 0%,
       transparent 60%
     ),
     radial-gradient(
       ellipse 50% 40% at 90% 12%,
-      rgba(220, 238, 255, 0.45) 0%,
+      color-mix(in srgb, var(--app-accent) 35%, transparent) 0%,
       transparent 55%
     ),
     radial-gradient(
       ellipse 45% 40% at 88% 85%,
-      rgba(205, 239, 216, 0.3) 0%,
+      color-mix(in srgb, var(--app-atmosphere-c) 30%, transparent) 0%,
       transparent 58%
     );
   animation: bg-drift 32s ease-in-out infinite alternate;
 }
 
 .nd-glass {
-  background: rgba(255, 253, 247, 0.82);
-  backdrop-filter: blur(16px) saturate(120%);
-  -webkit-backdrop-filter: blur(16px) saturate(120%);
-  border: 1px solid var(--nd-border);
-  box-shadow: 0 6px 24px rgba(46, 39, 34, 0.04);
+  background: var(--color-surface);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--glass-shadow);
 }
 
 .nd-glass-warm {
-  background: rgba(255, 253, 247, 0.9);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--nd-border);
-  box-shadow: 0 4px 20px rgba(46, 39, 34, 0.04);
+  background: var(--color-surface);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--glass-shadow);
 }
 
 .glass-header {
-  background: rgba(255, 248, 236, 0.88);
-  border-bottom: 1px solid var(--nd-border);
-  backdrop-filter: blur(16px) saturate(120%);
-  -webkit-backdrop-filter: blur(16px) saturate(120%);
+  background: var(--color-surface-header);
+  border-bottom: 1px solid var(--color-border);
+  backdrop-filter: var(--glass-filter-header);
+  -webkit-backdrop-filter: var(--glass-filter-header);
 }
 
 .nd-route-line {

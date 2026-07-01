@@ -1,0 +1,21 @@
+NeighborDogs — new session. Read the attached 00_PICKUP.txt in full before responding. Do not act until you have read it.
+
+Standing rules: one step at a time, PASS/FAIL only (deployed/compiles != PASS), no guessing — primary sources only and SERVER LOGS beat browser/UI mode badges, no hand-editing code (Cursor executes all changes via two-phase plan->approve->apply prompts), capture side issues to the list, I decide what's built next. Lead with the move, not the caveats; match my pace.
+
+WHERE WE ARE (verified last session, 2026-06-29):
+The flow B payment code (Stripe Connect Standard + direct charges) is deployed but NOT proven — no walk has been charged end-to-end. Last session was verification + audit, no code shipped.
+
+THE ONE BLOCKER, already root-caused from the Vercel runtime log (not a guess): the deployed STRIPE_SECRET_KEY in Vercel Production is a LIVE key (sk_live_), so operator Stripe onboarding 500s. It must be swapped to the SANDBOX secret key from account acct_1T7bN7 ("AppStack LLC sandbox", where Connect + the ND_walk_connect_webhook already live).
+
+NEXT ACTION (single move, clears the blocker):
+  1. Stripe SANDBOX (acct_1T7bN7) -> Developers -> API keys -> copy Secret key (sk_test_).
+  2. Vercel -> neighbordogs -> Settings -> Env Variables -> STRIPE_SECRET_KEY -> edit PRODUCTION -> paste -> save.
+  3. Deployments -> Redeploy (env change needs a redeploy).
+  4. /dashboard?tab=pricing as north-hills -> "Connect Stripe account" -> complete onboarding with Stripe TEST data.
+  5. Confirm PASS via read-only query: profiles.stripe_connect_id for id bb52d0f0-03c4-44b7-912f-b47350d71cd0 is now an acct_ value.
+
+THEN the TEST WALK (flow B): /book/north-hills, RETURNING path, seeded customer seedtest@neighbordogs.com (already approved). Before trusting the result, verify public.bookings columns vs walk-checkout.ts insert so a failed insert isn't misread as a Stripe failure. PASS = charge on operator's connected account, $0 to platform, amount = operator price, webhook flips booking to paid.
+
+Manual/never-automate: Stripe and Vercel dashboards and any secrets/env vars stay manual (screenshot + confirm). Never use a live Stripe key in a test. Claude Chrome extension may drive the CUSTOMER booking/checkout flow for observation only.
+
+Start by confirming you've read the pickup, then give me step 1 of the key swap and wait. Do not write a Cursor prompt — the next task is the key swap + onboarding + test walk, not code.

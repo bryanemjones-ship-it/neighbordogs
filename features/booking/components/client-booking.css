@@ -1,14 +1,14 @@
 @import "../../admin/components/admin.css";
 
 .client-booking {
-  --max: 720px;
-  --blue: #1e6fd4;
+  --max: var(--size-content-max);
+  --blue: var(--color-new);
 }
 
 .client-booking {
   max-width: var(--max);
   margin: 0 auto;
-  padding: 18px;
+  padding: var(--size-content-pad);
   color: var(--text);
 }
 
@@ -39,22 +39,22 @@
 .client-booking select {
   width: 100%;
   padding: 13px 15px;
-  border: 1px solid rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--color-border-glass);
   border-radius: 14px;
   font-size: 16px;
   font-family: inherit;
-  background: rgba(255, 255, 255, 0.46);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--color-surface-input);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
   color: var(--text);
   outline: none;
-  box-shadow: 0 1px 6px rgba(28, 55, 100, 0.07) inset;
+  box-shadow: var(--glass-shadow-input);
 }
 
 .client-booking select:focus {
-  background: rgba(255, 255, 255, 0.68);
-  border-color: #fff;
-  box-shadow: var(--focus), 0 1px 6px rgba(28, 55, 100, 0.07) inset;
+  background: var(--color-surface-input-focus);
+  border-color: var(--neutral-white);
+  box-shadow: var(--focus), var(--glass-shadow-input);
 }
 
 .client-booking .pay-method {
@@ -64,21 +64,21 @@
   width: 100%;
   padding: 14px 16px;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  background: rgba(255, 255, 255, 0.46);
+  border: 1px solid var(--color-border-glass);
+  background: var(--color-surface-input);
   cursor: pointer;
   font-family: inherit;
   text-align: left;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--duration-hover), border-color var(--duration-hover);
 }
 
 .client-booking .pay-method:hover {
-  background: rgba(255, 255, 255, 0.65);
+  background: var(--color-surface-input-focus);
 }
 
 .client-booking .pay-method.active {
-  border-color: var(--blue);
-  background: rgba(59, 130, 246, 0.06);
+  border-color: var(--color-new);
+  background: var(--color-new-soft);
 }
 
 .client-booking .pay-method-icon {
@@ -97,7 +97,7 @@
   display: none;
   font-size: 16px;
   font-weight: 700;
-  color: var(--blue);
+  color: var(--color-new);
 }
 
 .client-booking .pay-method.active .pay-method-check {
@@ -108,15 +108,15 @@
   width: 100%;
   padding: 16px 18px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  background: linear-gradient(160deg, #22a870, #16845a);
-  color: #fff;
+  border: 1px solid color-mix(in srgb, var(--neutral-white) 25%, transparent);
+  background: linear-gradient(160deg, var(--color-success), var(--intent-success-deep));
+  color: var(--neutral-white);
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
   font-family: inherit;
-  box-shadow: 0 6px 22px rgba(22, 132, 90, 0.35);
-  transition: transform 0.18s;
+  box-shadow: 0 6px 22px color-mix(in srgb, var(--color-success) 35%, transparent);
+  transition: transform var(--duration-expand);
 }
 
 .client-booking .btn-weekly-promo:hover {
@@ -128,15 +128,15 @@
   margin-left: 6px;
   padding: 2px 8px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.22);
+  background: color-mix(in srgb, var(--neutral-white) 22%, transparent);
   font-size: 12px;
 }
 
 .client-booking .callout {
   padding: 12px;
   border-radius: 12px;
-  background: rgba(34, 114, 216, 0.06);
-  border: 1px solid rgba(34, 114, 216, 0.15);
+  background: var(--color-new-soft);
+  border: 1px solid color-mix(in srgb, var(--color-new) 15%, transparent);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -147,7 +147,8 @@
   gap: 6px;
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(30, 168, 112, 0.1);
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
   font-size: 13px;
 }
 
@@ -162,32 +163,33 @@
 }
 
 .client-booking .msg-warn {
-  color: #c8820a;
+  color: var(--color-attention);
 }
 
 .client-booking .msg-error {
-  color: var(--red);
+  color: var(--color-danger);
 }
 
 .client-booking .msg-info {
-  color: var(--muted);
+  color: var(--color-text-muted);
 }
 
 .client-booking-bg {
   min-height: 100vh;
-  background: linear-gradient(160deg, #bcd4e8 0%, #c8def4 35%, #bed4ec 65%, #aac4de 100%);
+  background: var(--color-bg-gradient);
 }
 
 .client-booking-bg header {
-  background: rgba(175, 208, 232, 0.5);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.52);
-  backdrop-filter: blur(30px) saturate(180%);
+  background: var(--color-surface-header);
+  border-bottom: 1px solid var(--color-border-glass);
+  backdrop-filter: var(--glass-filter-header);
+  -webkit-backdrop-filter: var(--glass-filter-header);
 }
 
 .client-booking-bg header .wrap {
-  max-width: 720px;
+  max-width: var(--size-content-max);
   margin: 0 auto;
-  padding: 12px 18px;
+  padding: 12px var(--size-content-pad);
   display: flex;
   align-items: center;
   gap: 12px;

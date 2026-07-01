@@ -1,0 +1,188 @@
+NEIGHBORDOGS — OPERATOR COMMERCE PROJECT MANAGEMENT PLAN
+Scope: Flow B (customer pays operator for walks via Stripe Connect).
+Out of scope: Flow A ($149/mo operator subscription — working, untouched).
+Last updated: 2026-06-29 (session results recorded in Phase 1).
+
+================================================================================
+DEFINITION OF DONE (the goal)
+================================================================================
+An operator onboards, sets walk prices in NeighborDogs, and a customer books and pays
+the operator's price. The charge lands on the operator's Stripe account. NeighborDogs
+receives $0 and carries no liability. The operator runs daily commerce (pricing, viewing
+payments, refunds) entirely inside NeighborDogs. Card/bank data lives only in Stripe.
+
+The project is DONE when: a real walk is paid end-to-end, operator is paid, NeighborDogs
+gets $0, the webhook marks the booking paid, AND the operator can set prices, see payments,
+and issue a refund without leaving NeighborDogs.
+
+================================================================================
+SEQUENCING RULES (apply to every phase)
+================================================================================
+- One variable changes at a time. No bundling unrelated changes.
+- Each task has a PASS/FAIL gate. "Looks good" / "deployed" / "compiles" is not PASS.
+- Code changes go through Cursor only, two-phase (plan -> approve -> apply).
+- No guessing. Primary sources only (Stripe docs, live dashboard screens, SERVER LOGS).
+- Items on the LIST stay on the list until Bryan promotes them. The broken/active flow
+  comes first.
+
+================================================================================
+PHASE 0 — FIX THE FOUNDATION  [STATUS: DONE, DEPLOYED, NOT PROVEN]
+================================================================================
+Goal: deployed code matches the locked model (Standard Connect + direct charges).
+
+Done:
+- stripe-connect.ts: Express -> Standard
+- walk-checkout.ts: destination -> direct charge ({ stripeAccount }), no platform fee
+- stripe.ts: getStripeConnectWebhookSecret()
+- webhook/route.ts: dual-secret verification + event.account routing
+- Stripe sandbox Connect webhook endpoint created (ND_walk_connect_webhook)
+- Vercel: STRIPE_CONNECT_WEBHOOK_SECRET added
+- Committed (code + docs, separately) and deployed.
+
+GATE: PASSED for "correct code is live." NOT passed for "payments work."
+
+================================================================================
+PHASE 1 — PROVE FLOW B (THE TEST WALK)  [STATUS: CURRENT / IN PROGRESS]
+================================================================================
+Goal: one real walk paid end-to-end on production with sandbox keys (fake money, real path).
+
+--- SESSION RESULTS 2026-06-29 ------------------------------------------------
+1.1a  STRIPE_SECRET_KEY is a SANDBOX key?            FAIL.
+      Root cause proven from VERCEL RUNTIME LOG (not a guess): onboard call hit
+      account acct_1T7bMw... in LIVEMODE (header x-stripe-routing-context-priority
+      -tier: livemode; stripe-version 2026-05-27.dahlia). The deployed key is a
+      LIVE key (sk_live_), NOT sandbox.
+      NOTE: earlier read of the Stripe onboarding PAGE showing "Sandbox" was the
+      browser session mode, NOT the server key. Misleading signal. The server log
+      is the authority. (This is the avoidable miss of the session.)
+      No harm done: live account has no Connect enabled, so accounts.create failed
+      safely — nothing created, no money movable.
+
+1.1b  BOTH webhook endpoints exist?                  PASS (Connect side confirmed).
+      ND_walk_connect_webhook = Active, Connected accounts scope,
+      event checkout.session.completed, API 2026-02-25.clover, on sandbox account
+      acct_1T7bN7... ("AppStack, LLC sandbox"). Platform endpoint not re-verified
+      this session — confirm when convenient.
+
+1.1c  north-hills onboarded (Standard, charges_enabled)?   BLOCKED by 1.1a.
+      profiles row: slug=north-hills, stripe_connect_id=NULL. Connect IS enabled on
+      sandbox account acct_1T7bN7 (Connect overview loads). Onboarding 500s only
+      because the LIVE key targets a different account with no Connect. Fixing 1.1a
+      unblocks this.
+
+      ACCOUNT MAP (important): sandbox w/ Connect+webhook = acct_1T7bN7 ("AppStack LLC
+      sandbox / HostClaim"). Live account the bad key points at = acct_1T7bMw.
+
+1.2   Schema-drift safety check — PARTIALLY ADVANCED.
+      Confirmed public.customers has NO migration (exists in prod, absent from
+      supabase/migrations 001-006). Columns only inferable from a live row. This is
+      Risk #2 (drift) made concrete. Still need: verify public.bookings columns vs
+      walk-checkout.ts insert (test_flag + stripe_*/payment_status/operator_id set)
+      BEFORE trusting the test-walk result.
+
+      SEED DONE: approved customer inserted into public.customers for the test walk:
+      email seedtest@neighbordogs.com, approved=true, id f9add01b-759c-416b-8828-
+      f0974a31bcf2. Returning-customer lookup only needs email + approved=true.
+-------------------------------------------------------------------------------
+
+>>> NEXT ACTION (single, unblocks 1.1a + 1.1c in one move):
+    Replace Vercel STRIPE_SECRET_KEY (Production) with the SANDBOX secret key
+    (sk_test_) from sandbox account acct_1T7bN7 -> Redeploy -> re-click
+    "Connect Stripe account". Then onboard north-hills with Stripe test data.
+
+1.3 Run the test walk (customer pays operator):
+    - Customer booking flow on www.neighbordogs.com/book/north-hills (RETURNING path,
+      using seeded customer above; New Customer path is a stub — see LIST).
+    - Pay with sandbox test card.
+    - (Claude Chrome extension may drive/observe the CUSTOMER flow only — never secrets,
+      env vars, or dashboards.)
+
+1.4 Confirm results (all must PASS):
+    - Charge created on the OPERATOR's connected account (direct charge)
+    - NeighborDogs received $0 (no application fee)
+    - Amount charged = operator's set price (validates the validate-route price path;
+      note validate currently uses DEFAULT_PRICES — watch for divergence)
+    - Webhook fired, marked the booking paid in public.bookings
+
+GATE: One walk, paid, operator paid, $0 to platform, booking marked paid. First real
+PASS for the whole architecture.
+
+================================================================================
+PHASE 2 — HARDEN FLOW B  [STATUS: after Phase 1 PASS]
+================================================================================
+2.1 charges_enabled gate. Block/handle checkout when operator isn't fully onboarded,
+    instead of only checking connect_id exists.
+    OPEN DECISION (Bryan): operator-not-onboarded -> (a) booking blocked w/ message,
+    (b) pay-later, or (c) shop hidden. Decide before building.
+2.2 Fix production schema drift surfaced in Phase 1 (walk-checkout insert / walk-webhook
+    update columns; and the missing public.customers migration). Verify vs prod, not
+    migrations. Own task per column set.
+
+GATE: operator-not-onboarded path behaves per chosen UX; webhook + insert/update run
+clean against verified production schema.
+
+================================================================================
+PHASE 3 — COMPLETE THE OPERATOR SHOP  [STATUS: after Phase 2]
+================================================================================
+Build in this order, one at a time.
+3.1 Saved card (per operator) on the operator's connected account.
+3.2 Operator payments view inside NeighborDogs.
+3.3 In-app refund button (Option B) — real Stripe refund on connected account.
+    Replaces current RefundsPanel.tsx (localStorage + Venmo — not Stripe).
+    Operator-initiated only; customers cannot self-serve.
+
+ALSO NEW (surfaced 2026-06-29) — NEW CUSTOMER FRONT DOOR:
+    /book/[slug] "New Customer" is a STUB ("New customer setup is coming soon");
+    no app/api/booking/register route exists. The full new-customer flow (owner/dog
+    form -> geocode/service-radius -> Meet & Greet scheduling -> waiver -> approved=false
+    -> operator approval) EXISTS COMPLETE in _legacy/index.html. This is a PORT, not a
+    net-new build. Load-bearing decision before porting: which table does register write
+    to? Returning-lookup reads public.customers; request/admin read test_demo_customers
+    (split-brain). Must unify or the ported front door won't connect to the rest.
+    Sequence: prove the test walk FIRST, then port New Customer onto a proven foundation.
+
+GATE per item: each proven against a real (sandbox) transaction, not just compiled.
+
+================================================================================
+LIST (unscheduled — not blocking; do not fix unless promoted)
+================================================================================
+- LIVE KEY HYGIENE (new, 2026-06-29): a live key was deployed in Production for a
+  sandbox-only app. Harmless now (no real customers), but for the 10-app AppStack plan,
+  adopt: test keys in test deploys, live keys only at go-live. Habit, not a fire.
+- Split-brain customer tables: public.customers (returning lookup) vs test_demo_customers
+  (request + admin). Unify before New Customer port (see 3 / 2.2).
+- validate route DEFAULT_PRICES risk: payment-screen price may diverge from operator_prices
+  without operator context. (Checked in 1.4; fix if it diverges.)
+- localStorage-only admin tabs: Refunds, Weekly, Walkers, Testimonials persist nothing
+  server-side (single-browser only). Real persistence later.
+- Pre-existing lint errors: 11 in admin/booking components. Zero on payment files.
+  Build passes. Own task.
+- Stale doc flow lines: some docs still describe old on_behalf_of + transfer_data flow
+  while DECISIONS lock direct charges. Doc wording only.
+
+================================================================================
+DEFERRED PROJECT (its own initiative, not part of flow B)
+================================================================================
+Stripe account separation — one Stripe account per AppStack app instead of shared.
+- Likely YES eventually, driven by SELLABILITY (clean, severable asset). Naming/metadata
+  organize reporting only; they do not create app-level separation for a sale.
+- Do NOT combine with flow B work.
+- Re-open trigger: TWO AppStack apps both holding REAL customer money on the shared
+  account at the same time. (HostClaim live while NeighborDogs sandbox does NOT trip it.)
+- When activated, verify from Stripe docs: Organizations support for clean sale, and what
+  migrating connected accounts between platforms requires.
+
+================================================================================
+TOP RISKS
+================================================================================
+1. "Deployed = done" illusion. Mitigation: Phase 1 gate; nothing PASS without a real charge.
+   [2026-06-29: borne out — code was deployed but a live key blocked all onboarding.]
+2. Schema drift masking a payment failure (test_flag; missing public.customers migration).
+   Mitigation: 1.2 before the walk.
+3. Webhook not actually receiving Connect events live. Mitigation: confirm in 1.4 the
+   booking flips to paid — proof the event arrived and verified.
+4. Shared-account cross-talk (HostClaim/$149 events). Mitigation: event.account + metadata
+   filtering already in code; confirm $149 path still works after deploy.
+5. Wrong-signal debugging (new). Mitigation: trust SERVER LOGS over UI/browser mode
+   indicators. The 2026-06-29 live-key miss came from reading a browser "Sandbox" badge
+   instead of the deployed key / runtime log.

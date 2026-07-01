@@ -1,145 +1,156 @@
-PROJECT:
-NeighborDogs — AppStack dog-walking territory SaaS (Next.js + Supabase + Stripe).
-Repo path: C:\Projects\appstack\_APPS\NeighborDogs
+NEIGHBORDOGS — SESSION PICKUP FILE
+Generated end of session 2026-06-29. Read this in full before doing anything next session. No exceptions.
+
+================================================================================
+PROJECT
+================================================================================
+NeighborDogs — AppStack territory-based dog-walking SaaS (business-in-a-box).
+Stack: Next.js + Supabase + Stripe + Vercel + Leaflet.
+Repo path: C:\Projects\appstack\_APPS\NeighborDogs   (note: live tree, _legacy/ beside it)
 Production URL: https://www.neighbordogs.com
-Each operator runs their own service storefront inside NeighborDogs; the operator is
-the shop manager. Operators pay NeighborDogs $149/month for software access. Clients
-pay operators for walks in-app via Stripe Connect. NeighborDogs receives $0 from walk
-payments and does not collect operator banking information.
+Operator storefront smoke path: https://www.neighbordogs.com/book/north-hills
+Operator admin: https://www.neighbordogs.com/login -> /dashboard (tabs via ?tab=)
 
-CURRENT STATE:
-Branch: main (production-deploying via Vercel).
-Public booking smoke path: https://www.neighbordogs.com/book/north-hills
+TWO SEPARATE STRIPE MONEY FLOWS — DO NOT CONFLATE:
+  A) Operator -> NeighborDogs: $149/month software subscription. NeighborDogs IS
+     merchant here. UNTOUCHED. Leave alone.
+  B) Customer -> Operator: walk payments via Stripe Connect. OPERATOR is merchant of
+     record. NeighborDogs receives $0. All current work is flow B.
 
-Latest deployed commits (booking/payment path):
-  49c0de6 fix(booking): align time slots with production bookings schema
-  ef841e1 fix(booking): look up returning customers from Supabase
-  3a14c64 fix(payments): restore Connect payments without platform fee
-  41c4d4c docs(payments): lock NeighborDogs payment model
+================================================================================
+CRITICAL: WHAT "DEPLOYED" DOES AND DOES NOT MEAN
+================================================================================
+Phase 0 code (Standard Connect + direct charges) is live and compiles. NOTHING has been
+charged. No walk has completed end-to-end. Deployed != PASS. First real PASS for flow B =
+one real test walk completing end-to-end.
 
-Production verified:
-  - /book/north-hills loads.
-  - Returning Customer -> Find My Profile finds bryanemjones+testcustomer@gmail.com
-    via POST app/api/booking/customer-lookup/route.ts -> public.customers.
-  - 20 min walk selectable; Pick a Date & Time loads time slots.
-  - Continue to Payment reaches payment screen; Pay with Card visible.
-  - Payment blocked: "This operator has not finished Stripe Connect setup."
-  - north-hills Stripe Connect onboarding not completed.
+================================================================================
+SESSION 2026-06-29 — WHAT HAPPENED (verification + discovery, NO code shipped)
+================================================================================
+No Cursor code changes this session. Work was verification, a repo audit, a DB seed, and
+diagnosing why operator onboarding fails. Key results:
 
-Known north-hills operator:
-  slug: north-hills
-  operator id: bb52d0f0-03c4-44b7-912f-b47350d71cd0
+1) THE BLOCKER, ROOT-CAUSED FROM SERVER LOG (authoritative, not a guess):
+   Clicking "Connect Stripe account" -> POST /api/stripe/connect/onboard -> 500.
+   Vercel runtime log shows the call hit account acct_1T7bMw... in LIVEMODE
+   (header x-stripe-routing-context-priority-tier: livemode; stripe-version
+   2026-05-27.dahlia). => The deployed STRIPE_SECRET_KEY is a LIVE key (sk_live_),
+   NOT sandbox. Live account has no Connect enabled, so accounts.create failed safely
+   (nothing created, no money movable).
+   LESSON: a browser "Sandbox" badge shows the BROWSER session mode, not the server key.
+   Trust the runtime log / deployed key, not UI mode indicators.
 
-Known test customer: bryanemjones+testcustomer@gmail.com (public.customers, approved)
+2) ACCOUNT MAP (memorize — two accounts in play):
+   - acct_1T7bN7...  = "AppStack, LLC sandbox" (HostClaim). Connect ENABLED here.
+     ND_walk_connect_webhook lives here, Active. THIS is the sandbox we want.
+   - acct_1T7bMw...  = the LIVE account the bad deployed key points at. No Connect.
 
-Known north-hills operator_prices (cents):
-  w20 2900, w30 3500, w60 4900, emergency 4900, buddyAddon 1000, weeklyDiscount 15
+3) PRE-TEST CHECK RESULTS:
+   1.1a sandbox key in Vercel?            FAIL (it's live — see #1).
+   1.1b both webhook endpoints exist?     PASS for Connect side (ND_walk_connect_webhook
+        Active, Connected-accounts, checkout.session.completed, API 2026-02-25.clover).
+        Platform endpoint not re-verified this session.
+   1.1c north-hills onboarded?            BLOCKED by 1.1a. profiles.stripe_connect_id = NULL.
+        Connect IS enabled on the sandbox account; onboarding 500s only due to the live key.
 
-Stripe setup state (in progress — no final action completed):
-  - Shared Stripe account intentionally used for AppStack/NeighborDogs.
-  - NeighborDogs Stripe objects should use ND_ or NeighborDogs naming.
-  - Connect setup showed "Power your platform with Connect."
-  - Correct model: Build a platform (NOT Build a marketplace).
-  - Continue setup steps seen: Choose business model, Test Connect, Set up recurring
-    payments, Set up payments, Finish setup, Go live, Build Connect integration.
-  - Test Connect action: Create test connected account.
-  - Modal seen: "Switch to sandbox account? You must set up this feature in your
-    sandbox account before using it in your live account."
+4) CUSTOMER SEEDED for the test walk (public.customers):
+   email seedtest@neighbordogs.com, name "Seed Test", approved=true,
+   id f9add01b-759c-416b-8828-f0974a31bcf2.
+   Returning-customer lookup needs only email + approved=true (confirmed from code).
 
-DECISIONS (FINAL ONLY):
-CLARIFIED STOREFRONT / PAYMENT MODEL:
-- Each operator runs their own service storefront inside NeighborDogs; operator is
-  shop manager.
-- Operators manage walk/service prices in NeighborDogs Admin (operator_prices).
-- Customers see operator current prices on public booking page (/book/[slug]).
-- Checkout price is current operator price when customer submits order (server re-read
-  at checkout; inline price_data — not Stripe Dashboard Products/Prices for walks).
-- Walk payments are separate from the $149/month operator subscription.
-- Walk payments use Stripe Connect Standard accounts and direct charges.
-- Operator is merchant of record for walk payments; operator pays Stripe card
-  processing fees; operator Stripe balance bears refunds and disputes.
-- Stripe processes customer card on the operator connected account (direct charge).
-- Operators onboard/connect directly with Stripe for payout/banking; NeighborDogs
-  stores only stripe_connect_id/status, not banking information.
-- Bryan / NeighborDogs receives $0 from walk payments — no platform percentage,
-  commission, application fee, or cut. No application_fee_amount.
-- No transfer_data.destination. No on_behalf_of. NeighborDogs is the software
-  layer only.
-- STRIPE_WALK_PLATFORM_FEE_PERCENT is not part of this release.
-- Do not say payment happens outside the app or is handled directly with the walker.
+5) REPO AUDIT — what's BUILT vs STUB (live app/ tree, ignoring _legacy/):
+   - Returning-customer walk on /book/[slug]: BUILT, end-to-end Stripe direct-charge path.
+   - NEW CUSTOMER on /book/[slug]: STUB ("New customer setup is coming soon"); NO
+     app/api/booking/register route exists. Full new-customer flow (owner/dog form ->
+     geocode/service-radius -> Meet & Greet scheduling -> waiver -> approved=false ->
+     operator approval) EXISTS COMPLETE in _legacy/index.html. => PORT, not net-new build.
+   - Booking APIs customer-lookup / slots / validate / checkout / request: all REAL. register: absent.
+   - Operator dashboard tabs: Schedule/Pricing/Approvals real(ish); Refunds/Weekly/Walkers/
+     Testimonials are localStorage-only (no server persistence).
+   - SPLIT-BRAIN customer tables: returning-lookup reads public.customers; request + admin
+     read test_demo_customers. Must unify before porting New Customer.
+   - public.customers has NO migration (exists in prod, absent from migrations 001-006) = schema drift.
 
-STRIPE ACCOUNT SEPARATION (during current fix — not a split project yet):
-- Do not split Stripe accounts during the NeighborDogs walk-payment direct-charge fix.
-- Keep the current payment fix to one variable: Standard Connect + direct charges
-  inside the current Stripe setup.
-- Stripe account separation is a separate future project and must not be combined
-  with the current walk-payment fix.
+================================================================================
+NEXT ACTION (single move, clears 1.1a + 1.1c at once)
+================================================================================
+Swap the live key for the sandbox key, then onboard:
+  1. Stripe SANDBOX (acct_1T7bN7) -> Developers -> API keys -> copy Secret key (sk_test_...).
+  2. Vercel -> neighbordogs -> Settings -> Environment Variables -> STRIPE_SECRET_KEY ->
+     edit PRODUCTION -> paste sandbox key -> save.
+  3. Deployments -> latest -> Redeploy (env change does not apply until redeploy).
+  4. Re-click "Connect Stripe account" in /dashboard?tab=pricing (logged in as north-hills),
+     complete Stripe onboarding using TEST data (SSN 000-00-0000; routing 110000000 /
+     acct 000123456789; phone 000-000-0000; any 18+ DOB/address).
+  5. PASS check (not the redirect): run read-only
+        select id, slug, stripe_connect_id from public.profiles
+        where id = 'bb52d0f0-03c4-44b7-912f-b47350d71cd0';
+     stripe_connect_id populated (acct_...) => onboarding PASS.
 
-LOCKED SAAS MODEL:
-- Operators pay NeighborDogs $149/month (Stripe subscription checkout).
+Then run the TEST WALK (flow B):
+  - /book/north-hills, RETURNING path, seeded customer above, sandbox test card.
+  - Before trusting the result, verify public.bookings columns vs walk-checkout.ts insert
+    (test_flag + stripe_*/payment_status/operator_id) so a failed insert isn't misread as a
+    Stripe failure.
+  - PASS = charge on operator's connected account, $0 to platform, amount = operator price,
+    webhook flips booking to paid.
 
-OPERATIONS:
-- Returning customer lookup: public.customers via customer-lookup API (ef841e1).
-- localStorage rdgw_customers_v1 is fallback only, not production source of truth.
-- Slot reads: production public.bookings (no test_flag, no blocked_end_time; end_time
-  for overlap). Hardcoded operating slots; public.walkers not required.
-- Stripe Connect required before walk card checkout per operator slug.
-- New Customer registration remains stub for this release.
-- Stripe dashboard guidance: screen-by-screen only; no guessing; ask or stop if uncertain.
+================================================================================
+OPEN ISSUES / LIST (not the active task — do not fix unless promoted)
+================================================================================
+1. New Customer front door = stub; PORT from _legacy/index.html AFTER the test walk passes.
+   Load-bearing pre-decision: which table does register write to (unify public.customers
+   vs test_demo_customers first).
+2. Split-brain customer tables (public.customers vs test_demo_customers). Unify.
+3. public.customers (and possible bookings) schema drift vs migrations. Verify prod, not migrations.
+4. charges_enabled gate: checkout only checks connect_id EXISTS, not charges_enabled.
+   OPEN UX decision (Bryan): block booking / pay-later / hide shop. Add AFTER first walk passes.
+5. validate route uses DEFAULT_PRICES (no operator context) — price shown could diverge from
+   operator_prices. Confirm during the walk.
+6. LIVE KEY HYGIENE (new): a live key was deployed in Production for a sandbox-only app.
+   Harmless now; for the 10-app plan adopt "test keys in test deploys, live only at go-live."
+7. localStorage-only admin tabs (Refunds/Weekly/Walkers/Testimonials) — no server persistence.
+8. Pre-existing lint: 11 errors in admin/booking components; zero on payment files; build passes.
+9. Stale doc flow lines (old on_behalf_of/transfer_data wording) in some docs. Doc-only.
+10. Saved card / operator payments view / in-app Stripe refund button — NOT BUILT. Build order
+    after test walk: saved card -> payments view -> refund (Option B). Current RefundsPanel.tsx
+    is localStorage + Venmo, must be replaced by a real Stripe refund on the connected account.
 
-WHAT EXISTS:
-- Operator storefront: /book/[slug] (Returning Customer flow verified).
-- Admin pricing: PricingPanel -> operator_prices save/load.
-- customer-lookup, slots, validate, checkout APIs; Connect onboard API.
-- Inline price_data walk checkout (CURRENT CODE WRONG: Express accounts +
-  destination charge via on_behalf_of + transfer_data — to fix per locked model).
-- Connect UI: Pricing -> Connect Stripe account -> POST /api/stripe/connect/onboard.
-- Webhook code to mark walk paid (walk-webhook.ts; not production-verified end-to-end).
-- Territory $149/month subscription checkout (unchanged).
+================================================================================
+LOCKED DECISIONS (do not relitigate)
+================================================================================
+- Walk payments: Stripe Connect STANDARD + DIRECT charges. Operator = merchant of record,
+  pays Stripe fee, bears refunds/disputes. NeighborDogs receives $0. No application_fee_amount,
+  no transfer_data.destination, no on_behalf_of.
+- Refund model = Option B: in-app refund button in operator's NeighborDogs dashboard, Stripe
+  refund on their connected account. Customers cannot self-serve.
+- Saved cards: per-operator (on each operator's connected account; unavoidable w/ direct charges).
+- Walk prices live in NeighborDogs operator_prices, re-read server-side at checkout, sent as
+  inline price_data. NOT Stripe Dashboard Products/Prices.
+- Shared AppStack Stripe account for now; ND_ naming convention.
+- Stripe Dashboard guidance: screen-by-screen from current screen evidence, official Stripe
+  docs, or SERVER LOGS. Never guess clicks or modes from memory or from a browser badge.
 
-WHAT DOES NOT EXIST:
-- Completed New Customer registration on /book/[slug] (stub only).
-- Completed Stripe Connect platform setup in Stripe Dashboard (in progress).
-- Completed north-hills operator Connect onboarding (profiles.stripe_connect_id).
-- Verified successful hosted walk checkout or webhook paid update in production.
-- Stripe Dashboard Product/Price IDs for walk pricing (not used by code).
-- Platform fee / application_fee_amount on walks.
+PRODUCT DIRECTION (decided this session, informal):
+- Brand-forward: NeighborDogs is the focus; operator present but not the star. Customer bonds
+  to the platform/territory. No operator loyalty program — the $149 value is the retention.
+- Real risk is operator churn-with-customers + territory poaching, not fee leakage (we take $0).
+- Identity = lock-in: show the human for trust, but the account/history/territory stay with the
+  platform. Matters most for high-trust verticals (dog-walking), less for low-touch (bins).
 
-KNOWN ISSUES:
-- north-hills Connect incomplete -> "This operator has not finished Stripe Connect setup."
-- Stripe Connect dashboard setup incomplete; sandbox modal not resolved.
-- Anti-drift: prior assistant guessed Stripe dashboard clicks — do not repeat.
-- CODE RISKS (read-only investigation; fix after Connect verified):
-  1) app/api/booking/validate/route.ts may use DEFAULT_PRICES without operator context.
-  2) walk-checkout.ts may insert booking columns not in verified production bookings.
-  3) walk-webhook.ts may update payment columns not verified in production bookings.
-  4) Same drift class as pre-49c0de6 slot loader (UI ok, server schema assumptions).
-- Admin/demo paths may still reference test_demo_customers/test_flag.
-- CURRENT CODE WRONG: walk-checkout uses Express + destination charge (on_behalf_of,
-  transfer_data.destination) — locked model is Standard Connect + direct charges.
-- AppStack likely needs separate Stripe accounts per app for clean sellability /
-  handoff. Naming conventions and metadata organize reporting but do not create
-  clean app-level separation for a future sale or spin-off.
-- Stripe Organizations may be the preferred management model later: separate Stripe
-  accounts managed from one login.
-- Re-open Stripe separation after NeighborDogs walk payments are fixed and proven,
-  especially before multiple AppStack apps hold real customer money on the same
-  shared Stripe account.
+================================================================================
+DEFERRED PROJECT (separate initiative, not flow B)
+================================================================================
+Stripe account separation (one account per AppStack app vs shared). Likely YES eventually for
+sellability. Do NOT combine with flow B. Re-open trigger: TWO AppStack apps holding REAL
+customer money on the shared account at the same time. When activated verify from Stripe docs:
+Organizations support for clean sale, and migrating connected accounts between platforms.
 
-LAST CURSOR PROMPT:
-Update the support documents now. DOCUMENTATION-ONLY. Full rewrites of 00_PICKUP.txt,
-Active.txt, Decisions.txt, OPERATOR_COMMERCE_RELEASE_CHECKLIST.txt, Schema.txt,
-Starter.txt with clarified payment model, Stripe setup state, anti-drift warning,
-and read-only investigation findings. Do not commit.
-
-NEXT TASK:
-Do not work on Stripe account separation yet. Finish NeighborDogs walk-payment fix
-first: Standard Connect, direct charges, onboarding/charges_enabled gate, webhook
-verification, one real paid walk test, and confirmation that Bryan / NeighborDogs
-receives $0 from walk payments.
-
-Stripe dashboard steps: verified screen-by-screen guidance only (especially the
-"Switch to sandbox account?" modal if shown). Do not guess dashboard clicks.
-
-After walk-payment architecture is corrected in code, complete north-hills operator
-Connect onboarding and run one real paid walk test end-to-end.
+================================================================================
+WORKING RULES REMINDER
+================================================================================
+- One step at a time. PASS/FAIL before moving. "Looks good"/"deployed"/"compiles" != PASS.
+- No code edits by hand. Cursor only, two-phase (plan -> approve -> apply).
+- No guessing. Primary sources only: Stripe docs, live screens, SERVER LOGS > browser UI.
+- Walk before you fix. Fix before feature. Capture side issues to the LIST.
+- Bryan decides what's built next. Match his pace; lead with the move, not the caveats.

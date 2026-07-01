@@ -74,13 +74,13 @@ function LoginForm() {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center bg-zinc-50 px-4 py-16 dark:bg-black">
-      <main className="w-full max-w-md rounded-2xl border border-black/[.08] bg-white p-8 shadow-sm dark:border-white/[.145] dark:bg-zinc-950">
+    <div className="flex flex-1 items-center justify-center bg-background px-4 py-16">
+      <main className="w-full max-w-md rounded-2xl border border-[var(--color-border-subtle)] bg-[var(--color-surface)] p-8 shadow-sm">
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-black dark:text-zinc-50">
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-text)]">
             {mode === "login" ? "Sign in" : "Create account"}
           </h1>
-          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-2 text-sm text-[var(--color-text-muted)]">
             {mode === "login"
               ? "Welcome back to NeighborDogs."
               : "Start managing your dog walking business."}
@@ -91,7 +91,7 @@ function LoginForm() {
           <div>
             <label
               htmlFor="email"
-              className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="mb-1.5 block text-sm font-medium text-[var(--color-text-secondary)]"
             >
               Email
             </label>
@@ -102,7 +102,7 @@ function LoginForm() {
               required
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none ring-foreground/20 transition focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-input)] px-3 py-2 text-sm text-[var(--color-text)] outline-none transition focus:ring-2 focus:ring-[var(--color-new-soft)]"
               placeholder="you@example.com"
             />
           </div>
@@ -110,7 +110,7 @@ function LoginForm() {
           <div>
             <label
               htmlFor="password"
-              className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+              className="mb-1.5 block text-sm font-medium text-[var(--color-text-secondary)]"
             >
               Password
             </label>
@@ -124,7 +124,7 @@ function LoginForm() {
               minLength={6}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-black outline-none ring-foreground/20 transition focus:ring-2 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-50"
+              className="w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-input)] px-3 py-2 text-sm text-[var(--color-text)] outline-none transition focus:ring-2 focus:ring-[var(--color-new-soft)]"
               placeholder="At least 6 characters"
             />
           </div>
@@ -132,7 +132,7 @@ function LoginForm() {
           {error ? (
             <p
               role="alert"
-              className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+              className="rounded-lg border border-[var(--color-danger-soft)] bg-[var(--color-danger-soft)] px-3 py-2 text-sm text-[var(--color-danger)]"
             >
               {error}
             </p>
@@ -141,7 +141,7 @@ function LoginForm() {
           {message ? (
             <p
               role="status"
-              className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
+              className="rounded-lg border border-[var(--color-success-soft)] bg-[var(--color-success-soft)] px-3 py-2 text-sm text-[var(--color-success)]"
             >
               {message}
             </p>
@@ -150,7 +150,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="flex h-11 w-full items-center justify-center rounded-full bg-foreground px-5 text-sm font-medium text-background transition-colors hover:bg-[#383838] disabled:cursor-not-allowed disabled:opacity-60 dark:hover:bg-[#ccc]"
+            className="flex h-11 w-full items-center justify-center rounded-full bg-new px-5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {loading
               ? "Please wait..."
@@ -160,14 +160,14 @@ function LoginForm() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
+        <p className="mt-6 text-center text-sm text-[var(--color-text-muted)]">
           {mode === "login" ? (
             <>
               Don&apos;t have an account?{" "}
               <button
                 type="button"
                 onClick={() => switchMode("signup")}
-                className="font-medium text-zinc-950 underline-offset-4 hover:underline dark:text-zinc-50"
+                className="font-medium text-[var(--color-text)] underline-offset-4 hover:underline"
               >
                 Sign up
               </button>
@@ -178,7 +178,7 @@ function LoginForm() {
               <button
                 type="button"
                 onClick={() => switchMode("login")}
-                className="font-medium text-zinc-950 underline-offset-4 hover:underline dark:text-zinc-50"
+                className="font-medium text-[var(--color-text)] underline-offset-4 hover:underline"
               >
                 Sign in
               </button>
@@ -189,7 +189,7 @@ function LoginForm() {
         <p className="mt-4 text-center">
           <Link
             href="/"
-            className="text-sm text-zinc-500 underline-offset-4 hover:text-zinc-800 hover:underline dark:text-zinc-400 dark:hover:text-zinc-200"
+            className="text-sm text-[var(--color-text-muted)] underline-offset-4 hover:text-[var(--color-text-secondary)] hover:underline"
           >
             Back to home
           </Link>

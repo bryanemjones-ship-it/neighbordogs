@@ -1,16 +1,15 @@
 .legacy-admin {
-  --text: #0d1820;
-  --text2: #3d5060;
-  --muted: #6a8090;
-  --green-dk: #157a4f;
-  --red: #d04030;
-  --glass: rgba(255, 255, 255, 0.55);
-  --glass-blur: blur(26px) saturate(185%) brightness(1.06);
-  --g-shadow: 0 8px 32px rgba(28, 55, 100, 0.12),
-    0 1px 0 rgba(255, 255, 255, 0.78) inset;
-  --radius: 18px;
-  --focus: 0 0 0 3px rgba(28, 140, 94, 0.2);
-  --border: rgba(255, 255, 255, 0.68);
+  --text: var(--color-text);
+  --text2: var(--color-text-secondary);
+  --muted: var(--color-text-muted);
+  --green-dk: var(--color-success);
+  --red: var(--color-danger);
+  --glass: var(--color-surface);
+  --glass-blur: var(--glass-filter);
+  --g-shadow: var(--glass-shadow);
+  --radius: var(--radius-16);
+  --focus: var(--color-focus-ring);
+  --border: var(--color-border-glass);
 }
 
 .legacy-admin .stack {
@@ -41,7 +40,7 @@
   background: var(--glass);
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--color-border-glass);
   border-radius: var(--radius);
   padding: 18px;
   box-shadow: var(--g-shadow);
@@ -74,9 +73,9 @@
   height: 1px;
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.6),
-    rgba(150, 195, 230, 0.25),
-    rgba(255, 255, 255, 0.6)
+    var(--color-border-glass),
+    color-mix(in srgb, var(--app-accent) 25%, transparent),
+    var(--color-border-glass)
   );
   margin: 14px 0;
 }
@@ -92,20 +91,20 @@
   border-radius: 999px;
   font-size: 12px;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.55);
-  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: var(--color-surface-input);
+  border: 1px solid var(--color-border-glass);
 }
 
 .legacy-admin .pill.ok {
-  background: rgba(28, 140, 94, 0.13);
-  border-color: rgba(28, 140, 94, 0.28);
-  color: var(--green-dk);
+  background: var(--color-success-soft);
+  border-color: color-mix(in srgb, var(--color-success) 28%, transparent);
+  color: var(--color-success);
 }
 
 .legacy-admin .pill.warn {
-  background: rgba(208, 64, 48, 0.1);
-  border-color: rgba(208, 64, 48, 0.25);
-  color: var(--red);
+  background: var(--color-danger-soft);
+  border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
+  color: var(--color-danger);
 }
 
 .legacy-admin label {
@@ -118,17 +117,17 @@
 .legacy-admin textarea {
   width: 100%;
   padding: 13px 15px;
-  border: 1px solid rgba(255, 255, 255, 0.75);
+  border: 1px solid var(--color-border-glass);
   border-radius: 14px;
   font-size: 16px;
   font-family: inherit;
-  background: rgba(255, 255, 255, 0.46);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--color-surface-input);
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
   color: var(--text);
   outline: none;
-  box-shadow: 0 1px 6px rgba(28, 55, 100, 0.07) inset;
-  transition: all 0.2s;
+  box-shadow: var(--glass-shadow-input);
+  transition: all var(--duration-hover) var(--ease-standard);
 }
 
 .legacy-admin textarea {
@@ -138,9 +137,9 @@
 
 .legacy-admin input:focus,
 .legacy-admin textarea:focus {
-  background: rgba(255, 255, 255, 0.68);
-  border-color: #fff;
-  box-shadow: var(--focus), 0 1px 6px rgba(28, 55, 100, 0.07) inset;
+  background: var(--color-surface-input-focus);
+  border-color: var(--neutral-white);
+  box-shadow: var(--focus), var(--glass-shadow-input);
 }
 
 .legacy-admin input[type="checkbox"] {
@@ -163,19 +162,18 @@
   border-radius: 16px;
   padding: 14px 18px;
   letter-spacing: -0.15px;
-  background: rgba(255, 255, 255, 0.46);
-  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: var(--color-surface-input);
+  border: 1px solid var(--color-border-glass);
   color: var(--text);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 2px 10px rgba(28, 55, 100, 0.09),
-    0 1px 0 rgba(255, 255, 255, 0.65) inset;
-  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s,
-    background 0.15s;
+  backdrop-filter: var(--glass-filter);
+  -webkit-backdrop-filter: var(--glass-filter);
+  box-shadow: var(--glass-shadow-button);
+  transition: transform var(--duration-expand) var(--ease-spring),
+    box-shadow var(--duration-expand), background var(--duration-hover);
 }
 
 .legacy-admin .btn:hover {
-  background: rgba(255, 255, 255, 0.62);
+  background: var(--color-surface-input-focus);
   transform: translateY(-1px);
 }
 
@@ -184,23 +182,24 @@
 }
 
 .legacy-admin .btn.primary {
-  background: linear-gradient(160deg, #2a80e0, #1a68c8);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #fff;
-  box-shadow: 0 4px 18px rgba(26, 104, 200, 0.38),
-    0 1px 0 rgba(255, 255, 255, 0.22) inset;
+  background: linear-gradient(160deg, var(--color-new), var(--intent-new-deep));
+  border-color: color-mix(in srgb, var(--neutral-white) 25%, transparent);
+  color: var(--neutral-white);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--color-new) 38%, transparent),
+    0 1px 0 color-mix(in srgb, var(--neutral-white) 22%, transparent) inset;
 }
 
 .legacy-admin .btn.primary:hover {
-  background: linear-gradient(160deg, #3088e8, #2070d0);
+  background: linear-gradient(160deg, var(--intent-new), var(--color-new));
+  filter: brightness(1.05);
 }
 
 .legacy-admin .btn.secondary {
-  background: linear-gradient(160deg, #22a870, #1a7f5a);
-  border-color: rgba(255, 255, 255, 0.22);
-  color: #fff;
-  box-shadow: 0 4px 18px rgba(26, 127, 90, 0.36),
-    0 1px 0 rgba(255, 255, 255, 0.2) inset;
+  background: linear-gradient(160deg, var(--color-success), var(--intent-success-deep));
+  border-color: color-mix(in srgb, var(--neutral-white) 22%, transparent);
+  color: var(--neutral-white);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--color-success) 36%, transparent),
+    0 1px 0 color-mix(in srgb, var(--neutral-white) 20%, transparent) inset;
 }
 
 .legacy-admin .admin-tab-btn {
@@ -213,17 +212,17 @@
 }
 
 .legacy-admin .btn.emergency {
-  background: linear-gradient(160deg, #e84535, #c83020);
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  box-shadow: 0 4px 18px rgba(200, 48, 32, 0.36),
-    0 1px 0 rgba(255, 255, 255, 0.18) inset;
+  background: linear-gradient(160deg, var(--color-danger), var(--intent-urgent-deep));
+  border-color: color-mix(in srgb, var(--neutral-white) 20%, transparent);
+  color: var(--neutral-white);
+  box-shadow: 0 4px 18px color-mix(in srgb, var(--color-danger) 36%, transparent),
+    0 1px 0 color-mix(in srgb, var(--neutral-white) 18%, transparent) inset;
 }
 
 .legacy-admin .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--color-overlay);
   z-index: 9999;
 }
 
@@ -237,7 +236,7 @@
 .legacy-admin .confirm-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--color-overlay);
   z-index: 10000;
   display: flex;
   align-items: center;
@@ -248,7 +247,7 @@
 .legacy-admin .confirm-dialog {
   background: var(--glass);
   backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--color-border-glass);
   border-radius: var(--radius);
   padding: 24px;
   max-width: 420px;
@@ -281,11 +280,11 @@
   bottom: 24px;
   right: 24px;
   z-index: 10001;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.8);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-glass);
   border-radius: 14px;
   padding: 12px 16px;
-  box-shadow: 0 8px 24px rgba(28, 55, 100, 0.15);
+  box-shadow: var(--glass-shadow);
   font-size: 14px;
 }
 
